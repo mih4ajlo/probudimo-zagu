@@ -1,5 +1,5 @@
 import kaplay from "kaplay";
-import { fitScreen, GAME_HEIGHT, GAME_WIDTH, type ScreenFit } from "./screen";
+import { fitScreen, GAME_HEIGHT, GAME_WIDTH, pixelDensityFor, type ScreenFit } from "./screen";
 
 // Scenes lay out in a 320x180 grid of game units; the canvas fills the
 // window and shows more around that grid on other aspect ratios (screen.ts).
@@ -11,8 +11,9 @@ export const RENDER_SCALE = 4;
 // Pixel font loaded in assets.ts; used as the default for every k.text().
 export const FONT = "pixel";
 
-// Framebuffer pixels per canvas pixel (sharp on high-DPI screens, capped at 2).
-export const PIXEL_DENSITY = Math.min(window.devicePixelRatio || 1, 2);
+// Framebuffer pixels per canvas pixel: sharp on high-DPI screens, within a
+// pixel budget (screen.ts). Chosen once at startup from the window size.
+export const PIXEL_DENSITY = pixelDensityFor(window.devicePixelRatio || 1, window.innerWidth, window.innerHeight);
 
 const root = document.querySelector("#game") ?? undefined;
 

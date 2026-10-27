@@ -41,6 +41,8 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   along the border, and stops when it can get no closer.
 - **Screen fit:** 16:9 shows exactly 320x180; wider or taller screens show
   more, never less.
+- **Pixel density:** phones keep 2x; big high-DPI screens stay within
+  `MAX_CANVAS_PIXELS`; never below 1 unless the screen ratio is.
 - **Pinch:** one finger never zooms; two fingers zoom by their spread ratio,
   clamped to the zoom limits; lifting a finger stops; a third finger is ignored.
 
