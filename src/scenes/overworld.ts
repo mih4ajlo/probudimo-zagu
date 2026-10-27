@@ -1,3 +1,4 @@
+import { SPRITES } from "../assets";
 import { LORDS, type LordId } from "../data/lords";
 import {
   ADVANCE_KEYS,
@@ -71,16 +72,17 @@ export function registerOverworldScene(): void {
     const spawnCol = MAP[spawnRow].indexOf("@");
 
     const player = k.add([
-      k.rect(TILE - 2, TILE - 2),
-      k.color(220, 180, 210),
+      k.sprite(SPRITES.princess),
       k.pos(spawnCol * TILE + TILE / 2, spawnRow * TILE + TILE / 2),
       k.anchor("center"),
-      k.area(),
+      // Collide with the feet only, so her head can overlap the wall row above.
+      k.area({ scale: k.vec2(0.9, 0.5), offset: k.vec2(0, 6) }),
       k.body(),
       "player",
     ]);
 
-    const hud = k.add([k.text(hudText(), { size: 8 }), k.pos(8, 8), k.fixed()]);
+    k.add([k.rect(k.width(), 16), k.pos(0, 0), k.color(12, 10, 20), k.opacity(0.85), k.fixed()]);
+    const hud = k.add([k.text(hudText(), { size: 8 }), k.pos(8, 4), k.fixed()]);
 
     const dialogBox = k.add([
       k.rect(300, 48),
@@ -92,13 +94,13 @@ export function registerOverworldScene(): void {
     ]);
 
     const dialogText = k.add([
-      k.text("", { size: 8, width: 280 }),
+      k.text("", { size: 8, width: 284, lineSpacing: 4 }),
       k.pos(18, 130),
       k.fixed(),
     ]);
 
     function hudText(): string {
-      return `Score ${session.score.total}   Lords ${session.score.visited.length}/${lordIds.length}`;
+      return `Score ${session.score.total}  Lords ${session.score.visited.length}/${lordIds.length}`;
     }
 
     function refreshDialog(): void {
