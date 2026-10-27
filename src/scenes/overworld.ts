@@ -1,4 +1,4 @@
-import { SPRITES } from "../assets";
+import { SPRITE_SCALE, SPRITES } from "../assets";
 import { LORDS, type LordId } from "../data/lords";
 import {
   ADVANCE_KEYS,
@@ -8,7 +8,7 @@ import {
   isMovementBlocked,
   openDialog,
 } from "../dialog";
-import { k, TILE } from "../kaplayContext";
+import { addScreenLayer, GAME_WIDTH, k, RENDER_SCALE, TILE } from "../kaplayContext";
 import { isReadyForEnding } from "../progress";
 import { getSession } from "../session";
 import { visitLord } from "../score";
@@ -33,6 +33,7 @@ type LordTile = { lordId: LordId };
 
 export function registerOverworldScene(): void {
   k.scene("overworld", () => {
+    k.camScale(RENDER_SCALE);
     const session = getSession();
     const dialog = createDialog();
     const lordIds = LORDS.map((lord) => lord.id);
@@ -73,30 +74,30 @@ export function registerOverworldScene(): void {
 
     const player = k.add([
       k.sprite(SPRITES.princess),
+      k.scale(SPRITE_SCALE),
       k.pos(spawnCol * TILE + TILE / 2, spawnRow * TILE + TILE / 2),
       k.anchor("center"),
       // Collide with the feet only, so her head can overlap the wall row above.
-      k.area({ scale: k.vec2(0.9, 0.5), offset: k.vec2(0, 6) }),
+      k.area({ scale: k.vec2(0.9, 0.5), offset: k.vec2(0, 6 / SPRITE_SCALE) }),
       k.body(),
       "player",
     ]);
 
-    k.add([k.rect(k.width(), 16), k.pos(0, 0), k.color(12, 10, 20), k.opacity(0.85), k.fixed()]);
-    const hud = k.add([k.text(hudText(), { size: 8 }), k.pos(8, 4), k.fixed()]);
+    const ui = addScreenLayer();
+    ui.add([k.rect(GAME_WIDTH, 16), k.pos(0, 0), k.color(12, 10, 20), k.opacity(0.85)]);
+    const hud = ui.add([k.text(hudText(), { size: 8 }), k.pos(8, 4)]);
 
-    const dialogBox = k.add([
+    const dialogBox = ui.add([
       k.rect(300, 48),
       k.pos(10, 122),
       k.color(12, 10, 20),
       k.outline(1, k.rgb(220, 200, 140)),
-      k.fixed(),
       k.opacity(0),
     ]);
 
-    const dialogText = k.add([
+    const dialogText = ui.add([
       k.text("", { size: 8, width: 284, lineSpacing: 4 }),
       k.pos(18, 130),
-      k.fixed(),
     ]);
 
     function hudText(): string {

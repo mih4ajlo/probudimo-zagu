@@ -1,4 +1,4 @@
-import { SPRITES } from "../assets";
+import { SPRITE_SCALE, SPRITES } from "../assets";
 import { WAKE_LINES } from "../data/story";
 import {
   ADVANCE_KEYS,
@@ -7,14 +7,15 @@ import {
   currentLine,
   openDialog,
 } from "../dialog";
-import { k } from "../kaplayContext";
+import { k, useGameUnits } from "../kaplayContext";
 
 export function registerWakeScene(): void {
   k.scene("wake", () => {
+    useGameUnits();
     const dialog = createDialog();
     openDialog(dialog, WAKE_LINES);
 
-    k.add([k.sprite(SPRITES.wake), k.pos(0, 0)]);
+    k.add([k.sprite(SPRITES.wake), k.scale(SPRITE_SCALE), k.pos(0, 0)]);
 
     k.add([
       k.rect(300, 48),
