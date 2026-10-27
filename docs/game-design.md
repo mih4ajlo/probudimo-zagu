@@ -34,9 +34,15 @@ office count and score fill up, then see an ending.
 - Touch (phones/tablets): after the first touch, an on-screen joystick
   (bottom-left) walks her in 8 directions like the keys, a "!" button
   (bottom-right) shouts, and + / - buttons zoom; two-finger pinch on the map
-  also zooms. Controls hide while a dialog is open. Tapping anywhere advances
-  dialog and starts/leaves the title and ending screens. Best played in
-  landscape.
+  also zooms. A quick one-finger tap on the map walks her straight to that
+  spot (a red x marks it); she slides along the border and stops when she can
+  get no closer, and keys or the joystick cancel the walk. Controls hide while
+  a dialog is open. Tapping anywhere advances dialog and starts/leaves the
+  title and ending screens.
+- The game fills the whole browser window, in landscape or portrait, on
+  phones and desktop. At least the 320x180 design area is always visible; a
+  wider or taller screen shows more map. HUD, dialog and touch controls stick
+  to the screen edges. Title, wake and ending stay centered.
 
 ## Content
 | Level | Office | Points | Count |

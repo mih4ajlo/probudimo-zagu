@@ -2,10 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Probudimo Zagu</title>
     <style>
-      html, body { margin: 0; background: #140f1e; height: 100%; }
-      #game { display: flex; justify-content: center; align-items: center; height: 100%; }
+      html, body { margin: 0; background: #140f1e; height: 100%; overflow: hidden; }
+      /* dvh follows the phone's address bar as it shows and hides. */
+      #game { position: fixed; inset: 0; height: 100dvh; touch-action: none; }
     </style>
   </head>
   <body>

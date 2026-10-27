@@ -35,6 +35,12 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
 - **Joystick:** no input until grabbed or inside the dead zone; snaps to the
   same 8 directions as the keys; follows only the grabbing finger; the knob
   stays inside the ring.
+- **Tap:** one quick finger without sliding is a tap; sliding, holding, or a
+  second finger (pinch) is not.
+- **Walk to a tap:** steps straight toward the target, lands on it, slides
+  along the border, and stops when it can get no closer.
+- **Screen fit:** 16:9 shows exactly 320x180; wider or taller screens show
+  more, never less.
 - **Pinch:** one finger never zooms; two fingers zoom by their spread ratio,
   clamped to the zoom limits; lifting a finger stops; a third finger is ignored.
 
