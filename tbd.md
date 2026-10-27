@@ -7,3 +7,4 @@ Open questions and research to do. Not decided yet.
       name, city, address, phone and email, but no chief.
 - [ ] Make a list of all cases left unanswered by the prosecutor's offices
       for 2 years or more.
+- [ ] Find contact info for each chief prosecutor.
