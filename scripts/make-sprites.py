@@ -22,6 +22,8 @@ def cut_out_character(path: Path) -> Image.Image:
     width, height = image.size
     for corner in [(0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)]:
         ImageDraw.floodfill(image, corner, (0, 0, 0, 0), thresh=40)
+    # Shrink the mask a few pixels to drop the light JPEG fringe around the figure.
+    image.putalpha(image.getchannel("A").filter(ImageFilter.MinFilter(5)))
     return image.crop(image.getbbox())
 
 
@@ -56,7 +58,7 @@ def wake_background(path: Path) -> Image.Image:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    princess = cut_out_character(ASSETS / "zaga_glavno.jfif")
+    princess = cut_out_character(ASSETS / "zaga.jfif")
     shrink(princess, PLAYER_HEIGHT).save(OUT / "princess.png")
     shrink(princess, PORTRAIT_HEIGHT).save(OUT / "princess-portrait.png")
     wake_background(ASSETS / "usnula_zaga.jfif").save(OUT / "wake.png")
