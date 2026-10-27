@@ -25,7 +25,7 @@ export function isShouting(state: ShoutState): boolean {
   return state.remaining > 0;
 }
 
-// A lord visit opens with the princess shouting, then the lord answers.
+// An office visit opens with the princess shouting, then the office answers.
 export function withShout(lines: readonly string[]): string[] {
   return [SHOUT_LINE, ...lines];
 }

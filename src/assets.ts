@@ -1,16 +1,19 @@
 import pixelFontUrl from "@fontsource/press-start-2p/files/press-start-2p-latin-400-normal.woff2?url";
 import pixelFontExtUrl from "@fontsource/press-start-2p/files/press-start-2p-latin-ext-400-normal.woff2?url";
 import { FONT, k, RENDER_SCALE } from "./kaplayContext";
-import { paintMap } from "./mapCanvas";
+import { MAP_DETAILS, paintMap, type MapDetail } from "./mapCanvas";
 
 // Sprites are generated from assets/ by scripts/make-sprites.py into public/sprites/.
 export const SPRITES = {
   princess: "princess",
   princessPortrait: "princess-portrait",
   wake: "wake",
-  // Painted at startup from the map data, not a file (see mapCanvas.ts).
-  map: "serbia-map",
 } as const;
+
+// Map sprites are painted at startup from the map data, one per detail level.
+export function mapSprite(detail: MapDetail): string {
+  return `serbia-map-${detail}`;
+}
 
 // Sprites are made at RENDER_SCALE detail (DETAIL in scripts/make-sprites.py);
 // draw them at this scale to get game-unit size with full detail.
@@ -43,5 +46,7 @@ export function loadAssets(): void {
   });
   k.loadSprite(SPRITES.princessPortrait, `sprites/${SPRITES.princessPortrait}.png`);
   k.loadSprite(SPRITES.wake, `sprites/${SPRITES.wake}.png`);
-  k.loadSprite(SPRITES.map, paintMap());
+  for (const detail of MAP_DETAILS) {
+    k.loadSprite(mapSprite(detail), paintMap(detail));
+  }
 }

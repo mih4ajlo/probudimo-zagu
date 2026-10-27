@@ -1,4 +1,4 @@
-import { SPRITE_SCALE, SPRITES } from "../assets";
+import { mapSprite, SPRITE_SCALE, SPRITES } from "../assets";
 import { CITIES } from "../data/cities";
 import { maxScore, OFFICE_IDS, OFFICES, getOffice, type OfficeLevel } from "../data/offices";
 import { NEIGHBOURS, SERBIA_RINGS } from "../data/serbia-geo";
@@ -23,7 +23,7 @@ import {
   releaseJoystick,
 } from "../joystick";
 import { addScreenLayer, GAME_HEIGHT, GAME_WIDTH, hasTouched, k, RENDER_SCALE } from "../kaplayContext";
-import { MAP_COLORS, MAP_DETAIL, type RGB } from "../mapCanvas";
+import { MAP_COLORS, pickMapDetail, type RGB } from "../mapCanvas";
 import { createPinch, pinchDown, pinchMove, pinchUp } from "../pinch";
 import { layoutOffices, MARKER_SIZE, spawnPoint, touchedOffice, visitToStart } from "../officeLayout";
 import { faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
@@ -46,7 +46,8 @@ const ZOOM_BUTTON_RADIUS = 11;
 // Feet sit at the sprite's bottom; the camera looks at her middle.
 const BODY_CENTER = 12;
 // Show city names from this zoom up; office names only near her when close.
-const CITY_LABEL_ZOOM = 0.2;
+// Label sizes are screen pixels in multiples of 8, the pixel font's grid.
+const CITY_LABEL_ZOOM = 0.3;
 const OFFICE_LABEL_ZOOM = 0.6;
 const OFFICE_LABEL_DISTANCE = 60;
 // Extra game units around the view in which markers and labels are still drawn.
@@ -95,6 +96,20 @@ export function registerOverworldScene(): void {
       k.drawText({ text, pos, size: px(sizePx), anchor: "center", color: rgb(color) });
     }
 
+    // A label on a pale tag, so it stays readable over houses and rivers.
+    // The pixel font is monospaced: each glyph is as wide as the text size.
+    function taggedLabel(text: string, pos: ReturnType<typeof k.vec2>, sizePx: number): void {
+      k.drawRect({
+        pos,
+        width: px(sizePx * text.length + 8),
+        height: px(sizePx + 6),
+        anchor: "center",
+        color: rgb(MAP_COLORS.paper),
+        opacity: 0.85,
+      });
+      label(text, pos, sizePx, INK);
+    }
+
     function drawOffice(id: string, level: OfficeLevel): void {
       const p = vec(officePos.get(id) as Point);
       const s = MARKER_SIZE;
@@ -139,28 +154,34 @@ export function registerOverworldScene(): void {
         draw() {
           const feet = { x: player.pos.x, y: player.pos.y };
           // Paper, countries, rivers and outline: painted once (mapCanvas.ts).
-          k.drawSprite({ sprite: SPRITES.map, pos: k.vec2(bounds.x, bounds.y), scale: 1 / MAP_DETAIL });
+          const detail = pickMapDetail(zoom * RENDER_SCALE);
+          k.drawSprite({ sprite: mapSprite(detail), pos: k.vec2(bounds.x, bounds.y), scale: 1 / detail });
           for (const n of neighbours) {
-            label(n.name, n.label, 10, MAP_COLORS.neighbourEdge);
+            label(n.name, n.label, 16, MAP_COLORS.neighbourEdge);
           }
           for (const c of cities) {
             if (!onScreen(c.pos)) {
               continue;
             }
             k.drawCircle({ pos: c.pos, radius: px(4), color: rgb(INK) });
-            if (zoom >= CITY_LABEL_ZOOM) {
-              label(c.name, c.pos.add(0, px(14)), 8, INK);
-            }
           }
           for (const office of OFFICES) {
             if (onScreen(officePos.get(office.id) as Point)) {
               drawOffice(office.id, office.level);
             }
           }
+          // City names after the houses, so the houses never cover them.
+          if (zoom >= CITY_LABEL_ZOOM) {
+            for (const c of cities) {
+              if (onScreen(c.pos)) {
+                taggedLabel(c.name, c.pos.add(0, px(18)), 16);
+              }
+            }
+          }
           const nearest = zoom >= OFFICE_LABEL_ZOOM ? nearestOffice(feet) : null;
           if (nearest) {
             // Above the roof: she approaches from below and would cover a label under it.
-            label(nearest.name, vec(nearest.pos).add(0, -MARKER_SIZE * 1.6), 8, INK);
+            taggedLabel(nearest.name, vec(nearest.pos).add(0, -MARKER_SIZE * 1.6 - px(4)), 16);
           }
         },
       },

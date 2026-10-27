@@ -13,13 +13,14 @@ export const START_CITY = "Beograd";
 // She wakes a little south of Beograd's offices, on land.
 const SPAWN_OFFSET: Point = { x: 0, y: 45 };
 
-// Big enough that neighbours on the ring (one chord apart) keep a walkable gap.
+// Big enough that neighbours on the ring (one chord apart) keep a walkable gap,
+// but never wider than MAX_RING_RADIUS so offices stay by their city.
 export function ringRadius(count: number): number {
   if (count <= 1) {
     return 0;
   }
   const spacing = Math.max(MARKER_SIZE + MARKER_GAP, 2 * TOUCH_RADIUS + WALK_GAP);
-  return Math.max(14, spacing / (2 * Math.sin(Math.PI / count)));
+  return Math.min(MAX_RING_RADIUS, Math.max(14, spacing / (2 * Math.sin(Math.PI / count))));
 }
 
 // Offices of one city sit evenly on a ring around the city point, first at the top.

@@ -1,9 +1,16 @@
 import { NEIGHBOURS, RIVERS, SERBIA_RINGS } from "./data/serbia-geo";
 import { mapBounds, projectRing, type Point } from "./geo";
 
-// The static map layers are painted once into an offscreen canvas at this many
-// pixels per game unit, then drawn as one sprite at 1/MAP_DETAIL scale.
-export const MAP_DETAIL = 2;
+// The static map layers are painted once per detail level (pixels per game
+// unit) and drawn as a sprite at 1/detail scale. Smaller levels act as
+// hand-made mipmaps so lines do not shimmer when zoomed far out.
+export const MAP_DETAILS = [0.5, 1, 2] as const;
+export type MapDetail = (typeof MAP_DETAILS)[number];
+
+// The least detail that still has a texture pixel for every screen pixel.
+export function pickMapDetail(screenPixelsPerUnit: number): MapDetail {
+  return MAP_DETAILS.find((detail) => detail >= screenPixelsPerUnit) ?? MAP_DETAILS[MAP_DETAILS.length - 1];
+}
 
 export type RGB = readonly [number, number, number];
 
@@ -33,16 +40,16 @@ function tracePath(ctx: CanvasRenderingContext2D, points: readonly Point[], clos
 }
 
 // Paper, neighbours, Serbia (shadow, fill, outline) and rivers.
-export function paintMap(): HTMLCanvasElement {
+export function paintMap(detail: MapDetail): HTMLCanvasElement {
   const bounds = mapBounds();
   const canvas = document.createElement("canvas");
-  canvas.width = Math.ceil(bounds.w * MAP_DETAIL);
-  canvas.height = Math.ceil(bounds.h * MAP_DETAIL);
+  canvas.width = Math.ceil(bounds.w * detail);
+  canvas.height = Math.ceil(bounds.h * detail);
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     return canvas;
   }
-  ctx.scale(MAP_DETAIL, MAP_DETAIL);
+  ctx.scale(detail, detail);
   ctx.translate(-bounds.x, -bounds.y);
   ctx.lineJoin = "round";
   ctx.lineCap = "round";

@@ -10,6 +10,7 @@ import {
   TOUCH_RADIUS,
   WALK_GAP,
   layoutOffices,
+  ringRadius,
   spawnPoint,
   touchedOffice,
   visitToStart,
@@ -45,6 +46,18 @@ describe("layoutOffices", () => {
       for (let j = i + 1; j < points.length; j++) {
         expect(distance(points[i], points[j])).toBeGreaterThanOrEqual(2 * TOUCH_RADIUS + WALK_GAP - 1e-9);
       }
+    }
+  });
+
+  it("never makes a ring wider than MAX_RING_RADIUS", () => {
+    expect(ringRadius(40)).toBe(MAX_RING_RADIUS);
+  });
+
+  it("keeps every real office within MAX_RING_RADIUS of its city", () => {
+    const positions = layoutOffices(OFFICES, (name) => project(CITIES[name]));
+    for (const office of OFFICES) {
+      const p = positions.get(office.id) as Point;
+      expect(distance(p, project(CITIES[office.city])), office.id).toBeLessThanOrEqual(MAX_RING_RADIUS);
     }
   });
 

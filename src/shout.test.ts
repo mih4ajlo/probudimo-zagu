@@ -34,7 +34,7 @@ describe("shout", () => {
 });
 
 describe("withShout", () => {
-  it("opens a lord visit with the shout, then the lord's lines", () => {
+  it("opens an office visit with the shout, then the office's lines", () => {
     expect(withShout(["hello", "bye"])).toEqual([SHOUT_LINE, "hello", "bye"]);
   });
 });
