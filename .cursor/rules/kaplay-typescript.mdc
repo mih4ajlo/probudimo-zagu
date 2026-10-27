@@ -1,0 +1,14 @@
+---
+description: Kaplay + TypeScript conventions
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+# Kaplay + TypeScript
+
+- One Kaplay instance in `src/main.ts`. Scenes: title, wake, overworld, ending.
+- Use TypeScript types for lords, dialog lines, and score state.
+- Keep scene files thin: layout, input, calling systems.
+- Dialog and score are modules, not copied into each scene.
+- Pixel art: integer camera/scale; do not smooth/filter sprites.
+- No `any`. Prefer explicit types for game data.

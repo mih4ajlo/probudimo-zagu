@@ -1,0 +1,13 @@
+---
+description: Story and lord data live in data files
+globs: src/data/**
+alwaysApply: false
+---
+
+# Content data
+
+- Lords: id, display name, rank (1–3), map marker, linear dialog lines, points.
+- Rank 1 = 10 points, rank 2 = 20, rank 3 = 30. One lord per rank in v1.
+- Opening and ending lines live beside lords, not in rendering code.
+- Changing copy must not require changing Kaplay scene logic.
+- First visit only grants points; data should make that id stable.

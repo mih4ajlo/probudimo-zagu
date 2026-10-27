@@ -1,0 +1,16 @@
+---
+description: Vitest for game logic; Playwright for one browser smoke test
+globs: "**/*.{ts,spec.ts}"
+alwaysApply: false
+---
+
+# Testing
+
+Follow `docs/testing.md`.
+
+- Unit-test score, dialog, lord data, and “all visited” with Vitest.
+- Put tests next to modules: `foo.ts` → `foo.test.ts`. Do not import Kaplay scenes.
+- Do not test drawing, cameras, or dialog wording.
+- One Playwright smoke once a page exists: load, canvas present, no page error.
+- No Jest, Cypress, or screenshot tests in v1.
+- A logic change is not done until `npm test` passes.

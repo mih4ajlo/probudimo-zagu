@@ -1,0 +1,13 @@
+---
+description: v1 scope for Probudimo Zagu — keep the visit/dialog/score loop small
+alwaysApply: true
+---
+
+# v1 scope
+
+This is a short browser adventure: walk the map, talk to lords, get points once.
+
+- Follow `docs/game-design.md`. If code and the doc disagree, stop and ask.
+- Do not add combat, inventory, branching quests, extra maps, or a backend.
+- Do not start scaffolding or installing until the human asks to implement.
+- Placeholders for art and names are OK. Do not invent a large lore bible.
