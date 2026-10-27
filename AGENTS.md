@@ -24,3 +24,22 @@ drawing. Do not claim a feature done if its logic has no Vitest coverage.
 - Score still grants once per lord
 - Relevant Vitest tests pass (`npm test`)
 - No new systems unless the human asked
+
+## Versioning
+- Semantic versioning: `MAJOR.MINOR.PATCH`. The single source of truth is
+  `"version"` in `package.json`.
+- While pre-1.0 (`0.x`):
+  - **MINOR** (`0.1.0` → `0.2.0`): a new playable feature or content
+    milestone (new art, new scene, new lords, new mechanic).
+  - **PATCH** (`0.1.0` → `0.1.1`): bug fixes, copy/typo edits, tuning — no
+    new features.
+- `1.0.0` = the v1 loop is final (art, copy, and language decided) and
+  shipped to players.
+- Work on a feature branch (`feat/...`, `fix/...`), never directly on `main`.
+- Bump the version only when merging to `main`, in the merge or a commit
+  right after it — not on feature branches.
+- Before bumping: `npm test`, `npm run test:e2e`, and `npm run build` must pass.
+- Tag every version on `main` with an annotated tag `vX.Y.Z` whose message
+  lists what changed:
+  `git tag -a v0.2.0 -m "v0.2.0: <one line per change>"`
+- Do not push or publish tags unless the human asks.
