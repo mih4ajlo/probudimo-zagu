@@ -5,7 +5,7 @@ Read `docs/game-design.md` before changing gameplay.
 ## Order of work
 1. Do not start implementation until the human asks for it.
 2. When they do, follow `docs/superpowers/plans/2026-10-27-v1-game-loop.md` task by task.
-3. Keep story, lords, and dialog in `src/data/`, not in scene files.
+3. Keep story, offices, map data, and dialog in `src/data/`, not in scene files.
 4. Prefer the smallest change that preserves the v1 loop.
 
 ## Stack
@@ -21,7 +21,7 @@ drawing. Do not claim a feature done if its logic has no Vitest coverage.
 ## Definition of done for a feature
 - Playable in the browser
 - Dialog still blocks movement
-- Score still grants once per lord
+- Score still grants once per office
 - Relevant Vitest tests pass (`npm test`)
 - No new systems unless the human asked
 

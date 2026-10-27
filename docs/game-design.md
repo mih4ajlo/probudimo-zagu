@@ -1,50 +1,51 @@
 # Probudimo Zagu — game design (v1)
 
 ## Intent
-A short retro top-down adventure in the browser. An old, sleepy princess wakes.
-Her people ask her to visit every lord and check on them. Each first visit
-awards points. Travel is map movement. Talk is dialog.
+A short retro adventure in the browser. An old, sleepy princess (Zaga) wakes
+and is sent across a cartoon map of Serbia to wake up every public
+prosecutor's office. Each first visit awards points. Travel is map movement.
+Talk is dialog.
 
 ## Player fantasy
-Walk a small kingdom, greet each lord, feel the list and score fill up, then
-see an ending.
+Walk across Serbia, shout "Budite se, na posao!" at every office, watch the
+office count and score fill up, then see an ending.
 
 ## v1 loop
 1. Title → start
-2. Wake dialog (she is called to visit the lords)
-3. Overworld: walk, collide with a lord marker, dialog, points once
-4. HUD: score + lords visited / total
-5. When every lord is visited → ending scene
+2. Wake dialog (the prosecutors are asleep; visit every office)
+3. Serbia map: walk, touch an office, shout + reply, points once
+4. HUD: score / max and offices visited / total
+5. When every office is visited → ending scene
 
 ## Rules
-- One overworld map. Lords are markers on that map (not indoor rooms in v1).
-- Dialog is linear per lord (no branching trees in v1).
-- A lord can be talked to again, but points are granted only on first visit.
-- Three ranks of lords on the same map. Rank sets points (not a second map).
-- Movement is blocked while a dialog box is open.
-- Advance dialog with Space / Enter / click.
-- WASD or arrow keys to walk. She faces the way she walks (left/right) and
-  plays a walk animation while moving.
-- Shout: press E in the overworld. She throws her hands in the air and shouts
-  "Budite se, na posao!" in a speech bubble for ~1.2 s. Movement is blocked
-  while shouting. Cosmetic only: no points. Ignored while a dialog is open.
-- Every lord visit opens with the same shout (hands in the air) as the first
-  dialog line; then the lord answers.
+- One map: a cartoon vector map of Serbia **including Kosovo**, drawn from
+  Natural Earth borders. Kosovo is walkable; no offices there.
+- She starts in Beograd and can only walk on Serbian land; walking into the
+  border slides along it.
+- Stops are the 60 public prosecutor's offices in `assets/tuzilastva.csv`,
+  each its own marker around its city.
+- Each visit opens with the shout ("Budite se, na posao!", hands in the air),
+  then the office's reply. Dialog is linear.
+- An office can be visited again, but points are granted only the first time.
+- Movement is blocked while a dialog box is open or while shouting.
+- Advance dialog with Space / Enter / click. Walk with WASD or arrow keys.
+- Shout any time with E (cosmetic, ~1.2 s, no points).
+- Zoom with the mouse wheel or +/-, from all of Serbia to a close view.
 
-## Content (placeholders until copy is written)
-- Opening: wake, call to duty.
-- 3 lords, one per rank:
+## Content
+| Level | Office | Points | Count |
+|---|---|---|---|
+| OJT | osnovno | 10 | 27 |
+| VJT | više | 20 | 25 |
+| AJT | apelaciono | 30 | 4 |
+| PJT | posebno | 40 | 3 |
+| VRHOVNO | Vrhovno javno tužilaštvo | 50 | 1 |
 
-  | Rank | Role        | Points |
-  |------|-------------|--------|
-  | 1    | Lesser lord | 10     |
-  | 2    | Lord        | 20     |
-  | 3    | High lord   | 30     |
-
-- Ending: all lords seen, score recap (max 60).
+Max score 1060. Replies per level live in `src/data/replies.ts`.
 
 ## Out of scope for v1
-Combat, enemies, inventory, branching quests, multiple maps, save/load,
+Combat, enemies, inventory, branching quests, indoor office scenes, fast
+travel, a minimap, save/load,
 backend, accounts, mobile-specific UI, pixel-perfect original art (use
 placeholders).
 
@@ -61,5 +62,5 @@ go up, and reach the ending without a console error.
 
 ## Open (decide before or during implementation)
 - Dialog language (Serbian vs English)
-- Final lord names and copy
+- Final office reply copy (placeholders in `src/data/replies.ts`)
 - Pixel size (recommend 16×16 sprites, integer scale, no blur)
