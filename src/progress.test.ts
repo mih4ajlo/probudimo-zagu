@@ -1,19 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { LORDS } from "./data/lords";
+import { OFFICE_IDS } from "./data/offices";
 import { isReadyForEnding } from "./progress";
 
-const ids = LORDS.map((lord) => lord.id);
-
 describe("isReadyForEnding", () => {
-  it("is false while one lord is still unvisited", () => {
-    expect(isReadyForEnding(["north", "east"], ids)).toBe(false);
+  it("is false while one office is still asleep", () => {
+    expect(isReadyForEnding(OFFICE_IDS.slice(1), OFFICE_IDS)).toBe(false);
   });
 
-  it("is true once every lord is visited", () => {
-    expect(isReadyForEnding(ids, ids)).toBe(true);
+  it("is true once every office is visited", () => {
+    expect(isReadyForEnding(OFFICE_IDS, OFFICE_IDS)).toBe(true);
   });
 
   it("ignores extra visited ids", () => {
-    expect(isReadyForEnding([...ids, "dragon"], ids)).toBe(true);
+    expect(isReadyForEnding([...OFFICE_IDS, "dragon"], OFFICE_IDS)).toBe(true);
   });
 });

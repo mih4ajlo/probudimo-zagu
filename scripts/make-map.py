@@ -124,6 +124,42 @@ def merge_rings(a: list, b: list):
     return [list(p) for p in ring] + [list(ring[0])]
 
 
+def clip_ring_to_box(ring: list) -> list:
+    """Sutherland-Hodgman: cut a ring to the view box so the map sheet has clean edges."""
+    lon_min, lat_min, lon_max, lat_max = VIEW_BOX
+    edges = [
+        (lambda p: p[0] >= lon_min, lambda a, b: cross_x(a, b, lon_min)),
+        (lambda p: p[0] <= lon_max, lambda a, b: cross_x(a, b, lon_max)),
+        (lambda p: p[1] >= lat_min, lambda a, b: cross_y(a, b, lat_min)),
+        (lambda p: p[1] <= lat_max, lambda a, b: cross_y(a, b, lat_max)),
+    ]
+    points = ring[:-1] if ring[0] == ring[-1] else ring
+    for inside, cross in edges:
+        if not points:
+            break
+        out = []
+        for i, current in enumerate(points):
+            previous = points[i - 1]
+            if inside(current):
+                if not inside(previous):
+                    out.append(cross(previous, current))
+                out.append(current)
+            elif inside(previous):
+                out.append(cross(previous, current))
+        points = out
+    return points + points[:1] if len(points) >= 3 else []
+
+
+def cross_x(a, b, x):
+    t = (x - a[0]) / (b[0] - a[0])
+    return [x, a[1] + t * (b[1] - a[1])]
+
+
+def cross_y(a, b, y):
+    t = (y - a[1]) / (b[1] - a[1])
+    return [a[0] + t * (b[0] - a[0]), y]
+
+
 def clip_to_box(line: list, margin: float) -> list:
     """Split a polyline into the runs of points inside the (padded) view box."""
     runs, run = [], []
@@ -153,8 +189,9 @@ def main() -> None:
 
     neighbours = []
     for code, name in NEIGHBOURS.items():
-        rings = [poly[0] for poly in polygons(by_code[code]) if any(in_box(p, 1.0) for p in poly[0])]
-        inside = [p for ring in rings for p in ring if in_box(p)]
+        rings = [clip_ring_to_box(poly[0]) for poly in polygons(by_code[code])]
+        rings = [ring for ring in rings if ring]
+        inside = [p for ring in rings for p in ring]
         label = [sum(p[0] for p in inside) / len(inside), sum(p[1] for p in inside) / len(inside)]
         neighbours.append({
             "name": name,
@@ -170,7 +207,7 @@ def main() -> None:
                 continue
             label, width = wanted[source]
             for part in line_parts(feature["geometry"]):
-                for run in clip_to_box(part, 0.3):
+                for run in clip_to_box(part, 0.0):
                     rivers.append({"name": label, "width": width, "path": rounded(simplify(run, RIVER_TOLERANCE))})
 
     def ts(value) -> str:

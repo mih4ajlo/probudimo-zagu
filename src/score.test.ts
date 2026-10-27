@@ -1,31 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { createScore, visitLord } from "./score";
+import { createScore, visitOffice } from "./score";
 
-describe("visitLord", () => {
-  it("grants points only on the first visit", () => {
+describe("visitOffice", () => {
+  it("grants the office's level points only on the first visit", () => {
     const state = createScore();
-    expect(visitLord(state, "north").granted).toBe(10);
-    expect(visitLord(state, "north").granted).toBe(0);
+    expect(visitOffice(state, "ojt-u-novom-sadu").granted).toBe(10);
+    expect(visitOffice(state, "ojt-u-novom-sadu").granted).toBe(0);
     expect(state.total).toBe(10);
-    expect(state.visited).toEqual(["north"]);
+    expect(state.visited).toEqual(["ojt-u-novom-sadu"]);
   });
 
-  it("grants rank 2 points for a rank 2 lord", () => {
+  it("grants more for higher levels", () => {
     const state = createScore();
-    expect(visitLord(state, "east").granted).toBe(20);
-  });
-
-  it("sums points across different ranked lords", () => {
-    const state = createScore();
-    visitLord(state, "north");
-    visitLord(state, "east");
-    visitLord(state, "west");
-    expect(state.total).toBe(60);
+    expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(20);
+    expect(visitOffice(state, "ajt-u-novom-sadu").granted).toBe(30);
+    expect(visitOffice(state, "vrhovno-javno-tuzilastvo").granted).toBe(50);
+    expect(state.total).toBe(100);
   });
 
   it("grants nothing for an unknown id and does not throw", () => {
     const state = createScore();
-    expect(visitLord(state, "dragon").granted).toBe(0);
+    expect(visitOffice(state, "dragon").granted).toBe(0);
     expect(state.total).toBe(0);
     expect(state.visited).toEqual([]);
   });

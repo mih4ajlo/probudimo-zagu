@@ -1,5 +1,5 @@
 import { ENDING_LINES, TITLE } from "../data/story";
-import { maxScore } from "../data/lords";
+import { maxScore } from "../data/offices";
 import { GAME_WIDTH, k, useGameUnits } from "../kaplayContext";
 import { getSession } from "../session";
 
