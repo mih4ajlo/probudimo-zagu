@@ -6,7 +6,7 @@ when implementation starts, not while the repo is docs-only.
 ## Stack
 | Layer | Tool | What it covers |
 |--------|------|----------------|
-| Logic | Vitest + TypeScript | Score, dialog, lord data, “all visited” |
+| Logic | Vitest + TypeScript | Score, dialog, office data, map geometry, zoom, “all visited” |
 | Browser smoke | Playwright | Page loads, canvas exists, no page error |
 
 Vite is the bundler, so Vitest is the runner. Do not add Jest or Cypress.
@@ -14,24 +14,32 @@ Vite is the bundler, so Vitest is the runner. Do not add Jest or Cypress.
 ## What to test (required)
 Keep rules in modules that do not import Kaplay, then unit-test those modules.
 
-- **Score:** first visit grants that lord’s points; a second talk grants 0;
-  total equals the sum of visited lords (ranks differ: 10, then 20, then 30).
 - **Dialog:** open blocks movement; Space / Enter / click advances a line;
   last line closes the box and unblocks movement.
-- **Lords:** exactly three lords, ranks 1–3 unique, each with stable `id`,
-  display name, marker, linear lines, and `points` matching `RANK_POINTS`.
-- **Progress:** after every lord is visited, the game is ready for the
+- **Score:** first visit grants the office's level points (10/20/30/40/50);
+  a second visit grants 0; unknown ids grant 0.
+- **Offices:** 60 entries, unique ids, level counts 27/25/4/3/1, max 1060,
+  every city has coordinates.
+- **Geo:** projection keeps north up; known cities inside/outside the
+  Serbia+Kosovo outline; every office city inside; blocked diagonals slide.
+- **Layout:** offices of one city do not overlap; every office on land;
+  a visit starts only when stepping onto a new office with no dialog open.
+- **Zoom:** clamped to its limits; camera never shows past the map, centers
+  when the map is smaller than the view.
+- **Progress:** after every office is visited, the game is ready for the
   ending scene.
 - **Princess:** facing follows sideways input and is kept when still; the
   animation is shout over walk over idle.
-- **Shout:** lasts `SHOUT_SECONDS`, does not restart mid-shout, and a lord
+- **Shout:** lasts `SHOUT_SECONDS`, does not restart mid-shout, and an office
   visit's dialog starts with the shout line.
 - **Joystick:** no input until grabbed or inside the dead zone; snaps to the
   same 8 directions as the keys; follows only the grabbing finger; the knob
   stays inside the ring.
+- **Pinch:** one finger never zooms; two fingers zoom by their spread ratio,
+  clamped to the zoom limits; lifting a finger stops; a third finger is ignored.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
-lords, progress).
+offices, geo, officeLayout, zoom, progress).
 
 ## What not to test
 - Pixel drawing, sprite animation, camera, or Kaplay internals
@@ -61,11 +69,11 @@ Do not script walking the whole map in v1. That is brittle on canvas.
 ## Example (score)
 
 ```typescript
-it("grants that lord's rank points only on the first visit", () => {
+it("grants the office's level points only on the first visit", () => {
   const state = createScore();
-  expect(visitLord(state, "north").granted).toBe(10);
-  expect(visitLord(state, "north").granted).toBe(0);
-  expect(visitLord(state, "east").granted).toBe(20);
+  expect(visitOffice(state, "ojt-u-novom-sadu").granted).toBe(10);
+  expect(visitOffice(state, "ojt-u-novom-sadu").granted).toBe(0);
+  expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(20);
   expect(state.total).toBe(30);
 });
 ```

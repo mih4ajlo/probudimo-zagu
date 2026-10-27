@@ -5,7 +5,7 @@ Read `docs/game-design.md` before changing gameplay.
 ## Order of work
 1. Do not start implementation until the human asks for it.
 2. When they do, follow `docs/superpowers/plans/2026-10-27-v1-game-loop.md` task by task.
-3. Keep story, lords, and dialog in `src/data/`, not in scene files.
+3. Keep story, offices, map data, and dialog in `src/data/`, not in scene files.
 4. Prefer the smallest change that preserves the v1 loop.
 
 ## Stack
@@ -15,13 +15,13 @@ Read `docs/game-design.md` before changing gameplay.
 - No extra frameworks (no React, no Phaser, no Jest, no Cypress, no backend)
 
 ## Testing
-Follow `docs/testing.md`. Test score, dialog state, and lord data — not Kaplay
+Follow `docs/testing.md`. Test score, dialog state, and office/map data — not Kaplay
 drawing. Do not claim a feature done if its logic has no Vitest coverage.
 
 ## Definition of done for a feature
 - Playable in the browser
 - Dialog still blocks movement
-- Score still grants once per lord
+- Score still grants once per office
 - Relevant Vitest tests pass (`npm test`)
 - No new systems unless the human asked
 
@@ -30,7 +30,7 @@ drawing. Do not claim a feature done if its logic has no Vitest coverage.
   `"version"` in `package.json`.
 - While pre-1.0 (`0.x`):
   - **MINOR** (`0.1.0` → `0.2.0`): a new playable feature or content
-    milestone (new art, new scene, new lords, new mechanic).
+    milestone (new art, new scene, new offices, new mechanic).
   - **PATCH** (`0.1.0` → `0.1.1`): bug fixes, copy/typo edits, tuning — no
     new features.
 - `1.0.0` = the v1 loop is final (art, copy, and language decided) and
