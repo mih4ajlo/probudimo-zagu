@@ -22,6 +22,10 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   display name, marker, linear lines, and `points` matching `RANK_POINTS`.
 - **Progress:** after every lord is visited, the game is ready for the
   ending scene.
+- **Princess:** facing follows sideways input and is kept when still; the
+  animation is shout over walk over idle.
+- **Shout:** lasts `SHOUT_SECONDS`, does not restart mid-shout, and a lord
+  visit's dialog starts with the shout line.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
 lords, progress).
