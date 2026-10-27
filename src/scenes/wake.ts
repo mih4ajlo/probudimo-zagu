@@ -1,3 +1,4 @@
+import { SPRITES } from "../assets";
 import { WAKE_LINES } from "../data/story";
 import {
   ADVANCE_KEYS,
@@ -13,6 +14,8 @@ export function registerWakeScene(): void {
     const dialog = createDialog();
     openDialog(dialog, WAKE_LINES);
 
+    k.add([k.sprite(SPRITES.wake), k.pos(0, 0)]);
+
     k.add([
       k.rect(300, 48),
       k.pos(10, 122),
@@ -21,7 +24,7 @@ export function registerWakeScene(): void {
     ]);
 
     const line = k.add([
-      k.text(currentLine(dialog) ?? "", { size: 8, width: 280 }),
+      k.text(currentLine(dialog) ?? "", { size: 8, width: 284, lineSpacing: 4 }),
       k.pos(18, 130),
     ]);
 
