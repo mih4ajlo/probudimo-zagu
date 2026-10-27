@@ -6,16 +6,20 @@ export const MARKER_SIZE = 10;
 export const MARKER_GAP = 2;
 // Feet within this distance of a marker count as touching it.
 export const TOUCH_RADIUS = 9;
+// Space between neighbouring offices' touch zones, so she can walk between them.
+export const WALK_GAP = 6;
 export const MAX_RING_RADIUS = 40;
 export const START_CITY = "Beograd";
 // She wakes a little south of Beograd's offices, on land.
 const SPAWN_OFFSET: Point = { x: 0, y: 45 };
 
+// Big enough that neighbours on the ring (one chord apart) keep a walkable gap.
 export function ringRadius(count: number): number {
   if (count <= 1) {
     return 0;
   }
-  return Math.max(14, (count * (MARKER_SIZE + 4)) / (2 * Math.PI));
+  const spacing = Math.max(MARKER_SIZE + MARKER_GAP, 2 * TOUCH_RADIUS + WALK_GAP);
+  return Math.max(14, spacing / (2 * Math.sin(Math.PI / count)));
 }
 
 // Offices of one city sit evenly on a ring around the city point, first at the top.

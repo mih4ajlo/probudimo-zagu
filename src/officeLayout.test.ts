@@ -8,6 +8,7 @@ import {
   MARKER_SIZE,
   MAX_RING_RADIUS,
   TOUCH_RADIUS,
+  WALK_GAP,
   layoutOffices,
   spawnPoint,
   touchedOffice,
@@ -33,6 +34,16 @@ describe("layoutOffices", () => {
     for (let i = 0; i < points.length; i++) {
       for (let j = i + 1; j < points.length; j++) {
         expect(distance(points[i], points[j])).toBeGreaterThanOrEqual(MARKER_SIZE + MARKER_GAP);
+      }
+    }
+  });
+
+  it("leaves a walkable gap between neighbouring offices' touch zones", () => {
+    const offices = Array.from({ length: 9 }, (_, i) => ({ id: `o${i}`, city: "X" }));
+    const points = [...layoutOffices(offices, () => city).values()];
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        expect(distance(points[i], points[j])).toBeGreaterThanOrEqual(2 * TOUCH_RADIUS + WALK_GAP - 1e-9);
       }
     }
   });
