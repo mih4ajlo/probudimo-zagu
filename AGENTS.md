@@ -15,7 +15,7 @@ Read `docs/game-design.md` before changing gameplay.
 - No extra frameworks (no React, no Phaser, no Jest, no Cypress, no backend)
 
 ## Testing
-Follow `docs/testing.md`. Test score, dialog state, and lord data — not Kaplay
+Follow `docs/testing.md`. Test score, dialog state, and office/map data — not Kaplay
 drawing. Do not claim a feature done if its logic has no Vitest coverage.
 
 ## Definition of done for a feature
@@ -30,7 +30,7 @@ drawing. Do not claim a feature done if its logic has no Vitest coverage.
   `"version"` in `package.json`.
 - While pre-1.0 (`0.x`):
   - **MINOR** (`0.1.0` → `0.2.0`): a new playable feature or content
-    milestone (new art, new scene, new lords, new mechanic).
+    milestone (new art, new scene, new offices, new mechanic).
   - **PATCH** (`0.1.0` → `0.1.1`): bug fixes, copy/typo edits, tuning — no
     new features.
 - `1.0.0` = the v1 loop is final (art, copy, and language decided) and
