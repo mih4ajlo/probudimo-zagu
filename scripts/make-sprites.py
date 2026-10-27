@@ -167,10 +167,103 @@ def dress_wake(image: Image.Image) -> Image.Image:
     return image
 
 
+# Princess sheet. The cut-out faces right; the game mirrors it for left.
+# Coordinates are pixels in the cut-out scaled to SHEET_WORK_HEIGHT tall.
+SHEET_WORK_HEIGHT = 384
+SHEET_PAD_X, SHEET_PAD_TOP = 56, 8
+LEG_TOP, LEG_X = 305, (50, 198)
+LEG_SPLIT_X = 120
+LEG_OVERLAP = 14
+LEFT_ARM = [(10, 150), (45, 150), (58, 170), (58, 285), (56, 316), (14, 316), (4, 290), (0, 240), (0, 180)]
+RIGHT_ARM = [(185, 150), (215, 155), (228, 200), (228, 280), (225, 311), (197, 311), (190, 285), (186, 220)]
+LEFT_SHOULDER, RIGHT_SHOULDER = (35, 162), (196, 165)
+MOUTH = (147, 122, 166, 139)
+# Frame order must match PRINCESS_FRAMES in src/assets.ts.
+SHEET_FRAMES = ["idle", "step-left", "step-right", "shout-1", "shout-2"]
+
+
+def region(image: Image.Image, polygon: list[tuple[int, int]] | None = None, box=None) -> Image.Image:
+    """Copy only the pixels inside a polygon or box; everything else transparent."""
+    mask = Image.new("L", image.size, 0)
+    if polygon:
+        ImageDraw.Draw(mask).polygon(polygon, fill=255)
+    if box:
+        ImageDraw.Draw(mask).rectangle(box, fill=255)
+    out = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    out.paste(image, (0, 0), Image.composite(image.getchannel("A"), mask, mask))
+    return out
+
+
+def without(image: Image.Image, *parts: Image.Image) -> Image.Image:
+    """Clear the pixels that belong to any of the given parts."""
+    out = image.copy()
+    alpha = out.getchannel("A")
+    for part in parts:
+        alpha = Image.composite(Image.new("L", image.size, 0), alpha, part.getchannel("A"))
+    out.putalpha(alpha)
+    return out
+
+
+def princess_frames(princess: Image.Image) -> list[Image.Image]:
+    width = round(princess.width * SHEET_WORK_HEIGHT / princess.height)
+    body = princess.resize((width, SHEET_WORK_HEIGHT), Image.Resampling.BOX)
+    cell = (width + 2 * SHEET_PAD_X, SHEET_WORK_HEIGHT + SHEET_PAD_TOP)
+
+    def frame(*layers: tuple[Image.Image, int, int]) -> Image.Image:
+        out = Image.new("RGBA", cell, (0, 0, 0, 0))
+        for layer, dx, dy in layers:
+            out.alpha_composite(layer, (SHEET_PAD_X + dx, SHEET_PAD_TOP + dy))
+        return out
+
+    upper = without(
+        body,
+        region(body, box=(LEG_X[0], LEG_TOP, LEG_X[1], SHEET_WORK_HEIGHT)),
+    )
+    # Legs reach up under the jacket so moving them never opens a gap at the hips.
+    leg_left = region(body, box=(LEG_X[0], LEG_TOP - LEG_OVERLAP, LEG_SPLIT_X - 1, SHEET_WORK_HEIGHT))
+    leg_right = region(body, box=(LEG_SPLIT_X, LEG_TOP - LEG_OVERLAP, LEG_X[1], SHEET_WORK_HEIGHT))
+    # A lifted leg is shorter: shift it up under the jacket; the body bobs up too.
+    step_left = frame((leg_right, 0, 0), (leg_left, -4, -18), (upper, 0, -4))
+    step_right = frame((leg_left, 0, 0), (leg_right, 4, -18), (upper, 0, -4))
+
+    arm_left = region(body, polygon=LEFT_ARM)
+    arm_right = region(body, polygon=RIGHT_ARM)
+    shouting = without(body, arm_left, arm_right)
+    ImageDraw.Draw(shouting).ellipse(MOUTH, fill=(92, 22, 34), outline=(52, 14, 20), width=2)
+
+    def raise_arm(arm: Image.Image, shoulder: tuple[int, int], angle: float) -> Image.Image:
+        # Rotate on a padded canvas so the raised arm is not clipped at the edges.
+        padded = Image.new("RGBA", (body.width + 2 * SHEET_PAD_X, body.height), (0, 0, 0, 0))
+        padded.paste(arm, (SHEET_PAD_X, 0))
+        center = (shoulder[0] + SHEET_PAD_X, shoulder[1])
+        return padded.rotate(angle, resample=Image.Resampling.NEAREST, center=center)
+
+    def arms_up(spread: int, lift: int) -> Image.Image:
+        # From hanging down to raised up, tilted `spread` degrees outward. The
+        # far (right) sleeve is mostly hidden in this 3/4 view, so it is the
+        # near arm mirrored onto the right shoulder, drawn behind the body.
+        left = raise_arm(arm_left, LEFT_SHOULDER, -(180 - spread))
+        right = left.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        mirrored_shoulder_x = right.width - 1 - (LEFT_SHOULDER[0] + SHEET_PAD_X)
+        right_dx = RIGHT_SHOULDER[0] + SHEET_PAD_X - mirrored_shoulder_x
+        right_dy = RIGHT_SHOULDER[1] - LEFT_SHOULDER[1]
+        return frame(
+            (right, right_dx - SHEET_PAD_X, right_dy - lift),
+            (shouting, 0, -lift),
+            (left, -SHEET_PAD_X, -lift),
+        )
+
+    return [frame((body, 0, 0)), step_left, step_right, arms_up(30, 0), arms_up(18, 8)]
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     princess = cut_out_character(ASSETS / "zaga.jfif")
-    shrink(princess, PLAYER_HEIGHT).save(OUT / "princess.png")
+    frames = [shrink(f, f.height * PLAYER_HEIGHT // SHEET_WORK_HEIGHT) for f in princess_frames(princess)]
+    sheet = Image.new("RGBA", (frames[0].width * len(frames), frames[0].height), (0, 0, 0, 0))
+    for index, frame in enumerate(frames):
+        sheet.paste(frame, (index * frames[0].width, 0))
+    sheet.save(OUT / "princess.png")
     shrink(princess, PORTRAIT_HEIGHT).save(OUT / "princess-portrait.png")
     wake_background(ASSETS / "usnula_zaga.jfif").save(OUT / "wake.png")
 

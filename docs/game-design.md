@@ -23,7 +23,13 @@ see an ending.
 - Three ranks of lords on the same map. Rank sets points (not a second map).
 - Movement is blocked while a dialog box is open.
 - Advance dialog with Space / Enter / click.
-- WASD or arrow keys to walk.
+- WASD or arrow keys to walk. She faces the way she walks (left/right) and
+  plays a walk animation while moving.
+- Shout: press E in the overworld. She throws her hands in the air and shouts
+  "Budite se, na posao!" in a speech bubble for ~1.2 s. Movement is blocked
+  while shouting. Cosmetic only: no points. Ignored while a dialog is open.
+- Every lord visit opens with the same shout (hands in the air) as the first
+  dialog line; then the lord answers.
 
 ## Content (placeholders until copy is written)
 - Opening: wake, call to duty.

@@ -1,5 +1,6 @@
 import { SPRITE_SCALE, SPRITES } from "../assets";
 import { LORDS, type LordId } from "../data/lords";
+import { SHOUT_LINE } from "../data/story";
 import {
   ADVANCE_KEYS,
   advanceDialog,
@@ -9,11 +10,16 @@ import {
   openDialog,
 } from "../dialog";
 import { addScreenLayer, GAME_WIDTH, k, RENDER_SCALE, TILE } from "../kaplayContext";
+import { faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
 import { isReadyForEnding } from "../progress";
 import { getSession } from "../session";
 import { visitLord } from "../score";
+import { createShout, isShouting, startShout, tickShout, withShout } from "../shout";
 
 const SPEED = 80;
+const SHOUT_KEY = "e";
+// Feet collision box, in game units.
+const FEET = 12;
 
 // Walls `#`, floor `.`, player spawn `@`, lords use each `lord.marker`.
 const MAP = [
@@ -72,15 +78,36 @@ export function registerOverworldScene(): void {
     const spawnRow = MAP.findIndex((row) => row.includes("@"));
     const spawnCol = MAP[spawnRow].indexOf("@");
 
+    // pos is at her feet; she collides with the feet only, so her head and
+    // raised arms can overlap the row above.
     const player = k.add([
-      k.sprite(SPRITES.princess),
+      k.sprite(SPRITES.princess, { anim: "idle" }),
       k.scale(SPRITE_SCALE),
-      k.pos(spawnCol * TILE + TILE / 2, spawnRow * TILE + TILE / 2),
-      k.anchor("center"),
-      // Collide with the feet only, so her head can overlap the wall row above.
-      k.area({ scale: k.vec2(0.9, 0.5), offset: k.vec2(0, 6 / SPRITE_SCALE) }),
+      k.pos(spawnCol * TILE + TILE / 2, (spawnRow + 1) * TILE - 2),
+      k.anchor("bot"),
+      k.area({ shape: new k.Rect(k.vec2(0, 0), FEET / SPRITE_SCALE, FEET / SPRITE_SCALE) }),
       k.body(),
       "player",
+    ]);
+    const shout = createShout();
+    let facing: Facing = "right";
+    let anim: PrincessAnim = "idle";
+
+    const bubble = k.add([
+      k.rect(SHOUT_LINE.length * 4 + 8, 10, { radius: 2 }),
+      k.pos(0, 0),
+      k.anchor("bot"),
+      k.color(250, 246, 230),
+      k.outline(0.5, k.rgb(12, 10, 20)),
+      k.opacity(0),
+      k.z(10),
+    ]);
+    const bubbleText = bubble.add([
+      k.text(SHOUT_LINE, { size: 4 }),
+      k.pos(0, -3),
+      k.anchor("center"),
+      k.color(12, 10, 20),
+      k.opacity(0),
     ]);
 
     const ui = addScreenLayer();
@@ -130,7 +157,7 @@ export function registerOverworldScene(): void {
       }
       visitLord(session.score, lord.id);
       hud.text = hudText();
-      openDialog(dialog, lord.lines);
+      openDialog(dialog, withShout(lord.lines));
       refreshDialog();
     });
 
@@ -147,19 +174,43 @@ export function registerOverworldScene(): void {
     }
     k.onClick(next);
 
+    k.onKeyPress(SHOUT_KEY, () => {
+      if (!isMovementBlocked(dialog)) {
+        startShout(shout);
+      }
+    });
+
     refreshDialog();
 
     k.onUpdate(() => {
-      if (!isMovementBlocked(dialog)) {
+      tickShout(shout, k.dt());
+      let dx = 0;
+      let dy = 0;
+      if (!isMovementBlocked(dialog) && !isShouting(shout)) {
         const left = k.isKeyDown("left") || k.isKeyDown("a");
         const right = k.isKeyDown("right") || k.isKeyDown("d");
         const up = k.isKeyDown("up") || k.isKeyDown("w");
         const down = k.isKeyDown("down") || k.isKeyDown("s");
-        const x = (Number(right) - Number(left)) * SPEED;
-        const y = (Number(down) - Number(up)) * SPEED;
-        player.move(x, y);
+        dx = Number(right) - Number(left);
+        dy = Number(down) - Number(up);
+        player.move(dx * SPEED, dy * SPEED);
       }
-      k.camPos(player.pos);
+
+      facing = faceFromInput(dx, facing);
+      player.flipX = facing === "left";
+      const shouting = isShouting(shout) || currentLine(dialog) === SHOUT_LINE;
+      const nextAnim = pickAnim({ moving: dx !== 0 || dy !== 0, shouting });
+      if (nextAnim !== anim) {
+        anim = nextAnim;
+        player.play(anim);
+      }
+
+      const showBubble = isShouting(shout) ? 1 : 0;
+      bubble.opacity = showBubble;
+      bubble.outline.width = showBubble * 0.5;
+      bubbleText.opacity = showBubble;
+      bubble.pos = player.pos.sub(0, 27);
+      k.camPos(player.pos.sub(0, FEET));
     });
   });
 }

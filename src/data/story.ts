@@ -10,3 +10,6 @@ export const ENDING_LINES: readonly string[] = [
   "Every lord has been seen.",
   "The kingdom can nap again — after tea.",
 ];
+
+// The princess shouts this with her hands in the air (E key, and on each lord visit).
+export const SHOUT_LINE = "Budite se, na posao!";
