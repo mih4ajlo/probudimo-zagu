@@ -34,3 +34,12 @@ export function useGameUnits(): void {
 export function addScreenLayer() {
   return k.add([k.pos(0, 0), k.scale(RENDER_SCALE), k.fixed()]);
 }
+
+// Touch controls show only once the player has touched the screen, so a
+// touchscreen laptop driven by keyboard keeps the desktop look.
+let touched = false;
+window.addEventListener("touchstart", () => (touched = true), { passive: true, once: true });
+
+export function hasTouched(): boolean {
+  return touched;
+}

@@ -9,7 +9,18 @@ import {
   isMovementBlocked,
   openDialog,
 } from "../dialog";
-import { addScreenLayer, GAME_WIDTH, k, RENDER_SCALE, TILE } from "../kaplayContext";
+import {
+  createJoystick,
+  isInsideCircle,
+  joystickInput,
+  JOYSTICK_RADIUS,
+  knobOffset,
+  moveJoystick,
+  pressJoystick,
+  releaseJoystick,
+  type Point,
+} from "../joystick";
+import { addScreenLayer, GAME_WIDTH, hasTouched, k, RENDER_SCALE, TILE } from "../kaplayContext";
 import { faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
 import { isReadyForEnding } from "../progress";
 import { getSession } from "../session";
@@ -20,6 +31,11 @@ const SPEED = 80;
 const SHOUT_KEY = "e";
 // Feet collision box, in game units.
 const FEET = 12;
+// Touch controls, in screen game units.
+const STICK_CENTER = { x: 40, y: 140 };
+const KNOB_RADIUS = 9;
+const SHOUT_BUTTON = { x: 284, y: 144 };
+const SHOUT_BUTTON_RADIUS = 16;
 
 // Walls `#`, floor `.`, player spawn `@`, lords use each `lord.marker`.
 const MAP = [
@@ -127,6 +143,36 @@ export function registerOverworldScene(): void {
       k.pos(18, 130),
     ]);
 
+    const stick = createJoystick(STICK_CENTER);
+    const stickRing = ui.add([
+      k.circle(JOYSTICK_RADIUS),
+      k.pos(STICK_CENTER.x, STICK_CENTER.y),
+      k.anchor("center"),
+      k.color(250, 246, 230),
+      k.opacity(0),
+    ]);
+    const stickKnob = ui.add([
+      k.circle(KNOB_RADIUS),
+      k.pos(STICK_CENTER.x, STICK_CENTER.y),
+      k.anchor("center"),
+      k.color(250, 246, 230),
+      k.opacity(0),
+    ]);
+    const shoutButton = ui.add([
+      k.circle(SHOUT_BUTTON_RADIUS),
+      k.pos(SHOUT_BUTTON.x, SHOUT_BUTTON.y),
+      k.anchor("center"),
+      k.color(220, 200, 140),
+      k.opacity(0),
+    ]);
+    const shoutButtonText = ui.add([
+      k.text("!", { size: 16 }),
+      k.pos(SHOUT_BUTTON.x + 1, SHOUT_BUTTON.y + 1),
+      k.anchor("center"),
+      k.color(12, 10, 20),
+      k.opacity(0),
+    ]);
+
     function hudText(): string {
       return `Score ${session.score.total}  Lords ${session.score.visited.length}/${lordIds.length}`;
     }
@@ -161,10 +207,15 @@ export function registerOverworldScene(): void {
       refreshDialog();
     });
 
+    // A tap advances dialog and also arrives as a touch; remember when, so the
+    // tap that closes the last line does not also press a touch control.
+    let lastAdvanceTime = -1;
+
     function next(): void {
       if (!isMovementBlocked(dialog)) {
         return;
       }
+      lastAdvanceTime = k.time();
       advanceDialog(dialog);
       refreshDialog();
     }
@@ -180,6 +231,23 @@ export function registerOverworldScene(): void {
       }
     });
 
+    // Touch positions arrive in canvas pixels; controls live in game units.
+    const toUnits = (pos: Point): Point => ({ x: pos.x / RENDER_SCALE, y: pos.y / RENDER_SCALE });
+
+    k.onTouchStart((pos, touch) => {
+      if (isMovementBlocked(dialog) || k.time() === lastAdvanceTime) {
+        return;
+      }
+      const point = toUnits(pos);
+      if (isInsideCircle(point, SHOUT_BUTTON, SHOUT_BUTTON_RADIUS)) {
+        startShout(shout);
+        return;
+      }
+      pressJoystick(stick, touch.identifier, point);
+    });
+    k.onTouchMove((pos, touch) => moveJoystick(stick, touch.identifier, toUnits(pos)));
+    k.onTouchEnd((_pos, touch) => releaseJoystick(stick, touch.identifier));
+
     refreshDialog();
 
     k.onUpdate(() => {
@@ -191,8 +259,9 @@ export function registerOverworldScene(): void {
         const right = k.isKeyDown("right") || k.isKeyDown("d");
         const up = k.isKeyDown("up") || k.isKeyDown("w");
         const down = k.isKeyDown("down") || k.isKeyDown("s");
-        dx = Number(right) - Number(left);
-        dy = Number(down) - Number(up);
+        const touchInput = joystickInput(stick);
+        dx = touchInput.dx || Number(right) - Number(left);
+        dy = touchInput.dy || Number(down) - Number(up);
         player.move(dx * SPEED, dy * SPEED);
       }
 
@@ -211,6 +280,14 @@ export function registerOverworldScene(): void {
       bubbleText.opacity = showBubble;
       bubble.pos = player.pos.sub(0, 27);
       k.camPos(player.pos.sub(0, FEET));
+
+      const showControls = hasTouched() && !isMovementBlocked(dialog);
+      const knob = knobOffset(stick);
+      stickKnob.pos = k.vec2(STICK_CENTER.x + knob.x, STICK_CENTER.y + knob.y);
+      stickRing.opacity = showControls ? 0.25 : 0;
+      stickKnob.opacity = showControls ? 0.6 : 0;
+      shoutButton.opacity = showControls ? (isShouting(shout) ? 0.9 : 0.6) : 0;
+      shoutButtonText.opacity = showControls ? 1 : 0;
     });
   });
 }
