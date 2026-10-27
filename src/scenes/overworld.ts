@@ -22,10 +22,13 @@ import {
   pressJoystick,
   releaseJoystick,
 } from "../joystick";
-import { addScreenLayer, GAME_HEIGHT, GAME_WIDTH, hasTouched, k, RENDER_SCALE } from "../kaplayContext";
+import { addScreenLayer, hasTouched, k, screenFit } from "../kaplayContext";
 import { MAP_COLORS, MAP_DETAIL, type RGB } from "../mapCanvas";
 import { createPinch, pinchDown, pinchMove, pinchUp } from "../pinch";
 import { layoutOffices, MARKER_SIZE, spawnPoint, touchedOffice, visitToStart } from "../officeLayout";
+import type { ScreenFit } from "../screen";
+import { createTap, tapDown, tapMove, tapUp } from "../tap";
+import { walkStep } from "../walkTo";
 import { faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
 import { isReadyForEnding } from "../progress";
 import { visitOffice } from "../score";
@@ -35,14 +38,21 @@ import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
 const SPEED = 80;
 const SHOUT_KEY = "e";
-// Touch controls, in screen game units.
-const STICK_CENTER = { x: 40, y: 140 };
+// Touch controls, in screen game units, anchored to the screen's corners.
 const KNOB_RADIUS = 9;
-const SHOUT_BUTTON = { x: 284, y: 144 };
 const SHOUT_BUTTON_RADIUS = 16;
-const ZOOM_OUT_BUTTON = { x: 266, y: 104 };
-const ZOOM_IN_BUTTON = { x: 302, y: 104 };
 const ZOOM_BUTTON_RADIUS = 11;
+const DIALOG_WIDTH = 300;
+const DIALOG_HEIGHT = 48;
+
+function controlLayout(fit: ScreenFit) {
+  return {
+    stick: { x: 40, y: fit.h - 40 },
+    shout: { x: fit.w - 36, y: fit.h - 36 },
+    zoomOut: { x: fit.w - 54, y: fit.h - 76 },
+    zoomIn: { x: fit.w - 18, y: fit.h - 76 },
+  };
+}
 // Feet sit at the sprite's bottom; the camera looks at her middle.
 const BODY_CENTER = 12;
 // Show city names from this zoom up; office names only near her when close.
@@ -76,6 +86,8 @@ export function registerOverworldScene(): void {
     let facing: Facing = "right";
     let anim: PrincessAnim = "idle";
     let lastTouched: string | null = null;
+    // Where a tap sent her, until she arrives or can get no closer.
+    let walkTarget: Point | null = null;
     // Part of the map on screen; only markers and labels inside it are drawn.
     let view = { x: 0, y: 0, w: 0, h: 0 };
     const onScreen = (p: Point) =>
@@ -89,7 +101,8 @@ export function registerOverworldScene(): void {
     const cities = [...new Set(OFFICES.map((o) => o.city))].map((name) => ({ name, pos: vec(cityPoint(name)) }));
 
     // Screen pixels → game units at the current zoom, for outlines and labels.
-    const px = (n: number) => n / (zoom * RENDER_SCALE);
+    // Tuned at 4 canvas pixels per unit, so they keep their look on any screen.
+    const px = (n: number) => n / (zoom * 4);
 
     function label(text: string, pos: ReturnType<typeof k.vec2>, sizePx: number, color: RGB): void {
       k.drawText({ text, pos, size: px(sizePx), anchor: "center", color: rgb(color) });
@@ -157,6 +170,12 @@ export function registerOverworldScene(): void {
               drawOffice(office.id, office.level);
             }
           }
+          if (walkTarget) {
+            const t = vec(walkTarget);
+            const r = px(5);
+            k.drawLines({ pts: [t.add(-r, -r), t.add(r, r)], width: px(2.5), color: rgb(ROOF) });
+            k.drawLines({ pts: [t.add(-r, r), t.add(r, -r)], width: px(2.5), color: rgb(ROOF) });
+          }
           const nearest = zoom >= OFFICE_LABEL_ZOOM ? nearestOffice(feet) : null;
           if (nearest) {
             // Above the roof: she approaches from below and would cover a label under it.
@@ -195,21 +214,23 @@ export function registerOverworldScene(): void {
     ]);
 
     const ui = addScreenLayer();
-    ui.add([k.rect(GAME_WIDTH, 16), k.pos(0, 0), k.color(12, 10, 20), k.opacity(0.85)]);
+    const hudBar = ui.add([k.rect(screenFit().w, 16), k.pos(0, 0), k.color(12, 10, 20), k.opacity(0.85)]);
     const hud = ui.add([k.text(hudText(), { size: 8 }), k.pos(8, 4)]);
     const dialogBox = ui.add([
-      k.rect(300, 48),
-      k.pos(10, 122),
+      k.rect(DIALOG_WIDTH, DIALOG_HEIGHT),
+      k.pos(0, 0),
       k.color(12, 10, 20),
       k.outline(1, k.rgb(220, 200, 140)),
       k.opacity(0),
     ]);
-    const dialogText = ui.add([k.text("", { size: 8, width: 284, lineSpacing: 4 }), k.pos(18, 130)]);
+    const dialogText = ui.add([k.text("", { size: 8, width: DIALOG_WIDTH - 16, lineSpacing: 4 }), k.pos(0, 0)]);
 
     // Touch controls: joystick, shout button, zoom buttons. Hidden until the
     // first touch, and while a dialog is open.
-    const stick = createJoystick(STICK_CENTER);
+    let layout = controlLayout(screenFit());
+    const stick = createJoystick(layout.stick);
     const pinch = createPinch();
+    const tap = createTap();
     function touchButton(center: Point, radius: number, glyph: string, color: RGB) {
       const button = ui.add([
         k.circle(radius),
@@ -229,23 +250,45 @@ export function registerOverworldScene(): void {
     }
     const stickRing = ui.add([
       k.circle(JOYSTICK_RADIUS),
-      k.pos(STICK_CENTER.x, STICK_CENTER.y),
+      k.pos(layout.stick.x, layout.stick.y),
       k.anchor("center"),
       k.color(250, 246, 230),
       k.opacity(0),
     ]);
     const stickKnob = ui.add([
       k.circle(KNOB_RADIUS),
-      k.pos(STICK_CENTER.x, STICK_CENTER.y),
+      k.pos(layout.stick.x, layout.stick.y),
       k.anchor("center"),
       k.color(250, 246, 230),
       k.opacity(0),
     ]);
-    const shoutButton = touchButton(SHOUT_BUTTON, SHOUT_BUTTON_RADIUS, "!", [220, 200, 140]);
-    const zoomButtons = [
-      touchButton(ZOOM_OUT_BUTTON, ZOOM_BUTTON_RADIUS, "-", [250, 246, 230]),
-      touchButton(ZOOM_IN_BUTTON, ZOOM_BUTTON_RADIUS, "+", [250, 246, 230]),
-    ];
+    const shoutButton = touchButton(layout.shout, SHOUT_BUTTON_RADIUS, "!", [220, 200, 140]);
+    const zoomOutButton = touchButton(layout.zoomOut, ZOOM_BUTTON_RADIUS, "-", [250, 246, 230]);
+    const zoomInButton = touchButton(layout.zoomIn, ZOOM_BUTTON_RADIUS, "+", [250, 246, 230]);
+    const zoomButtons = [zoomOutButton, zoomInButton];
+
+    function placeButton(button: ReturnType<typeof touchButton>, center: Point): void {
+      button.button.pos = vec(center);
+      button.text.pos = k.vec2(center.x + 1, center.y + 1);
+    }
+
+    // Follow the screen size: phones rotate and address bars come and go.
+    function placeUi(fit: ScreenFit): void {
+      layout = controlLayout(fit);
+      stick.center = layout.stick;
+      if (stick.touchId === null) {
+        stick.finger = layout.stick;
+      }
+      stickRing.pos = vec(layout.stick);
+      placeButton(shoutButton, layout.shout);
+      placeButton(zoomOutButton, layout.zoomOut);
+      placeButton(zoomInButton, layout.zoomIn);
+      hudBar.width = fit.w;
+      const box = { x: (fit.w - DIALOG_WIDTH) / 2, y: fit.h - DIALOG_HEIGHT - 10 };
+      dialogBox.pos = vec(box);
+      dialogText.pos = k.vec2(box.x + 8, box.y + 8);
+    }
+    placeUi(screenFit());
 
     function hudText(): string {
       return `Score ${session.score.total}/${maxScore()}  Offices ${session.score.visited.length}/${OFFICE_IDS.length}`;
@@ -272,6 +315,7 @@ export function registerOverworldScene(): void {
       if (!office) {
         return;
       }
+      walkTarget = null;
       visitOffice(session.score, id);
       hud.text = hudText();
       openDialog(dialog, withShout(office.lines));
@@ -316,34 +360,46 @@ export function registerOverworldScene(): void {
     });
 
     // Touch positions arrive in canvas pixels; controls live in game units.
-    const toUnits = (pos: Point): Point => ({ x: pos.x / RENDER_SCALE, y: pos.y / RENDER_SCALE });
+    const toUnits = (pos: Point): Point => {
+      const scale = screenFit().scale;
+      return { x: pos.x / scale, y: pos.y / scale };
+    };
 
     k.onTouchStart((pos, touch) => {
       if (isMovementBlocked(dialog) || k.time() === lastAdvanceTime) {
         return;
       }
       const point = toUnits(pos);
-      if (isInsideCircle(point, SHOUT_BUTTON, SHOUT_BUTTON_RADIUS)) {
+      if (isInsideCircle(point, layout.shout, SHOUT_BUTTON_RADIUS)) {
         startShout(shout);
-      } else if (isInsideCircle(point, ZOOM_IN_BUTTON, ZOOM_BUTTON_RADIUS)) {
+      } else if (isInsideCircle(point, layout.zoomIn, ZOOM_BUTTON_RADIUS)) {
         zoom = zoomIn(zoom);
-      } else if (isInsideCircle(point, ZOOM_OUT_BUTTON, ZOOM_BUTTON_RADIUS)) {
+      } else if (isInsideCircle(point, layout.zoomOut, ZOOM_BUTTON_RADIUS)) {
         zoom = zoomOut(zoom);
       } else if (!pressJoystick(stick, touch.identifier, point)) {
-        // Any other finger on the map can pinch-zoom with a second one.
+        // Any other finger on the map is a tap to walk, or pinch-zooms with a
+        // second one.
+        tapDown(tap, touch.identifier, point, k.time());
         pinchDown(pinch, touch.identifier, point, zoom);
       }
     });
     k.onTouchMove((pos, touch) => {
-      moveJoystick(stick, touch.identifier, toUnits(pos));
-      const pinched = pinchMove(pinch, touch.identifier, toUnits(pos));
+      const point = toUnits(pos);
+      moveJoystick(stick, touch.identifier, point);
+      tapMove(tap, touch.identifier, point);
+      const pinched = pinchMove(pinch, touch.identifier, point);
       if (pinched !== null) {
         zoom = pinched;
       }
     });
-    k.onTouchEnd((_pos, touch) => {
+    k.onTouchEnd((pos, touch) => {
       releaseJoystick(stick, touch.identifier);
       pinchUp(pinch, touch.identifier);
+      const tapped = tapUp(tap, touch.identifier, toUnits(pos), k.time());
+      if (tapped && !isMovementBlocked(dialog)) {
+        const world = k.toWorld(k.vec2(pos.x, pos.y));
+        walkTarget = { x: world.x, y: world.y };
+      }
     });
 
     k.onUpdate(() => {
@@ -354,11 +410,22 @@ export function registerOverworldScene(): void {
         const touchInput = joystickInput(stick);
         dx = touchInput.dx || Number(k.isKeyDown("right") || k.isKeyDown("d")) - Number(k.isKeyDown("left") || k.isKeyDown("a"));
         dy = touchInput.dy || Number(k.isKeyDown("down") || k.isKeyDown("s")) - Number(k.isKeyDown("up") || k.isKeyDown("w"));
+        const from = { x: player.pos.x, y: player.pos.y };
+        const canStand = (p: Point) => isInsideAny(p, serbia);
         if (dx !== 0 || dy !== 0) {
+          // Keys or joystick take over from a tap.
+          walkTarget = null;
           const step = (SPEED * k.dt()) / Math.hypot(dx, dy);
-          const from = { x: player.pos.x, y: player.pos.y };
-          const to = tryMove(from, { x: dx * step, y: dy * step }, (p) => isInsideAny(p, serbia));
-          player.pos = vec(to);
+          player.pos = vec(tryMove(from, { x: dx * step, y: dy * step }, canStand));
+        } else if (walkTarget) {
+          const walked = walkStep(from, walkTarget, SPEED * k.dt(), canStand);
+          player.pos = vec(walked.pos);
+          dx = Math.sign(walked.dx);
+          // Any movement counts as walking, for the animation.
+          dy = walked.pos.y === from.y ? 0 : 1;
+          if (walked.done) {
+            walkTarget = null;
+          }
         }
       }
 
@@ -388,15 +455,17 @@ export function registerOverworldScene(): void {
       bubble.scale = k.vec2(1 / zoom);
       bubble.pos = player.pos.sub(0, 27);
 
-      k.camScale(RENDER_SCALE * zoom);
-      const size = { w: GAME_WIDTH / zoom, h: GAME_HEIGHT / zoom };
+      const fit = screenFit();
+      placeUi(fit);
+      k.camScale(fit.scale * zoom);
+      const size = { w: fit.w / zoom, h: fit.h / zoom };
       const cam = clampCamera({ x: player.pos.x, y: player.pos.y - BODY_CENTER }, size, bounds);
       k.camPos(cam.x, cam.y);
       view = { x: cam.x - size.w / 2, y: cam.y - size.h / 2, w: size.w, h: size.h };
 
       const showControls = hasTouched() && !isMovementBlocked(dialog);
       const knob = knobOffset(stick);
-      stickKnob.pos = k.vec2(STICK_CENTER.x + knob.x, STICK_CENTER.y + knob.y);
+      stickKnob.pos = k.vec2(layout.stick.x + knob.x, layout.stick.y + knob.y);
       stickRing.opacity = showControls ? 0.25 : 0;
       stickKnob.opacity = showControls ? 0.6 : 0;
       shoutButton.button.opacity = showControls ? (isShouting(shout) ? 0.9 : 0.6) : 0;

@@ -1,10 +1,11 @@
 import kaplay from "kaplay";
+import { fitScreen, GAME_HEIGHT, GAME_WIDTH, type ScreenFit } from "./screen";
 
-// Scenes lay out in a 320x180 grid of game units. The canvas renders
-// RENDER_SCALE real pixels per unit so 4x-detail sprites stay sharp.
+// Scenes lay out in a 320x180 grid of game units; the canvas fills the
+// window and shows more around that grid on other aspect ratios (screen.ts).
+// Sprites are drawn at RENDER_SCALE detail per unit so they stay sharp.
 export const TILE = 16;
-export const GAME_WIDTH = 320;
-export const GAME_HEIGHT = 180;
+export { GAME_HEIGHT, GAME_WIDTH };
 export const RENDER_SCALE = 4;
 
 // Pixel font loaded in assets.ts; used as the default for every k.text().
@@ -12,27 +13,39 @@ export const FONT = "pixel";
 
 const root = document.querySelector("#game") ?? undefined;
 
+// No width/height: the canvas fills #game and follows window resizes.
 export const k = kaplay({
-  width: GAME_WIDTH * RENDER_SCALE,
-  height: GAME_HEIGHT * RENDER_SCALE,
-  letterbox: true,
   crisp: true,
-  pixelDensity: 1,
+  pixelDensity: Math.min(window.devicePixelRatio || 1, 2),
   global: false,
   font: FONT,
   background: [20, 16, 32],
   root: root instanceof HTMLElement ? root : undefined,
 });
 
-// Zoom the camera so scene objects use game units. Call at the start of a scene.
+export function screenFit(): ScreenFit {
+  return fitScreen(k.width(), k.height());
+}
+
+// Keep the camera on the 320x180 design area, centered on screen. Call at the
+// start of a scene.
 export function useGameUnits(): void {
-  k.camScale(RENDER_SCALE);
-  k.camPos(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+  const apply = () => {
+    k.camScale(screenFit().scale);
+    k.camPos(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+  };
+  apply();
+  k.onUpdate(apply);
 }
 
 // A screen-fixed layer in game units, for HUD and dialog over a moving camera.
+// Its origin is the screen's top-left; screenFit() gives its size.
 export function addScreenLayer() {
-  return k.add([k.pos(0, 0), k.scale(RENDER_SCALE), k.fixed()]);
+  const layer = k.add([k.pos(0, 0), k.scale(screenFit().scale), k.fixed()]);
+  k.onUpdate(() => {
+    layer.scale = k.vec2(screenFit().scale);
+  });
+  return layer;
 }
 
 // Touch controls show only once the player has touched the screen, so a
