@@ -28,6 +28,11 @@ see an ending.
 - Shout: press E in the overworld. She throws her hands in the air and shouts
   "Budite se, na posao!" in a speech bubble for ~1.2 s. Movement is blocked
   while shouting. Cosmetic only: no points. Ignored while a dialog is open.
+- Touch (phones/tablets): after the first touch, an on-screen joystick
+  (bottom-left) walks her in 8 directions like the keys, and a "!" button
+  (bottom-right) shouts. Both hide while a dialog is open. Tapping anywhere
+  advances dialog and starts/leaves the title and ending screens. Best played
+  in landscape.
 - Every lord visit opens with the same shout (hands in the air) as the first
   dialog line; then the lord answers.
 
@@ -45,7 +50,7 @@ see an ending.
 
 ## Out of scope for v1
 Combat, enemies, inventory, branching quests, multiple maps, save/load,
-backend, accounts, mobile-specific UI, pixel-perfect original art (use
+backend, accounts, pixel-perfect original art (use
 placeholders).
 
 ## Tech (locked for v1)
