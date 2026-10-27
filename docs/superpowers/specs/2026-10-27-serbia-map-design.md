@@ -19,7 +19,7 @@ prosecutor's office listed in `assets/tuzilastva.csv`, shouting
 | Map art | Drawn by the game from real borders (Natural Earth), cartoon style. |
 | Borders | Serbia **including** Kosovo; Kosovo is walkable land (no offices there). |
 | Stops | Every office in the CSV is its own stop (60). |
-| Rendering approach | Vector shapes drawn at runtime (not a pre-rendered image, not tiles). |
+| Rendering approach | Drawn by the game from the vector data (not an image file, not tiles). The static layers are painted once at startup into canvas sprites at three detail levels for speed; markers and labels are drawn each frame. |
 
 ## Gameplay
 

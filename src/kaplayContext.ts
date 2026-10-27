@@ -11,12 +11,15 @@ export const RENDER_SCALE = 4;
 // Pixel font loaded in assets.ts; used as the default for every k.text().
 export const FONT = "pixel";
 
+// Framebuffer pixels per canvas pixel (sharp on high-DPI screens, capped at 2).
+export const PIXEL_DENSITY = Math.min(window.devicePixelRatio || 1, 2);
+
 const root = document.querySelector("#game") ?? undefined;
 
 // No width/height: the canvas fills #game and follows window resizes.
 export const k = kaplay({
   crisp: true,
-  pixelDensity: Math.min(window.devicePixelRatio || 1, 2),
+  pixelDensity: PIXEL_DENSITY,
   global: false,
   font: FONT,
   background: [20, 16, 32],

@@ -1,6 +1,6 @@
 export function isReadyForEnding(
   visited: readonly string[],
-  lordIds: readonly string[],
+  officeIds: readonly string[],
 ): boolean {
-  return lordIds.every((id) => visited.includes(id));
+  return officeIds.every((id) => visited.includes(id));
 }

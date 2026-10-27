@@ -35,6 +35,10 @@ describe("project", () => {
 });
 
 describe("Serbia outline", () => {
+  it("is one ring: Serbia and Kosovo merged without a seam", () => {
+    expect(SERBIA_RINGS).toHaveLength(1);
+  });
+
   it("contains Beograd, Niš, Subotica and Priština (Kosovo included)", () => {
     expect(onLand([20.4573, 44.8176])).toBe(true);
     expect(onLand([21.8958, 43.3209])).toBe(true);
