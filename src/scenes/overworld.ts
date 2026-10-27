@@ -20,7 +20,7 @@ import { isReadyForEnding } from "../progress";
 import { visitOffice } from "../score";
 import { getSession } from "../session";
 import { createShout, isShouting, startShout, tickShout, withShout } from "../shout";
-import { clampCamera, ZOOM_START, zoomIn, zoomOut } from "../zoom";
+import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
 const SPEED = 80;
 const SHOUT_KEY = "e";
@@ -235,8 +235,11 @@ export function registerOverworldScene(): void {
         startShout(shout);
       }
     });
+    let scrollPending = 0;
     k.onScroll((delta) => {
-      zoom = delta.y < 0 ? zoomIn(zoom) : zoomOut(zoom);
+      const next = scrollZoom({ zoom, pending: scrollPending }, delta.y);
+      zoom = next.zoom;
+      scrollPending = next.pending;
     });
     for (const key of ["=", "+"] as const) {
       k.onKeyPress(key, () => {

@@ -32,3 +32,21 @@ export function clampCamera(center: Point, view: { w: number; h: number }, bound
     y: clampAxis(center.y, view.h / 2, bounds.y, bounds.h),
   };
 }
+
+// Wheel/trackpad delta that adds up to one zoom step.
+export const SCROLL_PER_STEP = 100;
+
+export type ScrollZoom = { zoom: number; pending: number };
+
+// Trackpads send many small deltas and big mice one large one: add deltas up and
+// take at most one step per event, so a single gesture does not jump the range.
+export function scrollZoom(state: ScrollZoom, deltaY: number): ScrollZoom {
+  const pending = state.pending + deltaY;
+  if (pending <= -SCROLL_PER_STEP) {
+    return { zoom: zoomIn(state.zoom), pending: 0 };
+  }
+  if (pending >= SCROLL_PER_STEP) {
+    return { zoom: zoomOut(state.zoom), pending: 0 };
+  }
+  return { zoom: state.zoom, pending };
+}

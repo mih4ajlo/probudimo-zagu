@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Bounds } from "./geo";
-import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, clampCamera, clampZoom, zoomIn, zoomOut } from "./zoom";
+import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, clampCamera, clampZoom, scrollZoom, zoomIn, zoomOut } from "./zoom";
 
 const bounds: Bounds = { x: 0, y: 0, w: 1000, h: 800 };
 
@@ -29,5 +29,24 @@ describe("clampCamera", () => {
 
   it("centers on the map when the view is bigger than it", () => {
     expect(clampCamera({ x: 10, y: 10 }, { w: 3000, h: 2000 }, bounds)).toEqual({ x: 500, y: 400 });
+  });
+});
+
+describe("scrollZoom", () => {
+  it("ignores scroll events with no vertical movement", () => {
+    expect(scrollZoom({ zoom: 0.5, pending: 0 }, 0)).toEqual({ zoom: 0.5, pending: 0 });
+  });
+
+  it("collects small trackpad deltas before stepping", () => {
+    let state = { zoom: 0.5, pending: 0 };
+    state = scrollZoom(state, -40);
+    expect(state.zoom).toBe(0.5);
+    state = scrollZoom(state, -40);
+    state = scrollZoom(state, -40);
+    expect(state.zoom).toBeCloseTo(0.5 * ZOOM_STEP);
+  });
+
+  it("steps at most once per event, however big the delta", () => {
+    expect(scrollZoom({ zoom: 0.5, pending: 0 }, 5000).zoom).toBeCloseTo(0.5 / ZOOM_STEP);
   });
 });
