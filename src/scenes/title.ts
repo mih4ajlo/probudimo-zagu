@@ -18,15 +18,17 @@ export function registerTitleScene(): void {
       k.anchor("top"),
     ]);
     k.add([
-      k.text("Press Enter to wake", { size: 8 }),
+      k.text(k.isTouchscreen() ? "Tap to wake" : "Press Enter to wake", { size: 8 }),
       k.pos(GAME_WIDTH / 2, 166),
       k.anchor("center"),
       k.color(250, 220, 140),
     ]);
 
-    k.onKeyPress("enter", () => {
+    const start = () => {
       resetSession();
       k.go("wake");
-    });
+    };
+    k.onKeyPress("enter", start);
+    k.onClick(start);
   });
 }

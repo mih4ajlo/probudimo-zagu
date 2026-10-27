@@ -31,6 +31,12 @@ office count and score fill up, then see an ending.
 - Advance dialog with Space / Enter / click. Walk with WASD or arrow keys.
 - Shout any time with E (cosmetic, ~1.2 s, no points).
 - Zoom with the mouse wheel or +/-, from all of Serbia to a close view.
+- Touch (phones/tablets): after the first touch, an on-screen joystick
+  (bottom-left) walks her in 8 directions like the keys, a "!" button
+  (bottom-right) shouts, and + / - buttons zoom; two-finger pinch on the map
+  also zooms. Controls hide while a dialog is open. Tapping anywhere advances
+  dialog and starts/leaves the title and ending screens. Best played in
+  landscape.
 
 ## Content
 | Level | Office | Points | Count |
@@ -46,7 +52,7 @@ Max score 1060. Replies per level live in `src/data/replies.ts`.
 ## Out of scope for v1
 Combat, enemies, inventory, branching quests, indoor office scenes, fast
 travel, a minimap, save/load,
-backend, accounts, mobile-specific UI, pixel-perfect original art (use
+backend, accounts, pixel-perfect original art (use
 placeholders).
 
 ## Tech (locked for v1)

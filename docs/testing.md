@@ -32,6 +32,11 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   animation is shout over walk over idle.
 - **Shout:** lasts `SHOUT_SECONDS`, does not restart mid-shout, and an office
   visit's dialog starts with the shout line.
+- **Joystick:** no input until grabbed or inside the dead zone; snaps to the
+  same 8 directions as the keys; follows only the grabbing finger; the knob
+  stays inside the ring.
+- **Pinch:** one finger never zooms; two fingers zoom by their spread ratio,
+  clamped to the zoom limits; lifting a finger stops; a third finger is ignored.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
 offices, geo, officeLayout, zoom, progress).

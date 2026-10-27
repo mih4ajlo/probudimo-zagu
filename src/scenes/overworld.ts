@@ -12,8 +12,19 @@ import {
   openDialog,
 } from "../dialog";
 import { isInsideAny, mapBounds, project, projectRing, tryMove, type Point } from "../geo";
-import { addScreenLayer, GAME_HEIGHT, GAME_WIDTH, k, RENDER_SCALE } from "../kaplayContext";
+import {
+  createJoystick,
+  isInsideCircle,
+  joystickInput,
+  JOYSTICK_RADIUS,
+  knobOffset,
+  moveJoystick,
+  pressJoystick,
+  releaseJoystick,
+} from "../joystick";
+import { addScreenLayer, GAME_HEIGHT, GAME_WIDTH, hasTouched, k, RENDER_SCALE } from "../kaplayContext";
 import { MAP_COLORS, MAP_DETAIL, type RGB } from "../mapCanvas";
+import { createPinch, pinchDown, pinchMove, pinchUp } from "../pinch";
 import { layoutOffices, MARKER_SIZE, spawnPoint, touchedOffice, visitToStart } from "../officeLayout";
 import { faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
 import { isReadyForEnding } from "../progress";
@@ -24,6 +35,14 @@ import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
 const SPEED = 80;
 const SHOUT_KEY = "e";
+// Touch controls, in screen game units.
+const STICK_CENTER = { x: 40, y: 140 };
+const KNOB_RADIUS = 9;
+const SHOUT_BUTTON = { x: 284, y: 144 };
+const SHOUT_BUTTON_RADIUS = 16;
+const ZOOM_OUT_BUTTON = { x: 266, y: 104 };
+const ZOOM_IN_BUTTON = { x: 302, y: 104 };
+const ZOOM_BUTTON_RADIUS = 11;
 // Feet sit at the sprite's bottom; the camera looks at her middle.
 const BODY_CENTER = 12;
 // Show city names from this zoom up; office names only near her when close.
@@ -187,6 +206,47 @@ export function registerOverworldScene(): void {
     ]);
     const dialogText = ui.add([k.text("", { size: 8, width: 284, lineSpacing: 4 }), k.pos(18, 130)]);
 
+    // Touch controls: joystick, shout button, zoom buttons. Hidden until the
+    // first touch, and while a dialog is open.
+    const stick = createJoystick(STICK_CENTER);
+    const pinch = createPinch();
+    function touchButton(center: Point, radius: number, glyph: string, color: RGB) {
+      const button = ui.add([
+        k.circle(radius),
+        k.pos(center.x, center.y),
+        k.anchor("center"),
+        k.color(...color),
+        k.opacity(0),
+      ]);
+      const text = ui.add([
+        k.text(glyph, { size: 16 }),
+        k.pos(center.x + 1, center.y + 1),
+        k.anchor("center"),
+        k.color(12, 10, 20),
+        k.opacity(0),
+      ]);
+      return { button, text };
+    }
+    const stickRing = ui.add([
+      k.circle(JOYSTICK_RADIUS),
+      k.pos(STICK_CENTER.x, STICK_CENTER.y),
+      k.anchor("center"),
+      k.color(250, 246, 230),
+      k.opacity(0),
+    ]);
+    const stickKnob = ui.add([
+      k.circle(KNOB_RADIUS),
+      k.pos(STICK_CENTER.x, STICK_CENTER.y),
+      k.anchor("center"),
+      k.color(250, 246, 230),
+      k.opacity(0),
+    ]);
+    const shoutButton = touchButton(SHOUT_BUTTON, SHOUT_BUTTON_RADIUS, "!", [220, 200, 140]);
+    const zoomButtons = [
+      touchButton(ZOOM_OUT_BUTTON, ZOOM_BUTTON_RADIUS, "-", [250, 246, 230]),
+      touchButton(ZOOM_IN_BUTTON, ZOOM_BUTTON_RADIUS, "+", [250, 246, 230]),
+    ];
+
     function hudText(): string {
       return `Score ${session.score.total}/${maxScore()}  Offices ${session.score.visited.length}/${OFFICE_IDS.length}`;
     }
@@ -218,10 +278,15 @@ export function registerOverworldScene(): void {
       refreshDialog();
     }
 
+    // A tap advances dialog and also arrives as a touch; remember when, so the
+    // tap that closes the last line does not also press a touch control.
+    let lastAdvanceTime = -1;
+
     function next(): void {
       if (!isMovementBlocked(dialog)) {
         return;
       }
+      lastAdvanceTime = k.time();
       advanceDialog(dialog);
       refreshDialog();
     }
@@ -250,13 +315,45 @@ export function registerOverworldScene(): void {
       zoom = zoomOut(zoom);
     });
 
+    // Touch positions arrive in canvas pixels; controls live in game units.
+    const toUnits = (pos: Point): Point => ({ x: pos.x / RENDER_SCALE, y: pos.y / RENDER_SCALE });
+
+    k.onTouchStart((pos, touch) => {
+      if (isMovementBlocked(dialog) || k.time() === lastAdvanceTime) {
+        return;
+      }
+      const point = toUnits(pos);
+      if (isInsideCircle(point, SHOUT_BUTTON, SHOUT_BUTTON_RADIUS)) {
+        startShout(shout);
+      } else if (isInsideCircle(point, ZOOM_IN_BUTTON, ZOOM_BUTTON_RADIUS)) {
+        zoom = zoomIn(zoom);
+      } else if (isInsideCircle(point, ZOOM_OUT_BUTTON, ZOOM_BUTTON_RADIUS)) {
+        zoom = zoomOut(zoom);
+      } else if (!pressJoystick(stick, touch.identifier, point)) {
+        // Any other finger on the map can pinch-zoom with a second one.
+        pinchDown(pinch, touch.identifier, point, zoom);
+      }
+    });
+    k.onTouchMove((pos, touch) => {
+      moveJoystick(stick, touch.identifier, toUnits(pos));
+      const pinched = pinchMove(pinch, touch.identifier, toUnits(pos));
+      if (pinched !== null) {
+        zoom = pinched;
+      }
+    });
+    k.onTouchEnd((_pos, touch) => {
+      releaseJoystick(stick, touch.identifier);
+      pinchUp(pinch, touch.identifier);
+    });
+
     k.onUpdate(() => {
       tickShout(shout, k.dt());
       let dx = 0;
       let dy = 0;
       if (!isMovementBlocked(dialog) && !isShouting(shout)) {
-        dx = Number(k.isKeyDown("right") || k.isKeyDown("d")) - Number(k.isKeyDown("left") || k.isKeyDown("a"));
-        dy = Number(k.isKeyDown("down") || k.isKeyDown("s")) - Number(k.isKeyDown("up") || k.isKeyDown("w"));
+        const touchInput = joystickInput(stick);
+        dx = touchInput.dx || Number(k.isKeyDown("right") || k.isKeyDown("d")) - Number(k.isKeyDown("left") || k.isKeyDown("a"));
+        dy = touchInput.dy || Number(k.isKeyDown("down") || k.isKeyDown("s")) - Number(k.isKeyDown("up") || k.isKeyDown("w"));
         if (dx !== 0 || dy !== 0) {
           const step = (SPEED * k.dt()) / Math.hypot(dx, dy);
           const from = { x: player.pos.x, y: player.pos.y };
@@ -296,6 +393,18 @@ export function registerOverworldScene(): void {
       const cam = clampCamera({ x: player.pos.x, y: player.pos.y - BODY_CENTER }, size, bounds);
       k.camPos(cam.x, cam.y);
       view = { x: cam.x - size.w / 2, y: cam.y - size.h / 2, w: size.w, h: size.h };
+
+      const showControls = hasTouched() && !isMovementBlocked(dialog);
+      const knob = knobOffset(stick);
+      stickKnob.pos = k.vec2(STICK_CENTER.x + knob.x, STICK_CENTER.y + knob.y);
+      stickRing.opacity = showControls ? 0.25 : 0;
+      stickKnob.opacity = showControls ? 0.6 : 0;
+      shoutButton.button.opacity = showControls ? (isShouting(shout) ? 0.9 : 0.6) : 0;
+      shoutButton.text.opacity = showControls ? 1 : 0;
+      for (const zoomButton of zoomButtons) {
+        zoomButton.button.opacity = showControls ? 0.45 : 0;
+        zoomButton.text.opacity = showControls ? 1 : 0;
+      }
     });
 
     refreshDialog();

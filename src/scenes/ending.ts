@@ -23,11 +23,12 @@ export function registerEndingScene(): void {
       k.anchor("center"),
     ]);
     k.add([
-      k.text("Press Enter for title", { size: 8 }),
+      k.text(k.isTouchscreen() ? "Tap for title" : "Press Enter for title", { size: 8 }),
       k.pos(GAME_WIDTH / 2, 160),
       k.color(250, 220, 140),
       k.anchor("center"),
     ]);
     k.onKeyPress("enter", () => k.go("title"));
+    k.onClick(() => k.go("title"));
   });
 }
