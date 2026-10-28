@@ -9,6 +9,8 @@ export const SPRITES = {
   protester: "protester",
   princessPortrait: "princess-portrait",
   wake: "wake",
+  deskAsleep: "desk-asleep",
+  deskAwake: "desk-awake",
 } as const;
 
 // Map sprites are painted at startup from the map data, one per detail level.
@@ -52,6 +54,8 @@ export function loadAssets(): void {
   loadCharacter(SPRITES.protester);
   k.loadSprite(SPRITES.princessPortrait, `sprites/${SPRITES.princessPortrait}.png`);
   k.loadSprite(SPRITES.wake, `sprites/${SPRITES.wake}.png`);
+  k.loadSprite(SPRITES.deskAsleep, `sprites/${SPRITES.deskAsleep}.png`);
+  k.loadSprite(SPRITES.deskAwake, `sprites/${SPRITES.deskAwake}.png`);
   for (const detail of MAP_DETAILS) {
     k.loadSprite(mapSprite(detail), paintMap(detail));
   }
