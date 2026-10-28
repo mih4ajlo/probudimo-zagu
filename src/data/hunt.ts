@@ -12,8 +12,8 @@ export const NEAR_DISTANCE = 150;
 export const MID_DISTANCE = 450;
 
 export const HUNT_INTRO: readonly string[] = [
-  "Zaga is asleep in one of the offices, and she will not get up.",
-  "Lead the crowd from office to office. Shout, follow the snoring, and keep at it.",
+  "Somewhere in Serbia, in one of the offices, Zaga is fast asleep.",
+  "Three of you go looking for her. Shout at the offices and follow the snoring.",
 ];
 
 export const HINT_NEAR = "Very close! Zzz...";
@@ -21,6 +21,7 @@ export const hintMid = (direction: string) => `Zzz... snoring to the ${direction
 export const hintFar = (direction: string) => `Zzz... snoring to the ${direction}, far away.`;
 
 export const HUNT_ENDING_LINE = "Zaga is awake!";
+export const foundIn = (visits: number) => `Found in ${visits} visits`;
 
 export const FOUND_LINE = "There she is, fast asleep in the office!";
 export const CAUGHT_LINE = "Caught her again - still asleep!";
