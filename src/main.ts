@@ -4,6 +4,7 @@ import { registerTitleScene } from "./scenes/title";
 import { registerWakeScene } from "./scenes/wake";
 import { registerOverworldScene } from "./scenes/overworld";
 import { registerEndingScene } from "./scenes/ending";
+import { registerHuntIntroScene } from "./scenes/huntIntro";
 import { registerHuntScene } from "./scenes/hunt";
 import { registerHuntEndingScene } from "./scenes/huntEnding";
 
@@ -12,6 +13,7 @@ registerTitleScene();
 registerWakeScene();
 registerOverworldScene();
 registerEndingScene();
+registerHuntIntroScene();
 registerHuntScene();
 registerHuntEndingScene();
 k.onLoad(() => k.go("title"));

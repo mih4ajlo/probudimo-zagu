@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_FOLLOWERS } from "./data/hunt";
+import { FOLLOWERS } from "./data/hunt";
 import { createTrail, FOLLOWER_SPACING, followerPositions, pushTrail, TRAIL_STEP } from "./crowd";
 
 describe("followerPositions", () => {
@@ -54,8 +54,8 @@ describe("followerPositions", () => {
     for (let x = 1; x <= 1000; x++) {
       pushTrail(trail, { x, y: 0 });
     }
-    expect(trail.points.length).toBeLessThan(((MAX_FOLLOWERS + 2) * FOLLOWER_SPACING) / TRAIL_STEP + 2);
-    const spots = followerPositions(trail, { x: 1000, y: 0 }, MAX_FOLLOWERS);
-    expect(spots[MAX_FOLLOWERS - 1].x).toBeCloseTo(1000 - MAX_FOLLOWERS * FOLLOWER_SPACING);
+    expect(trail.points.length).toBeLessThan(((FOLLOWERS + 2) * FOLLOWER_SPACING) / TRAIL_STEP + 2);
+    const spots = followerPositions(trail, { x: 1000, y: 0 }, FOLLOWERS);
+    expect(spots[FOLLOWERS - 1].x).toBeCloseTo(1000 - FOLLOWERS * FOLLOWER_SPACING);
   });
 });

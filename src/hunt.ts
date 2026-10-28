@@ -1,13 +1,4 @@
-import {
-  FLEE_LINE,
-  MAX_FOLLOWERS,
-  MIN_HIDE_DISTANCE,
-  MUMBLES,
-  START_FOLLOWERS,
-  WAKE_BASE,
-  WAKE_FULL,
-  WAKE_PER_FOLLOWER,
-} from "./data/hunt";
+import { CAUGHT_LINE, FOUND_LINE, MIN_HIDE_DISTANCE } from "./data/hunt";
 import type { Point } from "./geo";
 import { hintFor } from "./hint";
 import type { HuntResult } from "./session";
@@ -18,24 +9,17 @@ export type Rng = () => number;
 export type HuntState = {
   positions: ReadonlyMap<string, Point>;
   rng: Rng;
-  // The office she sleeps in.
+  // The office she sleeps in (or is sleepwalking to).
   hidden: string;
-  wake: number;
-  followers: number;
   visits: number;
-  // Offices visited at least once this run; each grows the crowd once.
-  seen: string[];
-  // Empty offices searched since she last moved ("?" marks).
+  // Empty offices searched since the last find ("?" marks).
   searched: string[];
+  finds: number;
 };
 
 export type HuntVisit = { found: boolean; lines: string[] };
 
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
-
-export function wakeGain(followers: number): number {
-  return WAKE_BASE + WAKE_PER_FOLLOWER * followers;
-}
 
 // A random office far enough from `from`, never `exclude`; any other office
 // when none is far enough.
@@ -52,60 +36,35 @@ export function pickHideout(
 }
 
 export function createHunt(positions: ReadonlyMap<string, Point>, start: Point, rng: Rng): HuntState {
-  return {
-    positions,
-    rng,
-    hidden: pickHideout(positions, start, null, rng),
-    wake: 0,
-    followers: START_FOLLOWERS,
-    visits: 0,
-    seen: [],
-    searched: [],
-  };
+  return { positions, rng, hidden: pickHideout(positions, start, null, rng), visits: 0, searched: [], finds: 0 };
 }
 
-export function isAwake(state: HuntState): boolean {
-  return state.wake >= WAKE_FULL;
+// The crowd reaches an office: a hint, or a find; null for unknown offices.
+export function huntVisit(state: HuntState, id: string): HuntVisit | null {
+  const pos = state.positions.get(id);
+  if (!pos) {
+    return null;
+  }
+  state.visits += 1;
+  if (id === state.hidden) {
+    state.finds += 1;
+    state.searched = [];
+    return { found: true, lines: [state.finds === 1 ? FOUND_LINE : CAUGHT_LINE] };
+  }
+  if (!state.searched.includes(id)) {
+    state.searched.push(id);
+  }
+  return { found: false, lines: [hintFor(pos, state.positions.get(state.hidden) as Point)] };
 }
 
-// Followers plus the leader.
-export function crowdSize(state: HuntState): number {
-  return state.followers + 1;
+// After a talk round she sleepwalks to another office far away.
+export function huntFlee(state: HuntState): { from: Point; to: Point } {
+  const from = state.positions.get(state.hidden) as Point;
+  state.hidden = pickHideout(state.positions, from, state.hidden, state.rng);
+  return { from, to: state.positions.get(state.hidden) as Point };
 }
 
 // What the ending shows.
 export function huntResult(state: HuntState): HuntResult {
-  return { visits: state.visits, crowd: crowdSize(state) };
-}
-
-export function mumbleFor(wake: number): string {
-  return (MUMBLES.find((m) => wake <= m.upTo) ?? MUMBLES[MUMBLES.length - 1]).line;
-}
-
-// The crowd reaches an office: the lines that follow the shout, or null when
-// nothing happens (unknown office, or she is already awake).
-export function huntVisit(state: HuntState, id: string): HuntVisit | null {
-  const pos = state.positions.get(id);
-  if (!pos || isAwake(state)) {
-    return null;
-  }
-  state.visits += 1;
-  if (!state.seen.includes(id)) {
-    state.seen.push(id);
-    state.followers = Math.min(MAX_FOLLOWERS, state.followers + 1);
-  }
-  if (id !== state.hidden) {
-    if (!state.searched.includes(id)) {
-      state.searched.push(id);
-    }
-    return { found: false, lines: [hintFor(pos, state.positions.get(state.hidden) as Point)] };
-  }
-  state.wake = Math.min(WAKE_FULL, state.wake + wakeGain(state.followers));
-  state.searched = [];
-  const lines = [mumbleFor(state.wake)];
-  if (!isAwake(state)) {
-    state.hidden = pickHideout(state.positions, pos, id, state.rng);
-    lines.push(FLEE_LINE);
-  }
-  return { found: true, lines };
+  return { visits: state.visits };
 }

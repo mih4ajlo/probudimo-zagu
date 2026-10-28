@@ -20,15 +20,18 @@ office count and score fill up, then see an ending.
 ## Modes
 The title offers two modes (↑/↓ + Enter, or tap one):
 - **Wake the offices** — the v1 loop above.
-- **Find Zaga** — Zaga sleeps hidden in one office. A protest crowd (a
-  leader with followers trailing) searches the offices. An empty office
-  shouts back a hint: compass direction and "very close / not far / far
-  away", and gets a "?" mark. Each first visit to an office adds a follower
-  (3 to start, 12 at most). Finding her raises the wake meter by
-  12 + 2 per follower; she then sleepwalks to another office at least
-  300 units away and the "?" marks clear. At 100% she is awake and the
-  ending shows visits and crowd size. No points, no fail state. Same map,
-  controls, zoom and dialog rules as Wake the offices.
+- **Find Zaga** — opens at her desk: Zaga asleep behind the PC, Z's rising,
+  intro text. Then three protesters (a leader and two followers in its
+  trail; the crowd never grows) search the offices. An empty office shouts
+  back a hint: compass direction and "very close / not far / far away",
+  and gets a "?" mark. At her office she appears asleep on the map and a
+  talk round starts: pick one of 3 lines to shout (↑/↓ + Enter, or tap a
+  line) and she answers it. Every pick works. After rounds 1 and 2 she
+  sleepwalks (her avatar walks across the map, half the crowd's speed) to
+  another office at least 300 units away and stays asleep there; chase her
+  and the next round starts. After round 3 the desk scene shows her waking
+  with a start, then "Found in N visits". No points, no fail state. Same
+  map, controls, zoom and dialog rules as Wake the offices.
 
 ## Rules
 - One map: a cartoon vector map of Serbia **including Kosovo**, drawn from

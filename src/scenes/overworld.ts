@@ -4,6 +4,7 @@ import { k } from "../kaplayContext";
 import { isReadyForEnding } from "../progress";
 import { visitOffice } from "../score";
 import { getSession } from "../session";
+import { withShout } from "../shout";
 import { createMapView } from "./mapView";
 
 // Wake the offices: Zaga visits every office; first visits score points.
@@ -15,18 +16,20 @@ export function registerOverworldScene(): void {
       hudText: () =>
         `Score ${session.score.total}/${maxScore()}  Offices ${session.score.visited.length}/${OFFICE_IDS.length}`,
       officeMark: (id) => (session.score.visited.includes(id) ? "check" : null),
-      visitLines: (id) => {
+      onVisit: (id, talk) => {
         const office = getOffice(id);
         if (!office) {
-          return null;
+          return;
         }
         visitOffice(session.score, id);
-        return office.lines;
-      },
-      onDialogEnd: () => {
-        if (isReadyForEnding(session.score.visited, OFFICE_IDS)) {
-          k.go("ending");
-        }
+        talk.say(withShout(office.lines), {
+          shoutFirst: true,
+          then: () => {
+            if (isReadyForEnding(session.score.visited, OFFICE_IDS)) {
+              k.go("ending");
+            }
+          },
+        });
       },
     });
   });

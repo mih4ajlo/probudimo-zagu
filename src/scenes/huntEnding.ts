@@ -1,7 +1,12 @@
-import { HUNT_ENDING_LINE, HUNT_TITLE } from "../data/hunt";
-import { GAME_WIDTH, k, useGameUnits } from "../kaplayContext";
+import { SPRITES } from "../assets";
+import { foundIn, HUNT_ENDING_LINE } from "../data/hunt";
+import { phasesToEnter, WAKE_PHASES, type WakePhase } from "../deskWake";
+import { k, useGameUnits } from "../kaplayContext";
 import { getSession } from "../session";
+import { addDesk, addDeskBox, addSnore, DESK_HEAD } from "./desk";
 
+// Find Zaga ends at her desk: the Z's burst, she wakes with a start, and
+// the result shows.
 export function registerHuntEndingScene(): void {
   k.scene("huntEnding", () => {
     useGameUnits();
@@ -11,20 +16,48 @@ export function registerHuntEndingScene(): void {
       k.go("title");
       return;
     }
-    k.add([k.text(HUNT_TITLE, { size: 16 }), k.pos(GAME_WIDTH / 2, 28), k.anchor("center")]);
-    k.add([k.text(HUNT_ENDING_LINE, { size: 16 }), k.pos(GAME_WIDTH / 2, 76), k.anchor("center")]);
-    k.add([
-      k.text(`${result.visits} visits, ${result.crowd} protesters`, { size: 8 }),
-      k.pos(GAME_WIDTH / 2, 108),
-      k.anchor("center"),
-    ]);
-    k.add([
-      k.text(k.isTouchscreen() ? "Tap for title" : "Press Enter for title", { size: 8 }),
-      k.pos(GAME_WIDTH / 2, 160),
-      k.color(250, 220, 140),
-      k.anchor("center"),
-    ]);
-    k.onKeyPress("enter", () => k.go("title"));
-    k.onClick(() => k.go("title"));
+    const visits = result.visits;
+    const asleep = addDesk(SPRITES.deskAsleep);
+    const snore = addSnore();
+    const started = k.time();
+    let reached = 0;
+    let done = false;
+
+    function enter(phase: WakePhase): void {
+      if (phase === "burst") {
+        snore.burst();
+        k.shake(8);
+      } else if (phase === "awake") {
+        addDesk(SPRITES.deskAwake);
+        asleep.destroy();
+        k.add([
+          k.text("!", { size: 16 }),
+          k.pos(DESK_HEAD.x, DESK_HEAD.y - 14),
+          k.anchor("center"),
+          k.color(220, 40, 40),
+        ]);
+      } else if (phase === "text") {
+        addDeskBox(
+          [HUNT_ENDING_LINE, foundIn(visits), k.isTouchscreen() ? "Tap for title" : "Press Enter for title"].join(
+            "\n",
+          ),
+        );
+        done = true;
+      }
+    }
+
+    k.onUpdate(() => {
+      for (const phase of phasesToEnter(reached, k.time() - started)) {
+        reached = WAKE_PHASES.indexOf(phase);
+        enter(phase);
+      }
+    });
+    const leave = () => {
+      if (done) {
+        k.go("title");
+      }
+    };
+    k.onKeyPress("enter", leave);
+    k.onClick(leave);
   });
 }

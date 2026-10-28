@@ -1,7 +1,7 @@
 import { createScore, type ScoreState } from "./score";
 
 // How the last Find Zaga run ended, for its ending screen.
-export type HuntResult = { visits: number; crowd: number };
+export type HuntResult = { visits: number };
 
 export type Session = {
   score: ScoreState;

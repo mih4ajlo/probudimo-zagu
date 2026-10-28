@@ -325,6 +325,74 @@ def save_sheet(frames: list[Image.Image], path: Path) -> None:
     sheet.save(path)
 
 
+# Desk scenes for "Find Zaga", made from the wake picture (1280x720). The
+# baked-in Z's are removed so the game can animate its own; the awake frame
+# paints her eyes open and a small open mouth.
+SNORE_Z_BOXES = [
+    (545, 70, 588, 118), (590, 100, 628, 146), (728, 180, 772, 226),
+    (790, 140, 836, 195), (838, 125, 882, 178), (888, 95, 938, 153),
+]
+# Closed eyes (her right, her left) and the open mouth.
+FACE_BOXES = [(664, 145, 690, 169), (700, 147, 732, 165), (660, 188, 703, 215)]
+OPEN_EYES = [((667, 147, 687, 165), (673, 151, 683, 161)), ((703, 146, 729, 164), (711, 150, 722, 161))]
+O_MOUTH = (676, 198, 690, 211)
+EYE_WHITE = (250, 248, 240)
+FACE_LINE = (40, 22, 24)
+MOUTH_DARK = (92, 22, 34)
+
+
+def is_snore_z(rgb: tuple[int, int, int]) -> bool:
+    """The Z's are dark navy outlines around a pale lavender fill."""
+    r, g, b = rgb
+    return (max(rgb) < 90 and b > r + 10) or (r > 150 and g > 150 and b - r >= 6)
+
+
+def inpaint(image: Image.Image, mask: set[tuple[int, int]]) -> None:
+    """Fill masked pixels from the outside in with the average of known neighbours."""
+    px = image.load()
+    todo = set(mask)
+    while todo:
+        filled = {}
+        for x, y in todo:
+            known = [
+                px[n]
+                for n in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))
+                if n not in todo and 0 <= n[0] < image.width and 0 <= n[1] < image.height
+            ]
+            if known:
+                filled[(x, y)] = tuple(sum(c[i] for c in known) // len(known) for i in range(3))
+        if not filled:
+            return
+        for point, color in filled.items():
+            px[point] = color
+        todo -= filled.keys()
+
+
+def desk_asleep(wake: Image.Image) -> Image.Image:
+    image = wake.convert("RGB")
+    px = image.load()
+    mask: set[tuple[int, int]] = set()
+    for x0, y0, x1, y1 in SNORE_Z_BOXES:
+        for x in range(x0, x1):
+            for y in range(y0, y1):
+                if is_snore_z(px[x, y]):
+                    # Grow by 2 px to catch the soft edge around each letter.
+                    mask.update((x + dx, y + dy) for dx in range(-2, 3) for dy in range(-2, 3))
+    inpaint(image, mask)
+    return image
+
+
+def desk_awake(asleep: Image.Image) -> Image.Image:
+    image = asleep.copy()
+    inpaint(image, {(x, y) for x0, y0, x1, y1 in FACE_BOXES for x in range(x0, x1) for y in range(y0, y1)})
+    draw = ImageDraw.Draw(image)
+    for eye, pupil in OPEN_EYES:
+        draw.ellipse(eye, fill=EYE_WHITE, outline=FACE_LINE, width=2)
+        draw.ellipse(pupil, fill=FACE_LINE)
+    draw.ellipse(O_MOUTH, fill=MOUTH_DARK, outline=FACE_LINE, width=2)
+    return image
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     princess = cut_out_character(ASSETS / "zaga.jfif")
@@ -332,7 +400,11 @@ def main() -> None:
     save_sheet(frames, OUT / "princess.png")
     save_sheet(protester_frames(), OUT / "protester.png")
     shrink(princess, PORTRAIT_HEIGHT).save(OUT / "princess-portrait.png")
-    wake_background(ASSETS / "usnula_zaga.jfif").save(OUT / "wake.png")
+    wake = wake_background(ASSETS / "usnula_zaga.jfif")
+    wake.save(OUT / "wake.png")
+    asleep = desk_asleep(wake)
+    asleep.save(OUT / "desk-asleep.png")
+    desk_awake(asleep).save(OUT / "desk-awake.png")
 
 
 if __name__ == "__main__":

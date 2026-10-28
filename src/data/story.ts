@@ -17,7 +17,7 @@ export const SHOUT_LINE = "Budite se, na posao!";
 // Title menu: game modes and the scene each one starts.
 export const MODES: readonly { scene: string; label: string }[] = [
   { scene: "wake", label: "Wake the offices" },
-  { scene: "hunt", label: "Find Zaga" },
+  { scene: "huntIntro", label: "Find Zaga" },
 ];
 
 // Under the title's mode list.

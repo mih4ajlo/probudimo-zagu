@@ -1,4 +1,4 @@
-import { MAX_FOLLOWERS } from "./data/hunt";
+import { FOLLOWERS } from "./data/hunt";
 import type { Point } from "./geo";
 
 // Followers walk where the leader walked, this many game units apart.
@@ -6,7 +6,7 @@ export const FOLLOWER_SPACING = 9;
 // The leader's path is kept as points at least this far apart.
 export const TRAIL_STEP = 2;
 // Path kept behind the newest point: enough for the last follower.
-const KEEP_LENGTH = (MAX_FOLLOWERS + 1) * FOLLOWER_SPACING;
+const KEEP_LENGTH = (FOLLOWERS + 1) * FOLLOWER_SPACING;
 
 // The leader's recent path, newest point first.
 export type Trail = { points: Point[] };

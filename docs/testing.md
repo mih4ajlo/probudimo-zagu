@@ -48,17 +48,24 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
 - **Hint:** 8 compass directions with north up (−y), sector edges halfway;
   distance bands at 150 and 450; "near" has no direction.
 - **Hunt:** she hides at least `MIN_HIDE_DISTANCE` away (also on the real
-  map from Beograd); empty offices hint and get "?"; first visits grow the
-  crowd up to 12, revisits do not; a find adds `wakeGain`, clears "?" marks
-  and moves her far away; the meter caps at 100; visits after waking and
-  unknown offices are ignored.
+  map from Beograd); empty offices hint and get "?" once; her office is a
+  find (first "found", later "caught again") and clears the "?" marks;
+  `huntFlee` sends her to another office at least the min distance away;
+  unknown offices are ignored; the result is the visit count.
 - **Crowd:** followers stand a fixed path distance behind the leader, round
   corners, do not collapse when the leader stands still, wait at the oldest
   point on a short path; the trail keeps only what the last follower needs.
 - **Title menu:** selection wraps both ways; reset clears the hunt result.
+- **Dialog choices:** options block movement; the marker wraps; advancing
+  does not close them; a pick returns its index and unblocks; out-of-range
+  picks are ignored; a tap's row maps to an option.
+- **Talk:** each round offers its shouts; a pick returns shout + reply and
+  moves on; done after 3 rounds; 3 × 3 choices, shouts fit one line.
+- **Desk wake:** phase times; skipped frames still enter every phase in order.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
-offices, geo, officeLayout, zoom, progress, hint, hunt, crowd, titleMenu).
+offices, geo, officeLayout, zoom, progress, hint, hunt, crowd, titleMenu,
+talk, deskWake).
 
 ## What not to test
 - Pixel drawing, sprite animation, camera, or Kaplay internals
