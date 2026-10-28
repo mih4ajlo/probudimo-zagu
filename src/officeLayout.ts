@@ -1,4 +1,5 @@
 import { CITIES } from "./data/cities";
+import { OFFICES } from "./data/offices";
 import { project, type Point } from "./geo";
 
 // Office marker size and spacing, in game units.
@@ -42,6 +43,11 @@ export function layoutOffices(
     });
   }
   return positions;
+}
+
+// Where every office sits on the map.
+export function officePositions(): Map<string, Point> {
+  return layoutOffices(OFFICES, (city) => project(CITIES[city]));
 }
 
 export function touchedOffice(feet: Point, positions: ReadonlyMap<string, Point>): string | null {

@@ -10,6 +10,7 @@ import {
   TOUCH_RADIUS,
   WALK_GAP,
   layoutOffices,
+  officePositions,
   ringRadius,
   spawnPoint,
   touchedOffice,
@@ -111,5 +112,13 @@ describe("spawnPoint", () => {
     expect(distance(spawn, project(CITIES.Beograd))).toBeLessThan(80);
     const positions = layoutOffices(OFFICES, (name) => project(CITIES[name]));
     expect(touchedOffice(spawn, positions)).toBeNull();
+  });
+});
+
+describe("officePositions", () => {
+  it("places every office", () => {
+    const positions = officePositions();
+    expect(positions.size).toBe(OFFICES.length);
+    expect(positions).toEqual(layoutOffices(OFFICES, (name) => project(CITIES[name])));
   });
 });
