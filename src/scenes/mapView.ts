@@ -32,7 +32,7 @@ import { MARKER_SIZE, officePositions, spawnPoint, touchedOffice, visitToStart }
 import type { ScreenFit } from "../screen";
 import { createTap, tapDown, tapMove, tapUp } from "../tap";
 import { walkStep } from "../walkTo";
-import { faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
+import { characterLayout, faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
 import { createShout, isShouting, startShout, tickShout, withShout } from "../shout";
 import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
@@ -70,8 +70,6 @@ function controlLayout(fit: ScreenFit) {
     zoomIn: { x: fit.w - 18, y: fit.h - 76 },
   };
 }
-// Feet sit at the sprite's bottom; the camera looks at her middle.
-const BODY_CENTER = 12;
 // Show city names from this zoom up; office names only near her when close.
 // Label sizes are screen pixels in multiples of 8, the pixel font's grid.
 const CITY_LABEL_ZOOM = 0.3;
@@ -234,6 +232,9 @@ export function createMapView(hooks: MapViewHooks): void {
     k.z(10),
     "player",
   ]);
+  // Feet sit at the sprite's bottom; the shout bubble and the camera follow
+  // its height (frame pixels at SPRITE_SCALE), so taller characters fit too.
+  const leader = characterLayout(player.height * SPRITE_SCALE);
 
   const bubble = k.add([
     k.rect(SHOUT_LINE.length * 4 + 8, 10, { radius: 2 }),
@@ -486,14 +487,14 @@ export function createMapView(hooks: MapViewHooks): void {
     bubble.outline.width = showBubble * 0.5;
     bubbleText.opacity = showBubble;
     bubble.scale = k.vec2(1 / zoom);
-    bubble.pos = player.pos.sub(0, 27);
+    bubble.pos = player.pos.sub(0, leader.bubbleLift);
     hooks.onFrame?.({ pos: { x: player.pos.x, y: player.pos.y }, anim, facing });
 
     const fit = screenFit();
     placeUi(fit);
     k.camScale(fit.scale * zoom);
     const size = { w: fit.w / zoom, h: fit.h / zoom };
-    const cam = clampCamera({ x: player.pos.x, y: player.pos.y - BODY_CENTER }, size, bounds);
+    const cam = clampCamera({ x: player.pos.x, y: player.pos.y - leader.bodyCenter }, size, bounds);
     k.camPos(cam.x, cam.y);
     view = { x: cam.x - size.w / 2, y: cam.y - size.h / 2, w: size.w, h: size.h };
 

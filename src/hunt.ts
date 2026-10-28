@@ -10,6 +10,7 @@ import {
 } from "./data/hunt";
 import type { Point } from "./geo";
 import { hintFor } from "./hint";
+import type { HuntResult } from "./session";
 
 // Random number in [0, 1); scenes pass Math.random, tests a fixed value.
 export type Rng = () => number;
@@ -70,6 +71,11 @@ export function isAwake(state: HuntState): boolean {
 // Followers plus the leader.
 export function crowdSize(state: HuntState): number {
   return state.followers + 1;
+}
+
+// What the ending shows.
+export function huntResult(state: HuntState): HuntResult {
+  return { visits: state.visits, crowd: crowdSize(state) };
 }
 
 export function mumbleFor(wake: number): string {

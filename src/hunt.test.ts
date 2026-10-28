@@ -5,6 +5,7 @@ import { hintFor } from "./hint";
 import {
   createHunt,
   crowdSize,
+  huntResult,
   huntVisit,
   isAwake,
   mumbleFor,
@@ -141,5 +142,20 @@ describe("mumbleFor", () => {
     expect(mumbleFor(31)).toBe(MUMBLES[1].line);
     expect(mumbleFor(99)).toBe(MUMBLES[2].line);
     expect(mumbleFor(100)).toBe(MUMBLES[3].line);
+  });
+});
+
+describe("huntResult", () => {
+  it("plays a whole hunt to the ending result", () => {
+    const positions = line(10);
+    const hunt = createHunt(positions, start, first);
+    let finds = 0;
+    while (!isAwake(hunt)) {
+      expect(huntVisit(hunt, hunt.hidden)?.found).toBe(true);
+      finds += 1;
+    }
+    expect(finds).toBeGreaterThanOrEqual(3);
+    expect(huntVisit(hunt, hunt.hidden)).toBeNull();
+    expect(huntResult(hunt)).toEqual({ visits: finds, crowd: crowdSize(hunt) });
   });
 });

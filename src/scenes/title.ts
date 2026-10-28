@@ -1,5 +1,5 @@
 import { SPRITE_SCALE, SPRITES } from "../assets";
-import { MODES, TITLE } from "../data/story";
+import { MENU_HINT_KEYS, MENU_HINT_TOUCH, MODES, TITLE } from "../data/story";
 import { GAME_WIDTH, k, useGameUnits } from "../kaplayContext";
 import { resetSession } from "../session";
 import { moveSelection } from "../titleMenu";
@@ -23,7 +23,7 @@ export function registerTitleScene(): void {
     const options = MODES.map((mode, i) => {
       const button = k.add([
         k.rect(200, 13),
-        k.pos(GAME_WIDTH / 2, 148 + i * 15),
+        k.pos(GAME_WIDTH / 2, 142 + i * 14),
         k.anchor("center"),
         k.opacity(0),
         k.area(),
@@ -32,6 +32,12 @@ export function registerTitleScene(): void {
       button.onClick(() => start(i));
       return label;
     });
+    k.add([
+      k.text(k.isTouchscreen() ? MENU_HINT_TOUCH : MENU_HINT_KEYS, { size: 8 }),
+      k.pos(GAME_WIDTH / 2, 172),
+      k.anchor("center"),
+      k.color(150, 140, 120),
+    ]);
     const refresh = () => {
       options.forEach((label, i) => {
         label.text = i === selected ? `> ${MODES[i].label} <` : MODES[i].label;

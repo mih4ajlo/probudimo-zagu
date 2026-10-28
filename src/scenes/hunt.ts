@@ -1,7 +1,7 @@
 import { SPRITE_SCALE, SPRITES } from "../assets";
 import { createTrail, followerPositions, pushTrail } from "../crowd";
 import { HUNT_INTRO } from "../data/hunt";
-import { createHunt, crowdSize, huntVisit, isAwake } from "../hunt";
+import { createHunt, crowdSize, huntResult, huntVisit, isAwake } from "../hunt";
 import { k } from "../kaplayContext";
 import { officePositions, spawnPoint } from "../officeLayout";
 import type { PrincessAnim } from "../princess";
@@ -48,7 +48,7 @@ export function registerHuntScene(): void {
       visitLines: (id) => huntVisit(hunt, id)?.lines ?? null,
       onDialogEnd: () => {
         if (isAwake(hunt)) {
-          session.hunt = { visits: hunt.visits, crowd: crowdSize(hunt) };
+          session.hunt = huntResult(hunt);
           k.go("huntEnding");
         }
       },

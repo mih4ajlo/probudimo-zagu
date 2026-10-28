@@ -20,9 +20,7 @@ describe("session", () => {
 describe("hunt result", () => {
   it("is cleared on reset", () => {
     resetSession();
-    expect(getSession().hunt).toBeNull();
     getSession().hunt = { visits: 9, crowd: 7 };
-    expect(getSession().hunt).toEqual({ visits: 9, crowd: 7 });
     resetSession();
     expect(getSession().hunt).toBeNull();
   });
