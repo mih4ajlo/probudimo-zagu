@@ -32,3 +32,27 @@ export const MUMBLES: readonly { upTo: number; line: string }[] = [
 export const FLEE_LINE = "She sleepwalks away to another office.";
 
 export const HUNT_ENDING_LINE = "Zaga is awake!";
+
+export const FOUND_LINE = "There she is, fast asleep in the office!";
+
+export type TalkChoice = { shout: string; reply: string };
+
+// The talk once she is found: each round the crowd picks one shout and she
+// answers it, a little more awake each round. Shouts fit one dialog line.
+export const TALK_ROUNDS: readonly (readonly TalkChoice[])[] = [
+  [
+    { shout: "Budite se, na posao!", reply: "Mmm... five more minutes..." },
+    { shout: "The press is outside!", reply: "Tell them I'm in a meeting... zzz" },
+    { shout: "Cases are piling up!", reply: "Let them pile... piles are comfy..." },
+  ],
+  [
+    { shout: "Two years, no answer!", reply: "Who is shouting? It's not even noon..." },
+    { shout: "The citizens are waiting!", reply: "Waiting builds character... zzz" },
+    { shout: "We brought coffee!", reply: "Coffee...? No... too early..." },
+  ],
+  [
+    { shout: "We are not leaving!", reply: "Fine, fine... I'm getting up!" },
+    { shout: "The whole country sees you!", reply: "The whole country? ...Even TV?!" },
+    { shout: "Budite se, na posao!", reply: "Alright! I'm awake! I'm awake!" },
+  ],
+];
