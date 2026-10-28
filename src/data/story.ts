@@ -19,3 +19,7 @@ export const MODES: readonly { scene: string; label: string }[] = [
   { scene: "wake", label: "Wake the offices" },
   { scene: "hunt", label: "Find Zaga" },
 ];
+
+// Under the title's mode list.
+export const MENU_HINT_TOUCH = "Tap a mode";
+export const MENU_HINT_KEYS = "Up/Down, then Enter";

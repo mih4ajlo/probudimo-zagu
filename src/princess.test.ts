@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { faceFromInput, pickAnim } from "./princess";
+import { characterLayout, faceFromInput, pickAnim } from "./princess";
 
 describe("faceFromInput", () => {
   it("faces left when walking left and right when walking right", () => {
@@ -21,5 +21,18 @@ describe("pickAnim", () => {
 
   it("shows the shout pose over walking", () => {
     expect(pickAnim({ moving: true, shouting: true })).toBe("shout");
+  });
+});
+
+describe("characterLayout", () => {
+  it("keeps the princess's bubble and camera where they were", () => {
+    // Princess frames are 98 px at 4 px per unit.
+    expect(characterLayout(24.5)).toEqual({ bubbleLift: 27, bodyCenter: 12.25 });
+  });
+
+  it("lifts the bubble above a taller character's raised sign", () => {
+    const layout = characterLayout(30);
+    expect(layout.bubbleLift).toBeGreaterThan(30);
+    expect(layout.bodyCenter).toBe(15);
   });
 });

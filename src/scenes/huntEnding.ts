@@ -5,7 +5,12 @@ import { getSession } from "../session";
 export function registerHuntEndingScene(): void {
   k.scene("huntEnding", () => {
     useGameUnits();
-    const result = getSession().hunt ?? { visits: 0, crowd: 0 };
+    const result = getSession().hunt;
+    if (!result) {
+      // Only a finished hunt leads here; anything else goes back to the title.
+      k.go("title");
+      return;
+    }
     k.add([k.text(HUNT_TITLE, { size: 16 }), k.pos(GAME_WIDTH / 2, 28), k.anchor("center")]);
     k.add([k.text(HUNT_ENDING_LINE, { size: 16 }), k.pos(GAME_WIDTH / 2, 76), k.anchor("center")]);
     k.add([

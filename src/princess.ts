@@ -17,3 +17,10 @@ export function pickAnim(state: { moving: boolean; shouting: boolean }): Princes
   }
   return state.moving ? "walk" : "idle";
 }
+
+// Where the shout bubble and the camera sit for a character this many game
+// units tall (feet at the bottom): the bubble just above the top of the
+// sprite, the camera on its middle.
+export function characterLayout(height: number): { bubbleLift: number; bodyCenter: number } {
+  return { bubbleLift: height + 2.5, bodyCenter: height / 2 };
+}
