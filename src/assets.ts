@@ -6,6 +6,7 @@ import { MAP_DETAILS, paintMap, type MapDetail } from "./mapCanvas";
 // Sprites are generated from assets/ by scripts/make-sprites.py into public/sprites/.
 export const SPRITES = {
   princess: "princess",
+  protester: "protester",
   princessPortrait: "princess-portrait",
   wake: "wake",
 } as const;
@@ -19,9 +20,24 @@ export function mapSprite(detail: MapDetail): string {
 // draw them at this scale to get game-unit size with full detail.
 export const SPRITE_SCALE = 1 / RENDER_SCALE;
 
-// Frames in sprites/princess.png, left to right (SHEET_FRAMES in make-sprites.py).
-// The art faces right; flipX makes her face left.
-const PRINCESS_FRAMES = { idle: 0, stepLeft: 1, stepRight: 2, shout: 3, shoutHigh: 4 };
+// Frames in sprites/princess.png and sprites/protester.png, left to right
+// (SHEET_FRAMES in make-sprites.py). The art faces right; flipX makes them face left.
+const CHARACTER_FRAMES = { idle: 0, stepLeft: 1, stepRight: 2, shout: 3, shoutHigh: 4 };
+
+function loadCharacter(name: string): void {
+  k.loadSprite(name, `sprites/${name}.png`, {
+    sliceX: Object.keys(CHARACTER_FRAMES).length,
+    anims: {
+      idle: CHARACTER_FRAMES.idle,
+      walk: {
+        frames: [CHARACTER_FRAMES.stepLeft, CHARACTER_FRAMES.idle, CHARACTER_FRAMES.stepRight, CHARACTER_FRAMES.idle],
+        speed: 8,
+        loop: true,
+      },
+      shout: { from: CHARACTER_FRAMES.shout, to: CHARACTER_FRAMES.shoutHigh, speed: 5, loop: true },
+    },
+  });
+}
 
 export function loadAssets(): void {
   // Press Start 2P is drawn on an 8px grid: load at 8 and only use multiples of 8
@@ -32,18 +48,8 @@ export function loadAssets(): void {
   const latinExt = new FontFace(FONT, `url(${pixelFontExtUrl})`, { unicodeRange: "U+0100-024F" });
   document.fonts.add(latinExt);
   k.load(latinExt.load());
-  k.loadSprite(SPRITES.princess, `sprites/${SPRITES.princess}.png`, {
-    sliceX: Object.keys(PRINCESS_FRAMES).length,
-    anims: {
-      idle: PRINCESS_FRAMES.idle,
-      walk: {
-        frames: [PRINCESS_FRAMES.stepLeft, PRINCESS_FRAMES.idle, PRINCESS_FRAMES.stepRight, PRINCESS_FRAMES.idle],
-        speed: 8,
-        loop: true,
-      },
-      shout: { from: PRINCESS_FRAMES.shout, to: PRINCESS_FRAMES.shoutHigh, speed: 5, loop: true },
-    },
-  });
+  loadCharacter(SPRITES.princess);
+  loadCharacter(SPRITES.protester);
   k.loadSprite(SPRITES.princessPortrait, `sprites/${SPRITES.princessPortrait}.png`);
   k.loadSprite(SPRITES.wake, `sprites/${SPRITES.wake}.png`);
   for (const detail of MAP_DETAILS) {

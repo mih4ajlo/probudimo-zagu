@@ -256,14 +256,81 @@ def princess_frames(princess: Image.Image) -> list[Image.Image]:
     return [frame((body, 0, 0)), step_left, step_right, arms_up(30, 0), arms_up(18, 8)]
 
 
+# Protester for the "Find Zaga" crowd, drawn in game units (x DETAIL px), feet
+# at the bottom, facing right, holding a sign. Same frame order as the princess
+# (SHEET_FRAMES). The shirt is near-white so the game can tint followers.
+PROTESTER_UNITS = (16, 30)
+P_SKIN = (232, 184, 150)
+P_HAIR = (70, 48, 34)
+P_SHIRT = (240, 240, 236)
+P_TROUSERS = (70, 78, 110)
+P_SHOES = (40, 30, 26)
+P_SIGN_BOARD = (250, 240, 200)
+P_SIGN_INK = (176, 62, 48)
+P_POLE = (130, 90, 50)
+P_LINE = (30, 22, 18)
+P_OPEN_MOUTH = (92, 22, 34)
+
+
+def protester_frame(lifted_leg: str | None, sign_lift: float, shouting: bool) -> Image.Image:
+    u = DETAIL
+    image = Image.new("RGBA", (PROTESTER_UNITS[0] * u, PROTESTER_UNITS[1] * u), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+
+    def box(x0: float, y0: float, x1: float, y1: float) -> list[int]:
+        return [round(x0 * u), round(y0 * u), round(x1 * u) - 1, round(y1 * u) - 1]
+
+    lift = sign_lift
+    # Back arm, legs (a lifted leg ends higher), body.
+    draw.rectangle(box(2.2, 16, 3.8, 21.5), fill=P_SHIRT, outline=P_LINE, width=2)
+    draw.ellipse(box(2.2, 21, 3.8, 22.6), fill=P_SKIN, outline=P_LINE, width=2)
+    for leg, (x0, x1) in {"left": (4, 6.6), "right": (7.4, 10)}.items():
+        bottom = 28.5 if leg == lifted_leg else 30
+        draw.rectangle(box(x0, 23, x1, bottom), fill=P_TROUSERS, outline=P_LINE, width=2)
+        draw.rectangle(box(x0, bottom - 1.2, x1 + 0.6, bottom), fill=P_SHOES)
+    draw.rounded_rectangle(box(3, 15, 11, 23.5), radius=2 * u // 2, fill=P_SHIRT, outline=P_LINE, width=2)
+    # Sign on a pole, held by the near arm; shouting lifts it.
+    draw.rectangle(box(12.8, 9 - lift, 13.6, 23 - lift), fill=P_POLE)
+    draw.rectangle(box(10.5, 4 - lift, 16, 9 - lift), fill=P_SIGN_BOARD, outline=P_LINE, width=2)
+    for row in (5.3, 6.5, 7.7):
+        draw.rectangle(box(11.4, row - lift, 15.1, row + 0.6 - lift), fill=P_SIGN_INK)
+    draw.rectangle(box(10, 16 - lift / 2, 12.6, 19.5 - lift), fill=P_SHIRT, outline=P_LINE, width=2)
+    draw.ellipse(box(12, 18.5 - lift, 14.4, 20.9 - lift), fill=P_SKIN, outline=P_LINE, width=2)
+    # Head, hair, face (looking right).
+    draw.ellipse(box(4, 8.5, 10, 15), fill=P_SKIN, outline=P_LINE, width=2)
+    draw.chord(box(4, 8, 10, 13), start=180, end=360, fill=P_HAIR, outline=P_LINE, width=2)
+    for eye_x in (7.0, 8.8):
+        draw.ellipse(box(eye_x - 0.35, 11.3, eye_x + 0.35, 12.0), fill=P_LINE)
+    if shouting:
+        draw.ellipse(box(7.2, 12.8, 8.8, 14.2), fill=P_OPEN_MOUTH, outline=P_LINE, width=1)
+    else:
+        draw.line([round(7.4 * u), round(13.4 * u), round(8.6 * u), round(13.4 * u)], fill=P_LINE, width=2)
+    return image
+
+
+def protester_frames() -> list[Image.Image]:
+    return [
+        protester_frame(None, 0, False),
+        protester_frame("left", 0, False),
+        protester_frame("right", 0, False),
+        protester_frame(None, 2, True),
+        protester_frame(None, 4, True),
+    ]
+
+
+def save_sheet(frames: list[Image.Image], path: Path) -> None:
+    sheet = Image.new("RGBA", (frames[0].width * len(frames), frames[0].height), (0, 0, 0, 0))
+    for index, frame in enumerate(frames):
+        sheet.paste(frame, (index * frames[0].width, 0))
+    sheet.save(path)
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     princess = cut_out_character(ASSETS / "zaga.jfif")
     frames = [shrink(f, f.height * PLAYER_HEIGHT // SHEET_WORK_HEIGHT) for f in princess_frames(princess)]
-    sheet = Image.new("RGBA", (frames[0].width * len(frames), frames[0].height), (0, 0, 0, 0))
-    for index, frame in enumerate(frames):
-        sheet.paste(frame, (index * frames[0].width, 0))
-    sheet.save(OUT / "princess.png")
+    save_sheet(frames, OUT / "princess.png")
+    save_sheet(protester_frames(), OUT / "protester.png")
     shrink(princess, PORTRAIT_HEIGHT).save(OUT / "princess-portrait.png")
     wake_background(ASSETS / "usnula_zaga.jfif").save(OUT / "wake.png")
 
