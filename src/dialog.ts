@@ -85,8 +85,17 @@ export function pickChoice(state: DialogState, index = state.selected): number |
   return index;
 }
 
-// Which option row a tap at height y hits, for rows starting at top.
-export function choiceAt(y: number, top: number, rowHeight: number, count: number): number | null {
-  const row = Math.floor((y - top) / rowHeight);
+// Which option row a tap hits, for rows starting at the box's top-left and
+// as wide as the box; null beside, above or below them.
+export function choiceAt(
+  point: { x: number; y: number },
+  box: { x: number; y: number; w: number },
+  rowHeight: number,
+  count: number,
+): number | null {
+  if (point.x < box.x || point.x > box.x + box.w) {
+    return null;
+  }
+  const row = Math.floor((point.y - box.y) / rowHeight);
   return row >= 0 && row < count ? row : null;
 }

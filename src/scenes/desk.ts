@@ -23,6 +23,8 @@ export function addSnore(): { burst(): void } {
       k.anchor("center"),
       k.color(24, 26, 60),
       k.opacity(1),
+      // Above both desk pictures, so the burst stays visible after she wakes.
+      k.z(1),
       k.scale(1),
       { age: 0, velocity: k.vec2(14 + k.rand(-4, 4), -24) },
     ]);

@@ -437,7 +437,8 @@ export function createMapView(hooks: MapViewHooks): void {
       return;
     }
     // A click or tap picks the option row under it; elsewhere does nothing.
-    const row = choiceAt(toUnits(k.mousePos()).y, dialogText.pos.y, CHOICE_ROW, choices.length);
+    const box = { x: dialogBox.pos.x, y: dialogText.pos.y, w: DIALOG_WIDTH };
+    const row = choiceAt(toUnits(k.mousePos()), box, CHOICE_ROW, choices.length);
     if (row !== null) {
       choose(row);
     }

@@ -105,12 +105,23 @@ describe("dialog choices", () => {
 });
 
 describe("choiceAt", () => {
-  it("maps a y position to an option row", () => {
-    expect(choiceAt(100, 100, 12, 3)).toBe(0);
-    expect(choiceAt(111.9, 100, 12, 3)).toBe(0);
-    expect(choiceAt(112, 100, 12, 3)).toBe(1);
-    expect(choiceAt(135, 100, 12, 3)).toBe(2);
-    expect(choiceAt(99, 100, 12, 3)).toBeNull();
-    expect(choiceAt(136, 100, 12, 3)).toBeNull();
+  const box = { x: 10, y: 100, w: 300 };
+
+  it("maps a point to an option row", () => {
+    expect(choiceAt({ x: 20, y: 100 }, box, 12, 3)).toBe(0);
+    expect(choiceAt({ x: 20, y: 111.9 }, box, 12, 3)).toBe(0);
+    expect(choiceAt({ x: 20, y: 112 }, box, 12, 3)).toBe(1);
+    expect(choiceAt({ x: 20, y: 135 }, box, 12, 3)).toBe(2);
+  });
+
+  it("ignores points above or below the rows", () => {
+    expect(choiceAt({ x: 20, y: 99 }, box, 12, 3)).toBeNull();
+    expect(choiceAt({ x: 20, y: 136 }, box, 12, 3)).toBeNull();
+  });
+
+  it("ignores points beside the box at row height", () => {
+    expect(choiceAt({ x: 9, y: 105 }, box, 12, 3)).toBeNull();
+    expect(choiceAt({ x: 311, y: 105 }, box, 12, 3)).toBeNull();
+    expect(choiceAt({ x: 310, y: 105 }, box, 12, 3)).toBe(0);
   });
 });
