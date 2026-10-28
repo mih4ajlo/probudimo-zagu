@@ -6,8 +6,8 @@ when implementation starts, not while the repo is docs-only.
 ## Stack
 | Layer | Tool | What it covers |
 |--------|------|----------------|
-| Logic | Vitest + TypeScript | Score, dialog, office data, map geometry, zoom, “all visited” |
-| Browser smoke | Playwright | Page loads, canvas exists, no page error |
+| Logic | Vitest + TypeScript | Score, dialog, office data, map geometry, zoom, “all visited”, hunt rules |
+| Browser smoke | Playwright | Page loads, canvas exists, Find Zaga starts, no page error |
 
 Vite is the bundler, so Vitest is the runner. Do not add Jest or Cypress.
 
@@ -45,9 +45,20 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   `MAX_CANVAS_PIXELS`; never below 1 unless the screen ratio is.
 - **Pinch:** one finger never zooms; two fingers zoom by their spread ratio,
   clamped to the zoom limits; lifting a finger stops; a third finger is ignored.
+- **Hint:** 8 compass directions with north up (−y), sector edges halfway;
+  distance bands at 150 and 450; "near" has no direction.
+- **Hunt:** she hides at least `MIN_HIDE_DISTANCE` away (also on the real
+  map from Beograd); empty offices hint and get "?"; first visits grow the
+  crowd up to 12, revisits do not; a find adds `wakeGain`, clears "?" marks
+  and moves her far away; the meter caps at 100; visits after waking and
+  unknown offices are ignored.
+- **Crowd:** followers stand a fixed path distance behind the leader, round
+  corners, do not collapse when the leader stands still, wait at the oldest
+  point on a short path; the trail keeps only what the last follower needs.
+- **Title menu:** selection wraps both ways; reset clears the hunt result.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
-offices, geo, officeLayout, zoom, progress).
+offices, geo, officeLayout, zoom, progress, hint, hunt, crowd, titleMenu).
 
 ## What not to test
 - Pixel drawing, sprite animation, camera, or Kaplay internals
