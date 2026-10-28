@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Rework Find Zaga: a fixed crowd of 3 searches for her; when found she appears asleep on the map and the player runs a 3-round, pick-a-line talk; desk scenes show her asleep (intro) and waking up (ending).
+**Goal:** Rework Find Zaga: a fixed crowd of 3 searches for her; each of 3 finds runs one pick-a-line talk round, and between rounds her avatar sleepwalks across the map to a new office; desk scenes show her asleep (intro) and waking up (ending).
 
 **Architecture:** Pure, tested modules for the choice menu (`dialog.ts`), the talk (`talk.ts`), the simplified hunt (`hunt.ts`) and the ending timeline (`deskWake.ts`). `mapView` swaps its visit hooks for one `onVisit(id, talk)` with `talk.say` / `talk.ask`, and renders a choice list in the dialog box. Two desk scenes reuse an `addSnore()` Z animation. Desk art is generated from the wake picture by `make-sprites.py`.
 
@@ -15,7 +15,7 @@
 - Branch `feat/find-zaga-talk`; release v0.9.0 bumped only at merge (AGENTS.md).
 - No new dependencies. Copy and tuning in `src/data/`. Rules in Kaplay-free modules with Vitest coverage.
 - Wake the offices behaves exactly as v0.8.1 (dialog blocks movement, points once per office, ending after 60).
-- Crowd = leader + `FOLLOWERS = 2`. Talk = 3 rounds × 3 choices; shouts ≤ 33 characters.
+- Crowd = leader + `FOLLOWERS = 2`. Talk = 3 rounds × 3 choices, one round per find; shouts ≤ 33 characters. She sleepwalks at `SLEEPWALK_SPEED = 40` to an office ≥ `MIN_HIDE_DISTANCE` away.
 - Ending timeline: burst at 1.6 s, awake at 2.0 s, text at 3.0 s.
 - Commits end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - Port 5173 belongs to the user's server: run e2e through a temporary config on 5181, manual checks on 5180.
@@ -622,21 +622,23 @@ export type MapViewHooks = {
 
 ---
 
-### Task 5: Fixed crowd, found Zaga, talk on the map
+### Task 5: Fixed crowd, three finds, sleepwalking Zaga, talk on the map
 
-**Files:** Modify `src/data/hunt.ts`, `src/hunt.ts`, `src/hunt.test.ts`, `src/crowd.ts`, `src/crowd.test.ts`, `src/session.ts`, `src/session.test.ts`, `src/scenes/hunt.ts`.
+(Amended after the user asked mid-execution for her avatar to sleepwalk across the map between rounds: 3 finds, one talk round each.)
 
-**Interfaces — Produces:** `FOLLOWERS = 2`; `HuntState = { positions; hidden: string; visits: number; searched: string[]; found: boolean }`; `huntVisit(state, id): HuntVisit | null` (found → `{ found: true, lines: [FOUND_LINE] }`, null once found); `huntResult(state): HuntResult`; `HuntResult = { visits: number }`. Removed: `START_FOLLOWERS`, `MAX_FOLLOWERS`, `WAKE_*`, `MUMBLES`, `FLEE_LINE`, `wakeGain`, `mumbleFor`, `isAwake`, `crowdSize`, `HuntState.rng/wake/followers/seen`.
+**Files:** Modify `src/data/hunt.ts`, `src/hunt.ts`, `src/hunt.test.ts`, `src/crowd.ts`, `src/crowd.test.ts`, `src/session.ts`, `src/session.test.ts`, `src/scenes/hunt.ts`, `src/scenes/huntEnding.ts`.
+
+**Interfaces — Produces:** `FOLLOWERS = 2`, `SLEEPWALK_SPEED = 40`, `CAUGHT_LINE`, `SLEEPWALK_LINE`; `HuntState = { positions; rng; hidden: string; visits: number; searched: string[]; finds: number }`; `huntVisit(state, id): HuntVisit | null` (a find → `{ found: true, lines: [finds === 1 ? FOUND_LINE : CAUGHT_LINE] }`, clears `searched`); `huntFlee(state): { from: Point; to: Point }`; `huntResult(state): HuntResult`; `HuntResult = { visits: number }`. Removed: `START_FOLLOWERS`, `MAX_FOLLOWERS`, `WAKE_*`, `MUMBLES`, `FLEE_LINE`, `wakeGain`, `mumbleFor`, `isAwake`, `crowdSize`, `HuntState.wake/followers/seen`. Her walk reuses `walkStep(from, to, step, () => true)` from `src/walkTo.ts` (already tested: straight steps, lands exactly, reports done).
 
 - [ ] **Step 1: Failing tests**
   - `src/hunt.test.ts` — replace the whole file with:
 
 ```ts
 import { describe, expect, it } from "vitest";
-import { FOUND_LINE, MIN_HIDE_DISTANCE } from "./data/hunt";
+import { CAUGHT_LINE, FOUND_LINE, MIN_HIDE_DISTANCE } from "./data/hunt";
 import type { Point } from "./geo";
 import { hintFor } from "./hint";
-import { createHunt, huntResult, huntVisit, pickHideout } from "./hunt";
+import { createHunt, huntFlee, huntResult, huntVisit, pickHideout } from "./hunt";
 import { officePositions, spawnPoint } from "./officeLayout";
 
 // Offices o0..o(n-1) on a line, 100 units apart, starting at the origin.
@@ -654,6 +656,11 @@ describe("pickHideout", () => {
     expect(pickHideout(line(10), start, null, last)).toBe("o9");
   });
 
+  it("never picks the excluded office", () => {
+    const positions = new Map([["a", start], ["b", { x: 500, y: 0 }]]);
+    expect(pickHideout(positions, { x: 500, y: 0 }, "a", first)).toBe("b");
+  });
+
   it("falls back to any other office when none is far enough", () => {
     const positions = new Map([["a", start], ["b", { x: 10, y: 0 }]]);
     expect(pickHideout(positions, start, "a", first)).toBe("b");
@@ -661,9 +668,9 @@ describe("pickHideout", () => {
 });
 
 describe("createHunt", () => {
-  it("starts unfound with no visits", () => {
+  it("starts with no visits and no finds", () => {
     const hunt = createHunt(line(10), start, first);
-    expect(hunt).toMatchObject({ hidden: "o3", visits: 0, searched: [], found: false });
+    expect(hunt).toMatchObject({ hidden: "o3", visits: 0, searched: [], finds: 0 });
   });
 
   it("hides her far from Beograd on the real map", () => {
@@ -684,25 +691,40 @@ describe("huntVisit", () => {
     expect(hunt.searched).toEqual(["o0"]);
   });
 
-  it("finds her at her office", () => {
+  it("finds her at her office and clears the ? marks", () => {
     const hunt = createHunt(line(10), start, first);
+    huntVisit(hunt, "o0");
     expect(huntVisit(hunt, "o3")).toEqual({ found: true, lines: [FOUND_LINE] });
-    expect(hunt.found).toBe(true);
-    expect(hunt.visits).toBe(1);
+    expect(hunt.finds).toBe(1);
+    expect(hunt.searched).toEqual([]);
   });
 
-  it("ignores every office once she is found", () => {
+  it("says she is caught again on later finds", () => {
     const hunt = createHunt(line(10), start, first);
     huntVisit(hunt, "o3");
-    expect(huntVisit(hunt, "o3")).toBeNull();
-    expect(huntVisit(hunt, "o0")).toBeNull();
-    expect(hunt.visits).toBe(1);
+    const { to } = huntFlee(hunt);
+    expect(to).toEqual({ x: 0, y: 0 });
+    expect(huntVisit(hunt, hunt.hidden)).toEqual({ found: true, lines: [CAUGHT_LINE] });
+    expect(hunt.finds).toBe(2);
   });
 
   it("ignores unknown offices", () => {
     const hunt = createHunt(line(10), start, first);
     expect(huntVisit(hunt, "nowhere")).toBeNull();
     expect(hunt.visits).toBe(0);
+  });
+});
+
+describe("huntFlee", () => {
+  it("sends her far away to another office", () => {
+    const positions = line(10);
+    const hunt = createHunt(positions, start, last);
+    const from = hunt.hidden;
+    const walk = huntFlee(hunt);
+    expect(hunt.hidden).not.toBe(from);
+    expect(walk.from).toEqual(positions.get(from));
+    expect(walk.to).toEqual(positions.get(hunt.hidden));
+    expect(distance(walk.from, walk.to)).toBeGreaterThanOrEqual(MIN_HIDE_DISTANCE);
   });
 });
 
@@ -720,19 +742,26 @@ describe("huntResult", () => {
   - `src/session.test.ts`: in "hunt result", use `getSession().hunt = { visits: 9 };`.
   - `src/crowd.test.ts`: replace `MAX_FOLLOWERS` with `FOLLOWERS` (import and the "keeps only the path" test).
 
-- [ ] **Step 2: Run** `npx vitest run src/hunt.test.ts src/crowd.test.ts src/session.test.ts` — Expected: FAIL (`FOUND_LINE`/`FOLLOWERS` have no export, hunt shape differs).
+- [ ] **Step 2: Run** `npx vitest run src/hunt.test.ts src/crowd.test.ts src/session.test.ts` — Expected: FAIL (missing exports / hunt shape).
 
 - [ ] **Step 3: Implement**
   - `src/data/hunt.ts`: delete `START_FOLLOWERS`, `MAX_FOLLOWERS`, `WAKE_BASE`, `WAKE_PER_FOLLOWER`, `WAKE_FULL`, `MUMBLES`, `FLEE_LINE` (and their comments); add after `HUNT_TITLE`:
     ```ts
     // The crowd: the leader and this many followers.
     export const FOLLOWERS = 2;
+    // Her sleepwalk between talk rounds, game units per second (the crowd walks 80).
+    export const SLEEPWALK_SPEED = 40;
+    ```
+    and after `FOUND_LINE`:
+    ```ts
+    export const CAUGHT_LINE = "Caught her again - still asleep!";
+    export const SLEEPWALK_LINE = "She sleepwalks off to another office. After her!";
     ```
   - `src/crowd.ts`: import `FOLLOWERS` instead of `MAX_FOLLOWERS`; `KEEP_LENGTH = (FOLLOWERS + 1) * FOLLOWER_SPACING`.
   - `src/session.ts`: `export type HuntResult = { visits: number };`
   - `src/hunt.ts`: replace the whole file with:
     ```ts
-    import { FOUND_LINE, MIN_HIDE_DISTANCE } from "./data/hunt";
+    import { CAUGHT_LINE, FOUND_LINE, MIN_HIDE_DISTANCE } from "./data/hunt";
     import type { Point } from "./geo";
     import { hintFor } from "./hint";
     import type { HuntResult } from "./session";
@@ -742,12 +771,13 @@ describe("huntResult", () => {
 
     export type HuntState = {
       positions: ReadonlyMap<string, Point>;
-      // The office she sleeps in.
+      rng: Rng;
+      // The office she sleeps in (or is sleepwalking to).
       hidden: string;
       visits: number;
-      // Empty offices searched ("?" marks).
+      // Empty offices searched since the last find ("?" marks).
       searched: string[];
-      found: boolean;
+      finds: number;
     };
 
     export type HuntVisit = { found: boolean; lines: string[] };
@@ -769,25 +799,32 @@ describe("huntResult", () => {
     }
 
     export function createHunt(positions: ReadonlyMap<string, Point>, start: Point, rng: Rng): HuntState {
-      return { positions, hidden: pickHideout(positions, start, null, rng), visits: 0, searched: [], found: false };
+      return { positions, rng, hidden: pickHideout(positions, start, null, rng), visits: 0, searched: [], finds: 0 };
     }
 
-    // The crowd reaches an office: a hint, or she is found; null when nothing
-    // happens (unknown office, or she was already found).
+    // The crowd reaches an office: a hint, or a find; null for unknown offices.
     export function huntVisit(state: HuntState, id: string): HuntVisit | null {
       const pos = state.positions.get(id);
-      if (!pos || state.found) {
+      if (!pos) {
         return null;
       }
       state.visits += 1;
       if (id === state.hidden) {
-        state.found = true;
-        return { found: true, lines: [FOUND_LINE] };
+        state.finds += 1;
+        state.searched = [];
+        return { found: true, lines: [state.finds === 1 ? FOUND_LINE : CAUGHT_LINE] };
       }
       if (!state.searched.includes(id)) {
         state.searched.push(id);
       }
       return { found: false, lines: [hintFor(pos, state.positions.get(state.hidden) as Point)] };
+    }
+
+    // After a talk round she sleepwalks to another office far away.
+    export function huntFlee(state: HuntState): { from: Point; to: Point } {
+      const from = state.positions.get(state.hidden) as Point;
+      state.hidden = pickHideout(state.positions, from, state.hidden, state.rng);
+      return { from, to: state.positions.get(state.hidden) as Point };
     }
 
     // What the ending shows.
@@ -796,22 +833,23 @@ describe("huntResult", () => {
     }
     ```
 
-- [ ] **Step 4: Run** `npx vitest run` — Expected: PASS (tsc errors in the hunt scene are fixed next).
+- [ ] **Step 4: Run** `npx vitest run` — Expected: PASS (the scene's tsc errors are fixed next).
 
 - [ ] **Step 5: Hunt scene** — replace `src/scenes/hunt.ts` with:
 
 ```ts
 import { SPRITE_SCALE, SPRITES } from "../assets";
 import { createTrail, followerPositions, pushTrail } from "../crowd";
-import { FOLLOWERS, HUNT_TITLE, TALK_ROUNDS } from "../data/hunt";
+import { FOLLOWERS, SLEEPWALK_LINE, SLEEPWALK_SPEED, TALK_ROUNDS } from "../data/hunt";
 import type { Point } from "../geo";
-import { createHunt, huntResult, huntVisit } from "../hunt";
+import { createHunt, huntFlee, huntResult, huntVisit } from "../hunt";
 import { k } from "../kaplayContext";
 import { officePositions, spawnPoint } from "../officeLayout";
 import type { PrincessAnim } from "../princess";
 import { getSession } from "../session";
 import { withShout } from "../shout";
-import { createTalk, talkChoices, talkPick } from "../talk";
+import { createTalk, isTalkDone, talkChoices, talkPick } from "../talk";
+import { walkStep } from "../walkTo";
 import { createMapView, type MapTalk } from "./mapView";
 
 // Shirt tints so the crowd looks mixed (the sprite's shirt is near-white).
@@ -821,13 +859,13 @@ const FOLLOWER_TINTS: readonly [number, number, number][] = [
 ];
 // Small sideways offsets so followers on a straight path do not cover each other.
 const SIDE_STEP = [3, -3];
-// Sleeping Zaga stands beside her office; small z's float up from her head.
+// Zaga sleeps beside her office; small z's float up from her head.
 const ZAGA_OFFSET: Point = { x: 12, y: 6 };
 const SNORE_EVERY = 0.7;
 const SNORE_LIFE = 2;
 
-// Find Zaga: three protesters search the offices for the sleeping princess,
-// then talk her awake.
+// Find Zaga: three protesters search the offices for the sleeping princess and
+// talk her awake over three rounds; between rounds she sleepwalks away.
 export function registerHuntScene(): void {
   k.scene("hunt", () => {
     const session = getSession();
@@ -848,54 +886,92 @@ export function registerHuntScene(): void {
       ]),
     );
 
-    function showZaga(): void {
-      const office = positions.get(hunt.hidden) as Point;
-      const zaga = k.add([
-        k.sprite(SPRITES.princess, { anim: "idle" }),
-        k.scale(SPRITE_SCALE),
-        k.pos(office.x + ZAGA_OFFSET.x, office.y + ZAGA_OFFSET.y),
-        k.anchor("bot"),
-        k.z(8),
-      ]);
-      k.loop(SNORE_EVERY, () => {
-        const z = k.add([
-          k.text("z", { size: 6 }),
-          k.pos(zaga.pos.x + 4, zaga.pos.y - 24),
-          k.anchor("center"),
-          k.color(40, 40, 96),
-          k.opacity(1),
-          k.z(21),
-          { age: 0 },
-        ]);
-        z.onUpdate(() => {
-          z.age += k.dt();
-          z.move(5, -10);
-          z.opacity = Math.max(0, 1 - z.age / SNORE_LIFE);
-          if (z.age >= SNORE_LIFE) {
-            z.destroy();
-          }
-        });
-      });
+    // Hidden until the first find; then asleep at her office or sleepwalking.
+    const zaga = k.add([
+      k.sprite(SPRITES.princess, { anim: "idle" }),
+      k.scale(SPRITE_SCALE),
+      k.pos(0, 0),
+      k.anchor("bot"),
+      k.opacity(0),
+      k.z(8),
+    ]);
+    let walkTo: Point | null = null;
+    const spot = (office: Point) => ({ x: office.x + ZAGA_OFFSET.x, y: office.y + ZAGA_OFFSET.y });
+
+    function placeZaga(office: Point): void {
+      walkTo = null;
+      const p = spot(office);
+      zaga.pos = k.vec2(p.x, p.y);
+      zaga.opacity = 1;
+      zaga.play("idle");
     }
 
-    function nextRound(view: MapTalk): void {
+    zaga.onUpdate(() => {
+      if (!walkTo) {
+        return;
+      }
+      const step = walkStep({ x: zaga.pos.x, y: zaga.pos.y }, walkTo, SLEEPWALK_SPEED * k.dt(), () => true);
+      zaga.pos = k.vec2(step.pos.x, step.pos.y);
+      if (step.dx !== 0) {
+        zaga.flipX = step.dx < 0;
+      }
+      if (step.done) {
+        walkTo = null;
+        zaga.play("idle");
+      }
+    });
+    k.loop(SNORE_EVERY, () => {
+      if (zaga.opacity === 0) {
+        return;
+      }
+      const z = k.add([
+        k.text("z", { size: 6 }),
+        k.pos(zaga.pos.x + 4, zaga.pos.y - 24),
+        k.anchor("center"),
+        k.color(40, 40, 96),
+        k.opacity(1),
+        k.z(21),
+        { age: 0 },
+      ]);
+      z.onUpdate(() => {
+        z.age += k.dt();
+        z.move(5, -10);
+        z.opacity = Math.max(0, 1 - z.age / SNORE_LIFE);
+        if (z.age >= SNORE_LIFE) {
+          z.destroy();
+        }
+      });
+    });
+
+    function sleepwalk(): void {
+      const { to } = huntFlee(hunt);
+      walkTo = spot(to);
+      zaga.play("walk");
+    }
+
+    function talkRound(view: MapTalk): void {
       const choices = talkChoices(talk);
       if (!choices) {
-        session.hunt = huntResult(hunt);
-        k.go("huntEnding");
         return;
       }
       view.ask(choices, (index) => {
-        view.say(talkPick(talk, index) ?? [], { shoutFirst: true, then: () => nextRound(view) });
+        view.say(talkPick(talk, index) ?? [], {
+          shoutFirst: true,
+          then: () => {
+            if (isTalkDone(talk)) {
+              session.hunt = huntResult(hunt);
+              k.go("huntEnding");
+              return;
+            }
+            view.say([SLEEPWALK_LINE], { then: sleepwalk });
+          },
+        });
       });
     }
 
     createMapView({
       leaderSprite: SPRITES.protester,
-      hudText: () =>
-        hunt.found
-          ? `Round ${Math.min(talk.round + 1, TALK_ROUNDS.length)}/${TALK_ROUNDS.length}`
-          : `${HUNT_TITLE}  Visits ${hunt.visits}`,
+      hudText: () => `Round ${Math.min(talk.round + 1, TALK_ROUNDS.length)}/${TALK_ROUNDS.length}  Visits ${hunt.visits}`,
       officeMark: (id) => (hunt.searched.includes(id) ? "question" : null),
       onVisit: (id, view) => {
         const visit = huntVisit(hunt, id);
@@ -906,8 +982,9 @@ export function registerHuntScene(): void {
           view.say(withShout(visit.lines), { shoutFirst: true });
           return;
         }
-        showZaga();
-        view.say(visit.lines, { then: () => nextRound(view) });
+        // Caught, even if she had not arrived yet.
+        placeZaga(positions.get(id) as Point);
+        view.say(visit.lines, { then: () => talkRound(view) });
       },
       onFrame: (frame) => {
         pushTrail(trail, frame.pos);
@@ -926,11 +1003,11 @@ export function registerHuntScene(): void {
 }
 ```
 
-  - `src/scenes/huntEnding.ts`: drop the crowd from the result line for now: `` `${result.visits} visits` `` (Task 6 replaces the scene).
+  - `src/scenes/huntEnding.ts`: the result line becomes `` `${result.visits} visits` `` (Task 6 replaces the scene).
 
-- [ ] **Step 6: Verify** — `npx tsc --noEmit --noUnusedLocals && npm test && npm run build` + e2e (5181). Manual (5180): crowd is 3 and never grows; HUD `Find Zaga  Visits N`; follow the hints to her office; she appears with z's; 3 rounds of choices (keys, click on a row, click outside does nothing); after round 3 the (temporary) ending shows.
+- [ ] **Step 6: Verify** — `npx tsc --noEmit --noUnusedLocals && npm test && npm run build` + e2e (5181). Manual (5180): crowd is 3 and never grows; follow the hints to her; she appears asleep with z's; round 1 choices (keys, click on a row, click outside does nothing); then the sleepwalk line and her avatar walks across the map; chase her; rounds 2 and 3; after round 3 the (temporary) ending shows.
 
-- [ ] **Step 7: Commit** `feat: fixed crowd of three and a three-round talk with Zaga`.
+- [ ] **Step 7: Commit** `feat: fixed crowd of three, sleepwalking Zaga and a three-round talk`.
 
 ---
 
