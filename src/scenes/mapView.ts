@@ -9,10 +9,15 @@ import { SHOUT_LINE } from "../data/story";
 import {
   ADVANCE_KEYS,
   advanceDialog,
+  choiceAt,
   createDialog,
+  currentChoices,
   currentLine,
   isMovementBlocked,
+  moveChoice,
+  openChoices,
   openDialog,
+  pickChoice,
 } from "../dialog";
 import { isInsideAny, mapBounds, project, projectRing, tryMove, type Point } from "../geo";
 import {
@@ -33,22 +38,25 @@ import type { ScreenFit } from "../screen";
 import { createTap, tapDown, tapMove, tapUp } from "../tap";
 import { walkStep } from "../walkTo";
 import { characterLayout, faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
-import { createShout, isShouting, startShout, tickShout, withShout } from "../shout";
+import { createShout, isShouting, startShout, tickShout } from "../shout";
 import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
 export type OfficeMark = "check" | "question" | null;
 export type LeaderFrame = { pos: Point; anim: PrincessAnim; facing: Facing };
+export type MapTalk = {
+  // Lines in the dialog box; shoutFirst puts the leader in the shout pose on
+  // the first line; then runs after the last line closes.
+  say(lines: readonly string[], options?: { shoutFirst?: boolean; then?: () => void }): void;
+  // Options in the dialog box; then gets the picked index.
+  ask(options: readonly string[], then: (index: number) => void): void;
+};
 export type MapViewHooks = {
   // Sprite with idle/walk/shout anims (see loadCharacter in assets.ts).
   leaderSprite: string;
-  // Opened when the scene starts; none when omitted.
-  introLines?: readonly string[];
   hudText: () => string;
   officeMark: (id: string) => OfficeMark;
-  // Called once per visit; the lines after the shout, or null to ignore the touch.
-  visitLines: (id: string) => readonly string[] | null;
-  // Called whenever no dialog line is showing after a change (also once at start).
-  onDialogEnd: () => void;
+  // The leader stepped onto an office.
+  onVisit: (id: string, talk: MapTalk) => void;
   // Called every frame after the leader moved.
   onFrame?: (frame: LeaderFrame) => void;
 };
@@ -61,6 +69,8 @@ const SHOUT_BUTTON_RADIUS = 16;
 const ZOOM_BUTTON_RADIUS = 11;
 const DIALOG_WIDTH = 300;
 const DIALOG_HEIGHT = 48;
+// Choice rows in the dialog box: 8-unit text + 4 line spacing.
+const CHOICE_ROW = 12;
 
 function controlLayout(fit: ScreenFit) {
   return {
@@ -95,6 +105,11 @@ const vec = (p: Point) => k.vec2(p.x, p.y);
 export function createMapView(hooks: MapViewHooks): void {
   const dialog = createDialog();
   const shout = createShout();
+  // The line that shows the shout pose, and what runs when the open dialog
+  // or choice closes.
+  let shoutLine: string | null = null;
+  let afterDialog: (() => void) | null = null;
+  let afterChoice: ((index: number) => void) | null = null;
   const bounds = mapBounds();
   let zoom = ZOOM_START;
   let facing: Facing = "right";
@@ -331,37 +346,75 @@ export function createMapView(hooks: MapViewHooks): void {
   }
   placeUi(screenFit());
 
-  function refreshDialog(): void {
-    const text = currentLine(dialog);
-    if (text === null) {
-      dialogBox.opacity = 0;
-      dialogBox.outline.width = 0;
-      dialogText.text = "";
-      hooks.onDialogEnd();
-      return;
-    }
+  function showBox(text: string): void {
     dialogBox.opacity = 1;
     dialogBox.outline.width = 1;
     dialogText.text = text;
   }
 
-  function startVisit(id: string): void {
-    const lines = hooks.visitLines(id);
-    if (lines === null) {
+  function refreshDialog(): void {
+    hud.text = hooks.hudText();
+    const choices = currentChoices(dialog);
+    if (choices) {
+      showBox(choices.map((choice, i) => (i === dialog.selected ? `> ${choice}` : `  ${choice}`)).join("\n"));
       return;
     }
-    walkTarget = null;
-    hud.text = hooks.hudText();
-    openDialog(dialog, withShout(lines));
-    refreshDialog();
+    const text = currentLine(dialog);
+    if (text !== null) {
+      showBox(text);
+      return;
+    }
+    dialogBox.opacity = 0;
+    dialogBox.outline.width = 0;
+    dialogText.text = "";
+    const then = afterDialog;
+    afterDialog = null;
+    then?.();
+  }
+
+  const talk: MapTalk = {
+    say(lines, options = {}) {
+      walkTarget = null;
+      shoutLine = options.shoutFirst ? (lines[0] ?? null) : null;
+      afterDialog = options.then ?? null;
+      openDialog(dialog, lines);
+      refreshDialog();
+    },
+    ask(options, then) {
+      walkTarget = null;
+      shoutLine = null;
+      afterChoice = then;
+      openChoices(dialog, options);
+      refreshDialog();
+    },
+  };
+
+  function startVisit(id: string): void {
+    hooks.onVisit(id, talk);
   }
 
   // A tap advances dialog and also arrives as a touch; remember when, so the
   // tap that closes the last line does not also press a touch control.
   let lastAdvanceTime = -1;
 
+  function choose(index: number): void {
+    const picked = pickChoice(dialog, index);
+    if (picked === null) {
+      return;
+    }
+    lastAdvanceTime = k.time();
+    const then = afterChoice;
+    afterChoice = null;
+    refreshDialog();
+    then?.(picked);
+  }
+
   function next(): void {
     if (!isMovementBlocked(dialog)) {
+      return;
+    }
+    if (currentChoices(dialog)) {
+      choose(dialog.selected);
       return;
     }
     lastAdvanceTime = k.time();
@@ -372,7 +425,33 @@ export function createMapView(hooks: MapViewHooks): void {
   for (const key of ADVANCE_KEYS) {
     k.onKeyPress(key, next);
   }
-  k.onClick(next);
+  // Touch positions arrive in canvas pixels; controls live in game units.
+  const toUnits = (pos: Point): Point => {
+    const scale = screenFit().scale;
+    return { x: pos.x / scale, y: pos.y / scale };
+  };
+  k.onClick(() => {
+    const choices = currentChoices(dialog);
+    if (!choices) {
+      next();
+      return;
+    }
+    // A click or tap picks the option row under it; elsewhere does nothing.
+    const row = choiceAt(toUnits(k.mousePos()).y, dialogText.pos.y, CHOICE_ROW, choices.length);
+    if (row !== null) {
+      choose(row);
+    }
+  });
+  for (const [keys, delta] of [[["up", "w"], -1], [["down", "s"], 1]] as const) {
+    for (const key of keys) {
+      k.onKeyPress(key, () => {
+        if (currentChoices(dialog)) {
+          moveChoice(dialog, delta);
+          refreshDialog();
+        }
+      });
+    }
+  }
   k.onKeyPress(SHOUT_KEY, () => {
     if (!isMovementBlocked(dialog)) {
       startShout(shout);
@@ -392,12 +471,6 @@ export function createMapView(hooks: MapViewHooks): void {
   k.onKeyPress("-", () => {
     zoom = zoomOut(zoom);
   });
-
-  // Touch positions arrive in canvas pixels; controls live in game units.
-  const toUnits = (pos: Point): Point => {
-    const scale = screenFit().scale;
-    return { x: pos.x / scale, y: pos.y / scale };
-  };
 
   k.onTouchStart((pos, touch) => {
     if (isMovementBlocked(dialog) || k.time() === lastAdvanceTime) {
@@ -465,7 +538,7 @@ export function createMapView(hooks: MapViewHooks): void {
 
     facing = faceFromInput(dx, facing);
     player.flipX = facing === "left";
-    const shouting = isShouting(shout) || currentLine(dialog) === SHOUT_LINE;
+    const shouting = isShouting(shout) || (shoutLine !== null && currentLine(dialog) === shoutLine);
     const nextAnim = pickAnim({ moving: dx !== 0 || dy !== 0, shouting });
     if (nextAnim !== anim) {
       anim = nextAnim;
@@ -511,6 +584,5 @@ export function createMapView(hooks: MapViewHooks): void {
     }
   });
 
-  openDialog(dialog, hooks.introLines ?? []);
   refreshDialog();
 }

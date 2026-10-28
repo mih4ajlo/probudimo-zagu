@@ -1,11 +1,11 @@
 import { SPRITE_SCALE, SPRITES } from "../assets";
 import { createTrail, followerPositions, pushTrail } from "../crowd";
-import { HUNT_INTRO } from "../data/hunt";
 import { createHunt, crowdSize, huntResult, huntVisit, isAwake } from "../hunt";
 import { k } from "../kaplayContext";
 import { officePositions, spawnPoint } from "../officeLayout";
 import type { PrincessAnim } from "../princess";
 import { getSession } from "../session";
+import { withShout } from "../shout";
 import { createMapView } from "./mapView";
 
 // Shirt tints so the crowd looks mixed (the sprite's shirt is near-white).
@@ -42,15 +42,22 @@ export function registerHuntScene(): void {
 
     createMapView({
       leaderSprite: SPRITES.protester,
-      introLines: HUNT_INTRO,
       hudText: () => `Awake ${hunt.wake}%  Crowd ${crowdSize(hunt)}  Visits ${hunt.visits}`,
       officeMark: (id) => (hunt.searched.includes(id) ? "question" : null),
-      visitLines: (id) => huntVisit(hunt, id)?.lines ?? null,
-      onDialogEnd: () => {
-        if (isAwake(hunt)) {
-          session.hunt = huntResult(hunt);
-          k.go("huntEnding");
+      onVisit: (id, talk) => {
+        const visit = huntVisit(hunt, id);
+        if (!visit) {
+          return;
         }
+        talk.say(withShout(visit.lines), {
+          shoutFirst: true,
+          then: () => {
+            if (isAwake(hunt)) {
+              session.hunt = huntResult(hunt);
+              k.go("huntEnding");
+            }
+          },
+        });
       },
       onFrame: (frame) => {
         pushTrail(trail, frame.pos);
