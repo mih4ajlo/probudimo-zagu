@@ -14,7 +14,7 @@ export function registerHuntEndingScene(): void {
     k.add([k.text(HUNT_TITLE, { size: 16 }), k.pos(GAME_WIDTH / 2, 28), k.anchor("center")]);
     k.add([k.text(HUNT_ENDING_LINE, { size: 16 }), k.pos(GAME_WIDTH / 2, 76), k.anchor("center")]);
     k.add([
-      k.text(`${result.visits} visits, ${result.crowd} protesters`, { size: 8 }),
+      k.text(`${result.visits} visits`, { size: 8 }),
       k.pos(GAME_WIDTH / 2, 108),
       k.anchor("center"),
     ]);
