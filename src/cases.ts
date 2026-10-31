@@ -23,7 +23,8 @@ export type CaseAnswer =
   | { kind: "working"; caseId: string; lines: readonly string[] }
   | { kind: "returned"; caseId: string; lines: readonly string[]; next: string };
 
-export type CaseMark = { kind: "folder"; dust: number } | { kind: "target" } | null;
+// folder: dust of the file waiting (or expired) here; target: the carried file goes here.
+export type CaseMark = { folder: number | null; target: boolean } | null;
 
 export function createCases(files: readonly CaseFile[] = CASES): CasesState {
   return {
@@ -101,17 +102,14 @@ export function tickCases(state: CasesState, dt: number): CaseEntry[] {
 }
 
 export function caseMark(state: CasesState, officeId: string): CaseMark {
-  for (const entry of state.entries) {
-    if (entry.status === "carried" && entry.file.chain[entry.hop] === officeId) {
-      return { kind: "target" };
-    }
+  const target = state.entries.some((e) => e.status === "carried" && e.file.chain[e.hop] === officeId);
+  const folder = state.entries.find(
+    (e) => (e.status === "waiting" || e.status === "expired") && e.file.chain[0] === officeId,
+  );
+  if (!target && !folder) {
+    return null;
   }
-  for (const entry of state.entries) {
-    if ((entry.status === "waiting" || entry.status === "expired") && entry.file.chain[0] === officeId) {
-      return { kind: "folder", dust: entry.dust };
-    }
-  }
-  return null;
+  return { folder: folder?.dust ?? null, target };
 }
 
 const RESULT: Record<CaseStatus, CaseResult> = {

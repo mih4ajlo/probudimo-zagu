@@ -41,13 +41,14 @@ describe("case points", () => {
     expect(wakeMaxScore()).toBe(1060 + 50 * CASES.length);
   });
 
+  // Same order as the overworld visit: office points first, then the case file.
   it("grants office points once even on a case office", () => {
     const state = createScore();
     const cases = createCases();
-    visitForCases(cases, "vjt-u-novom-sadu");
     expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(20);
-    visitForCases(cases, "vjt-u-novom-sadu");
+    expect(visitForCases(cases, "vjt-u-novom-sadu").kind).toBe("pickup");
     expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(0);
+    expect(visitForCases(cases, "vjt-u-novom-sadu").kind).toBe("none");
     expect(state.total).toBe(20);
   });
 });

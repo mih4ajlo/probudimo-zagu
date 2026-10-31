@@ -48,7 +48,7 @@ export function registerOverworldScene(): void {
       },
       officeMark: (id) => (session.score.visited.includes(id) ? "check" : null),
       caseMark: (id) => caseMark(cases, id),
-      carrying: () => carriedCase(cases) !== null,
+      carriedDust: () => carriedCase(cases)?.dust ?? null,
       onVisit: (id, talk) => {
         const office = getOffice(id);
         if (!office) {

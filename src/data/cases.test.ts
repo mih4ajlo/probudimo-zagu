@@ -12,8 +12,24 @@ import {
 } from "./cases";
 import { OFFICE_IDS } from "./offices";
 
-// Two 284-unit dialog lines at 8 units per letter.
-const TWO_LINES = 66;
+// One 284-unit dialog row at 8 units per letter.
+const ROW_CHARS = 35;
+
+// Rows the dialog text takes when it wraps at word boundaries.
+function wrappedRows(text: string, width = ROW_CHARS): number {
+  let rows = 1;
+  let used = 0;
+  for (const word of text.split(" ")) {
+    const need = used === 0 ? word.length : used + 1 + word.length;
+    if (need <= width) {
+      used = need;
+    } else {
+      rows += 1;
+      used = word.length;
+    }
+  }
+  return rows;
+}
 // The 320-unit HUD strip minus its 8-unit margins, at 8 units per letter.
 const HUD_CHARS = 38;
 
@@ -55,8 +71,14 @@ describe("case files", () => {
       lines.push(...c.bounces, c.ask, c.done, expiredLine(c.title));
     }
     for (const line of lines) {
-      expect(line.length, line).toBeLessThanOrEqual(TWO_LINES);
+      expect(wrappedRows(line), line).toBeLessThanOrEqual(2);
     }
+  });
+
+  it("counts wrapped rows at word boundaries", () => {
+    expect(wrappedRows("aaa bbb", 7)).toBe(1);
+    expect(wrappedRows("aaa bbb ccc", 7)).toBe(2);
+    expect(wrappedRows("aaaa bbbb", 7)).toBe(2);
   });
 
   it("starts every case at a different office", () => {

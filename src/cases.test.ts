@@ -164,14 +164,20 @@ describe("case files", () => {
 
   it("marks folders, the target and expired files", () => {
     const state = fixture();
-    expect(caseMark(state, "a")).toEqual({ kind: "folder", dust: 0.5 });
+    expect(caseMark(state, "a")).toEqual({ folder: 0.5, target: false });
     expect(caseMark(state, "b")).toBeNull();
     visitForCases(state, "a");
     expect(caseMark(state, "a")).toBeNull();
-    expect(caseMark(state, "b")).toEqual({ kind: "target" });
+    expect(caseMark(state, "b")).toEqual({ folder: null, target: true });
     tickCases(state, DUST_SECONDS);
-    expect(caseMark(state, "a")).toEqual({ kind: "folder", dust: 1 });
+    expect(caseMark(state, "a")).toEqual({ folder: 1, target: false });
     expect(caseMark(state, "b")).toBeNull();
+  });
+
+  it("shows a waiting folder and the target ring on the same office", () => {
+    const state = createCases([LONG, file("third", ["b", "z"], 0.2)]);
+    visitForCases(state, "a");
+    expect(caseMark(state, "b")).toEqual({ folder: 0.2, target: true });
   });
 
   it("reports every case with its result", () => {
