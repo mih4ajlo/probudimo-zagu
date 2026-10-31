@@ -19,7 +19,20 @@ office count and score fill up, then see an ending.
 
 ## Modes
 The title offers two modes (↑/↓ + Enter, or tap one):
-- **Wake the offices** — the v1 loop above.
+- **Wake the offices** — the v1 loop above, plus case files: real stalled
+  cases (`src/data/cases.ts`, research in `docs/research/slucajevi.md`)
+  wait as folders at their start office. Visiting it picks the file up and
+  the office bounces it to the next office in its chain ("Nismo nadležni!").
+  The crowd carries one file at a time (a second start office says "Prvo
+  završite taj predmet!"); the HUD's second line names the target office,
+  which gets a pulsing ring. At the last office the player picks one of 3
+  demands: the right one puts the case "U RADU" (+50 points, once); a wrong
+  one says "Vraćeno na dopunu." and sends the file back one office. Each
+  file gathers dust over 300 s of play (time with a dialog open does not
+  count); full dust makes it "ZASTARELO" (grey, dropped, no points, no fail
+  state). Cases are optional: the ending still comes when every office is
+  visited. After the score, the ending shows one page per case: the game
+  result and a dated, sourced "U stvarnosti" line.
 - **Find Zaga** — opens at her desk: Zaga asleep behind the PC, Z's rising,
   intro text. Then three protesters (a leader and two followers in its
   trail; the crowd never grows) search the offices. An empty office shouts
@@ -42,7 +55,8 @@ The title offers two modes (↑/↓ + Enter, or tap one):
 - Stops are the 60 public prosecutor's offices in `assets/tuzilastva.csv`,
   each its own marker around its city.
 - Each visit opens with the shout ("Budite se, na posao!", hands in the air),
-  then the office's reply. Dialog is linear.
+  then the office's reply. Dialog is linear, except the 3-option choices
+  (Find Zaga talk, case demands).
 - An office can be visited again, but points are granted only the first time.
 - Movement is blocked while a dialog box is open or while shouting.
 - Advance dialog with Space / Enter / click. Walk with WASD or arrow keys.
@@ -70,7 +84,8 @@ The title offers two modes (↑/↓ + Enter, or tap one):
 | PJT | posebno | 40 | 3 |
 | VRHOVNO | Vrhovno javno tužilaštvo | 50 | 1 |
 
-Max score 1060. Replies per level live in `src/data/replies.ts`.
+Max score 1060 for offices, plus 50 per case file (1260 with 4 cases).
+Replies per level live in `src/data/replies.ts`.
 
 ## Out of scope for v1
 Combat, enemies, inventory, branching quests, indoor office scenes, fast
