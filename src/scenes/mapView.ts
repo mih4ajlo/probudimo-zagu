@@ -2,6 +2,7 @@
 // keyboard/touch movement, dialog box, HUD strip and touch controls. Each mode
 // supplies what is drawn on offices, what a visit says, and what the HUD shows.
 import { mapSprite, SPRITE_SCALE } from "../assets";
+import type { CaseMark } from "../cases";
 import { CITIES } from "../data/cities";
 import { OFFICES, type OfficeLevel } from "../data/offices";
 import { NEIGHBOURS, SERBIA_RINGS } from "../data/serbia-geo";
@@ -42,7 +43,7 @@ import { createShout, isShouting, startShout, tickShout } from "../shout";
 import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
 export type OfficeMark = "check" | "question" | null;
-export type LeaderFrame = { pos: Point; anim: PrincessAnim; facing: Facing };
+export type LeaderFrame = { pos: Point; anim: PrincessAnim; facing: Facing; blocked: boolean };
 export type MapTalk = {
   // Lines in the dialog box; shoutFirst puts the leader in the shout pose on
   // the first line; then runs after the last line closes.
@@ -59,6 +60,10 @@ export type MapViewHooks = {
   onVisit: (id: string, talk: MapTalk) => void;
   // Called every frame after the leader moved.
   onFrame?: (frame: LeaderFrame) => void;
+  // A case file waiting at the office, or the office the carried file goes to.
+  caseMark?: (id: string) => CaseMark;
+  // Draws a folder above the leader.
+  carrying?: () => boolean;
 };
 
 const SPEED = 80;
@@ -91,6 +96,9 @@ const CULL_MARGIN = 60;
 const INK = MAP_COLORS.ink;
 const ROOF: RGB = [176, 62, 48];
 const CHECK: RGB = [40, 150, 70];
+// Case folders fade from fresh to dusty.
+const FOLDER: RGB = [240, 200, 80];
+const DUST: RGB = [140, 140, 140];
 const LEVEL_COLORS: Record<OfficeLevel, RGB> = {
   OJT: [156, 156, 166],
   VJT: [72, 120, 204],
@@ -102,7 +110,8 @@ const LEVEL_COLORS: Record<OfficeLevel, RGB> = {
 const rgb = (c: RGB) => k.rgb(c[0], c[1], c[2]);
 const vec = (p: Point) => k.vec2(p.x, p.y);
 
-export function createMapView(hooks: MapViewHooks): void {
+// Returns the dialog, so a mode can also talk outside a visit.
+export function createMapView(hooks: MapViewHooks): MapTalk {
   const dialog = createDialog();
   const shout = createShout();
   // The line that shows the shout pose, and what runs when the open dialog
@@ -175,6 +184,31 @@ export function createMapView(hooks: MapViewHooks): void {
     } else if (mark === "question") {
       k.drawText({ text: "?", pos: p.add(0, 0.5), size: 6, anchor: "center", color: rgb(INK) });
     }
+    const caseMark = hooks.caseMark?.(id) ?? null;
+    if (caseMark?.kind === "folder") {
+      const d = caseMark.dust;
+      const mix = (i: number) => Math.round(FOLDER[i] + (DUST[i] - FOLDER[i]) * d);
+      const color: RGB = [mix(0), mix(1), mix(2)];
+      drawFolder(p.add(0, -s * 1.25), color);
+    } else if (caseMark?.kind === "target") {
+      k.drawCircle({
+        pos: p.add(0, -s * 0.2),
+        radius: s * (0.95 + 0.15 * Math.sin(k.time() * 6)),
+        fill: false,
+        outline: { width: px(2.5), color: rgb(FOLDER) },
+      });
+    }
+  }
+
+  function drawFolder(pos: ReturnType<typeof k.vec2>, color: RGB): void {
+    k.drawRect({
+      pos,
+      width: MARKER_SIZE * 0.7,
+      height: MARKER_SIZE * 0.5,
+      anchor: "center",
+      color: rgb(color),
+      outline: { width: px(1.5), color: rgb(INK) },
+    });
   }
 
   // Only the office nearest to her feet gets its name, so rings do not clutter.
@@ -234,6 +268,9 @@ export function createMapView(hooks: MapViewHooks): void {
           // Above the roof: she approaches from below and would cover a label under it.
           taggedLabel(nearest.name, vec(nearest.pos).add(0, -MARKER_SIZE * 1.6 - px(4)), 16);
         }
+        if (hooks.carrying?.()) {
+          drawFolder(player.pos.sub(0, leader.bubbleLift + 2), FOLDER);
+        }
       },
     },
   ]);
@@ -271,7 +308,7 @@ export function createMapView(hooks: MapViewHooks): void {
 
   const ui = addScreenLayer();
   const hudBar = ui.add([k.rect(screenFit().w, 16), k.pos(0, 0), k.color(12, 10, 20), k.opacity(0.85)]);
-  const hud = ui.add([k.text(hooks.hudText(), { size: 8 }), k.pos(8, 4)]);
+  const hud = ui.add([k.text(hooks.hudText(), { size: 8, lineSpacing: 4 }), k.pos(8, 4)]);
   const dialogBox = ui.add([
     k.rect(DIALOG_WIDTH, DIALOG_HEIGHT),
     k.pos(0, 0),
@@ -354,6 +391,8 @@ export function createMapView(hooks: MapViewHooks): void {
 
   function refreshDialog(): void {
     hud.text = hooks.hudText();
+    // One 12-unit row per HUD line.
+    hudBar.height = 4 + 12 * hud.text.split("\n").length;
     const choices = currentChoices(dialog);
     if (choices) {
       showBox(choices.map((choice, i) => (i === dialog.selected ? `> ${choice}` : `  ${choice}`)).join("\n"));
@@ -563,7 +602,7 @@ export function createMapView(hooks: MapViewHooks): void {
     bubbleText.opacity = showBubble;
     bubble.scale = k.vec2(1 / zoom);
     bubble.pos = player.pos.sub(0, leader.bubbleLift);
-    hooks.onFrame?.({ pos: { x: player.pos.x, y: player.pos.y }, anim, facing });
+    hooks.onFrame?.({ pos: { x: player.pos.x, y: player.pos.y }, anim, facing, blocked: isMovementBlocked(dialog) });
 
     const fit = screenFit();
     placeUi(fit);
@@ -587,4 +626,5 @@ export function createMapView(hooks: MapViewHooks): void {
   });
 
   refreshDialog();
+  return talk;
 }
