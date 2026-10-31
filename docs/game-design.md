@@ -28,8 +28,9 @@ The title offers two modes (↑/↓ + Enter, or tap one):
   talk round starts: pick one of 3 lines to shout (↑/↓ + Enter, or tap a
   line) and she answers it. Every pick works. After rounds 1 and 2 she
   sleepwalks (her avatar walks across the map, half the crowd's speed) to
-  another office at least 300 units away and stays asleep there; chase her
-  and the next round starts. After round 3 the desk scene shows her waking
+  another office at least 300 units away that she can reach in a straight
+  line without leaving Serbia, and stays asleep there; chase her and the
+  next round starts. The HUD round moves on when she walks off. After round 3 the desk scene shows her waking
   with a start, then "Found in N visits". No points, no fail state. Same
   map, controls, zoom and dialog rules as Wake the offices.
 

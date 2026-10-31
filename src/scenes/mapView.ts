@@ -430,7 +430,8 @@ export function createMapView(hooks: MapViewHooks): void {
     const scale = screenFit().scale;
     return { x: pos.x / scale, y: pos.y / scale };
   };
-  k.onClick(() => {
+  // Left button only (taps arrive as left); other buttons do nothing.
+  k.onMousePress("left", () => {
     const choices = currentChoices(dialog);
     if (!choices) {
       next();

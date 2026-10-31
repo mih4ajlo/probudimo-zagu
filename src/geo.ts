@@ -58,3 +58,15 @@ export function tryMove(from: Point, delta: Point, canStand: (p: Point) => boole
   }
   return from;
 }
+
+// Whether a straight walk from a to b stays on land, checked every `step` units.
+export function lineOnLand(a: Point, b: Point, canStand: (p: Point) => boolean, step = 4): boolean {
+  const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / step));
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    if (!canStand({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t })) {
+      return false;
+    }
+  }
+  return true;
+}
