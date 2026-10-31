@@ -60,10 +60,10 @@ export type MapViewHooks = {
   onVisit: (id: string, talk: MapTalk) => void;
   // Called every frame after the leader moved.
   onFrame?: (frame: LeaderFrame) => void;
-  // A case file waiting at the office, or the office the carried file goes to.
+  // A case file waiting at the office, and/or the office the carried file goes to.
   caseMark?: (id: string) => CaseMark;
-  // Draws a folder above the leader.
-  carrying?: () => boolean;
+  // Dust of the carried file, drawn as a folder above the leader; null when carrying nothing.
+  carriedDust?: () => number | null;
 };
 
 const SPEED = 80;
@@ -185,12 +185,7 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
       k.drawText({ text: "?", pos: p.add(0, 0.5), size: 6, anchor: "center", color: rgb(INK) });
     }
     const caseMark = hooks.caseMark?.(id) ?? null;
-    if (caseMark?.kind === "folder") {
-      const d = caseMark.dust;
-      const mix = (i: number) => Math.round(FOLDER[i] + (DUST[i] - FOLDER[i]) * d);
-      const color: RGB = [mix(0), mix(1), mix(2)];
-      drawFolder(p.add(0, -s * 1.25), color);
-    } else if (caseMark?.kind === "target") {
+    if (caseMark?.target) {
       k.drawCircle({
         pos: p.add(0, -s * 0.2),
         radius: s * (0.95 + 0.15 * Math.sin(k.time() * 6)),
@@ -198,9 +193,15 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
         outline: { width: px(2.5), color: rgb(FOLDER) },
       });
     }
+    if (caseMark && caseMark.folder !== null) {
+      drawFolder(p.add(0, -s * 1.25), caseMark.folder);
+    }
   }
 
-  function drawFolder(pos: ReturnType<typeof k.vec2>, color: RGB): void {
+  // Yellow when fresh, grey when the dust runs out.
+  function drawFolder(pos: ReturnType<typeof k.vec2>, dust: number): void {
+    const mix = (i: number) => Math.round(FOLDER[i] + (DUST[i] - FOLDER[i]) * dust);
+    const color: RGB = [mix(0), mix(1), mix(2)];
     k.drawRect({
       pos,
       width: MARKER_SIZE * 0.7,
@@ -268,8 +269,9 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
           // Above the roof: she approaches from below and would cover a label under it.
           taggedLabel(nearest.name, vec(nearest.pos).add(0, -MARKER_SIZE * 1.6 - px(4)), 16);
         }
-        if (hooks.carrying?.()) {
-          drawFolder(player.pos.sub(0, leader.bubbleLift + 2), FOLDER);
+        const carriedDust = hooks.carriedDust?.() ?? null;
+        if (carriedDust !== null) {
+          drawFolder(player.pos.sub(0, leader.bubbleLift + 2), carriedDust);
         }
       },
     },
