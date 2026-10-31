@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { carriedCase, visitForCases } from "./cases";
 import { visitOffice } from "./score";
 import { getSession, resetSession } from "./session";
 
@@ -13,7 +14,7 @@ describe("session", () => {
     resetSession();
     visitOffice(getSession().score, "vrhovno-javno-tuzilastvo");
     resetSession();
-    expect(getSession().score).toEqual({ total: 0, visited: [] });
+    expect(getSession().score).toEqual({ total: 0, visited: [], cases: [] });
   });
 });
 
@@ -23,5 +24,20 @@ describe("hunt result", () => {
     getSession().hunt = { visits: 9 };
     resetSession();
     expect(getSession().hunt).toBeNull();
+  });
+});
+
+describe("cases", () => {
+  it("starts fresh cases on reset", () => {
+    resetSession();
+    visitForCases(getSession().cases, "vjt-u-novom-sadu");
+    expect(carriedCase(getSession().cases)).not.toBeNull();
+    resetSession();
+    const cases = getSession().cases;
+    expect(carriedCase(cases)).toBeNull();
+    for (const entry of cases.entries) {
+      expect(entry.status).toBe("waiting");
+      expect(entry.dust).toBe(entry.file.startDust);
+    }
   });
 });

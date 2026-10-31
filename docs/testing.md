@@ -66,11 +66,22 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   moves on; done after 3 rounds; 3 × 3 choices, shouts fit one line.
 - **Copy:** hints name all 8 directions in Serbian; HUDs, the score line and
   "back to menu" read in Serbian; mode names fit the title button.
+- **Case data:** chains use real office ids (≥ 2), one bounce line per hop,
+  3 demands that fit one choice line, other lines within two dialog lines,
+  unique start offices, a dated reality line per case, the carry HUD line
+  fits one line.
+- **Cases:** pickup only at the start office; one file at a time ("busy");
+  bounces follow the chain; the right demand puts the case to work, a wrong
+  one sends it back one hop (also on a 2-office chain); answers count only
+  while asked; dust grows with time, not with dt 0 or once working, and
+  expires at 1 (dropping a carried file); folder/target marks; the report
+  lists every case; case points once; `wakeMaxScore` adds them; a reset
+  starts fresh cases.
 - **Desk wake:** phase times; skipped frames still enter every phase in order.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
 offices, geo, officeLayout, zoom, progress, hint, hunt, crowd, titleMenu,
-talk, deskWake).
+talk, deskWake, cases).
 
 ## What not to test
 - Pixel drawing, sprite animation, camera, or Kaplay internals
