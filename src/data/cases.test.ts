@@ -14,8 +14,8 @@ import { OFFICE_IDS } from "./offices";
 
 // Two 284-unit dialog lines at 8 units per letter.
 const TWO_LINES = 66;
-// The 320-unit HUD strip at 8 units per letter.
-const HUD_CHARS = 40;
+// The 320-unit HUD strip minus its 8-unit margins, at 8 units per letter.
+const HUD_CHARS = 38;
 
 describe("case files", () => {
   it("has between 4 and 6 cases with unique ids", () => {

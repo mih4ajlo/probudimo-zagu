@@ -108,11 +108,11 @@ export const CASES: readonly CaseFile[] = [
 
 // Short office names for the HUD line.
 export const OFFICE_LABEL: Readonly<Record<string, string>> = {
-  "vjt-u-novom-sadu": "VJT Novi Sad",
-  "vjt-u-beogradu": "VJT Beograd",
+  "vjt-u-novom-sadu": "VJT N. Sad",
+  "vjt-u-beogradu": "VJT Bgd",
   [TOK]: "TOK",
   "prvo-ojt-u-beogradu": "Prvo OJT Bgd",
-  "ojt-u-novom-sadu": "OJT Novi Sad",
+  "ojt-u-novom-sadu": "OJT N. Sad",
 };
 
 export const BUSY_LINE = "Prvo završite taj predmet!";
