@@ -35,8 +35,20 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   mesec dana istrage; Viši sud je u aprilu 2025. vratio na dopunu; nova
   optužnica u septembru 2025, „u bitnom ista“. Apelacioni sud u Novom Sadu
   potvrdio je optužnicu oko 20 meseci posle tragedije; 13 okrivljenih u tri
-  grupe. Glavni pretres: datum nije nađen **[proveriti]**.
-- **Status:** optužnica potvrđena, suđenje nije počelo (po dostupnim izvorima).
+  grupe (potvrda: 15. 6. 2026, objavljeno sredinom jula 2026). Odbrana je
+  podnela zahtev za zaštitu zakonitosti Vrhovnom sudu; dok on ne odluči,
+  pripremno ročište se ne održava; krajem oktobra 2026. ročište još nije
+  zakazano. Beogradska optužnica (drugi deo predmeta) treći put je oborena
+  pred Apelacionim sudom u Beogradu (15. 7. 2026); finansijska istraga TOK
+  još je bez optužnice (jul 2026).
+- **Status:** optužnica potvrđena, suđenje nije počelo; čeka se Vrhovni sud.
+- **U stvarnosti (za igru):** „Optužnica potvrđena posle 20 meseci. Suđenje
+  nije počelo: čeka se Vrhovni sud.“ stanje: okt. 2026. Izvori:
+  [021 — treći put oborena](https://www.021.rs/story/Novi-Sad/Vesti/449295/Apelacioni-sud-treci-put-oborio-optuznicu-za-pad-nadstresnice-u-Novom-Sadu.html),
+  [021 — Ninić, ročište](https://www.021.rs/story/Novi-Sad/Vesti/449677/Advokat-Ninic-o-tome-kako-bi-dalje-mogao-da-tece-slucaj-Nadstresnica-i-kad-se-ocekuje-rociste.html),
+  [N1 — odložen početak](https://n1info.rs/vesti/sudjenje-nadstresnica-odlaganje-advokati/).
+- **Lanac u igri:** VJT Novi Sad → VJT Beograd → TOK (stvarni put
+  korupcijskog dela, kartica 2).
 - **Za igru:** „20 meseci do potvrđene optužnice“, „gde je suđenje?“.
   Žrtve se ne pominju u šali.
 - Izvori: [021.rs](https://www.021.rs/novi-sad/vesti/449240/nakon-sto-je-novosadski-sud-potvrdio-optuznicu-cetiri-vazna-pitanja-o-predmetu-nadstresnica),
@@ -85,6 +97,18 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   OJT. VJT Beograd: „nema mesta gonjenju“, analiza na 36 strana; najavljuje
   gonjenje onih koji su „širili dezinformacije“. Po izvoru iz 2026,
   predistraga u Prvom OJT još traje.
+- **Jun 2026:** VJT Beograd tvrdi da zapisnik govori o „simulaciji“ zvučnog
+  topa i najavljuje gonjenje učesnika protesta i onih koji su organizovali
+  lekarske preglede; Advokatska komora Beograda: kršenje pretpostavke
+  nevinosti. Predmet je u predistražnom postupku.
+- **U stvarnosti (za igru):** „VJT: nema mesta gonjenju za zvučni top.
+  Umesto toga sumnja na ‚simulaciju‘ i najavljuje gonjenje učesnika
+  protesta.“ stanje: jun 2026. Izvori:
+  [021 — simulacija](https://www.021.rs/info/srbija/446649/afera-zvucni-top-tuzilastvo-sumnja-da-su-studenti-planirali-simulaciju-pogledajte-sta-sve-traze),
+  [021 — Stamenković](https://www.021.rs/info/srbija/446727/tuzilac-stamenkovic-nije-dovoljno-saopstenje-vjt-mora-da-opravda-svoje-tvrdnje-o-zvucnom-topu),
+  [Insajder](https://insajder.net/teme/jedina-istraga-o-mogucoj-upotrebi-zvucnog-topa-premestena-u-vjt-koje-tvrdi-da-nema-mesta-gonjenju).
+- **Lanac u igri:** Prvo OJT → TOK → Prvo OJT → VJT Beograd (stvarni put:
+  TOK vratio Prvom OJT; VJT tražio da mu se predmet ustupi).
 - **Sporno:** udruženja (npr. BCLjP) traže obrazloženje; nalaz VJT osporavaju.
 - **Za igru:** „Šta se desilo 15. marta?“ — Zaga: „Panika... zzz...“
   (karikatura, ne citat).
@@ -99,7 +123,21 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   Karađorđevoj — tek zahtev policiji. Novi Sad: četvorica uhapšena za napad
   na studente. Kritika: prijave su u nekim slučajevima stizale tek pod
   pritiskom javnosti.
-- **Status:** uglavnom nepoznat posle februara 2025 **[proveriti]**.
+- **Napad na studente FDU (22. 11. 2024, VJT Beograd):** troje okrivljenih
+  priznalo je krivicu uz sporazum sa tužilaštvom — uslovne kazne i novčane
+  kazne; dvojica prebačena u prekršajni postupak; ostali napadači i dalje
+  neidentifikovani. Apelaciono tužilaštvo je u martu 2026. naložilo VJT da
+  analizira snimke. Krivičnu prijavu podneo je dekan FDU.
+- **Status:** FDU — delimično okončan sporazumima; ostali napadači nepoznati
+  (mar. 2026). Ostali slučajevi iz 2025: zbirni ishod nije nađen (ne ide u
+  igru).
+- **U stvarnosti (za igru):** „Napad na studente FDU: troje priznalo uz
+  uslovne kazne. Ostali napadači i dalje nepoznati.“ stanje: mar. 2026.
+  Izvori: [Insajder — bez epiloga](https://insajder.net/vesti/napad-na-studente-fdu-bez-epiloga-preostali-napadaci-i-dalje-nepoznati-video),
+  [N1 — prijave odbačene](https://n1info.rs/vesti/napad-na-studente-fdu-i-dalje-bez-epiloga-neke-krivicne-prijave-odbacene-identitet-dva-napadaca-jos-nepoznat/),
+  [Danas — Matić](https://www.danas.rs/vesti/drustvo/veran-matic-o-sudjenju-za-napad-na-studente-fdu-doslo-do-kraja-a-da-nije-ni-pocelo/).
+- **Lanac u igri:** OJT Novi Sad → VJT Novi Sad → VJT Beograd. Prva dva
+  skoka su karikatura; VJT Beograd stvarno vodi FDU predmet.
 - **Za igru:** „Ko je udarao studente?“; procesuiranje napadača bilo je
   među prvim zahtevima blokada.
 - Izvori: [RSE](https://www.slobodnaevropa.org/a/beogradsko-tuzilastvo-napadi-na-studente/33287462.html),
@@ -112,7 +150,15 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   više predmeta, deo (falsifikovanje) šalje Prvom OJT. CRTA: nepravilnosti na
   5% (parlamentarni) i 9% (beogradski) biračkih mesta, organizovane migracije
   birača; tužilaštvo po CRTA nije postupilo.
-- **Status:** ishod predmeta nije nađen **[proveriti]**.
+- **Status:** CRTA (jun 2025): prijave za izbore 2023, među njima četiri
+  za falsifikovanje potpisa birača (podnete 3–12. 1. 2024), i dalje su bez
+  epiloga. Optužnica po tim prijavama nije nađena.
+- **U stvarnosti (za igru):** „Prijave za izbore 2023, i za falsifikovane
+  potpise birača, i dalje su bez epiloga.“ stanje: jun 2025. Izvori:
+  [CRTA — prijave koje je tužilaštvo zanemarilo (PDF)](https://crta.rs/wp-content/uploads/2025/06/Krivicne-prijave-koje-je-Crta-podnela-a-tuzilastvo-zanemarilo.pdf),
+  [Insajder — Dimitrijević](https://insajder.net/teme/pavle-dimitrijevic-crta-u-markeru-hipoteticki-je-moguce-da-se-izborna-lista-proglasi-sa-falsifikovanim-potpisima).
+- **Lanac u igri:** VJT Beograd → Prvo OJT (stvarni put: deo o
+  falsifikovanju poslat Prvom OJT).
 - **Za igru:** „Gde su fantomski birači?“ — 24 znaka.
 - Izvori: [CRTA — prijave](https://crta.rs/krivicne-prijave-crta-izbori-2023/),
   [CRTA — završni izveštaj](https://crta.rs/wp-content/uploads/2024/02/CRTA_Zavrsni-izborni-izvestaj-2023.pdf),
@@ -166,6 +212,12 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   [021 — predizborno uputstvo](https://www.021.rs/info/srbija/458796/sta-je-uputstvo-koje-je-izdala-dolovac-predizborna-instrukcija-koja-do-sad-nikada-nije-data),
   [Naslovi — VJT Beograd](https://naslovi.net/2026-10-29/euronews/odgovor-beogradskog-tuzilastva-na-nadzor-zagorke-dolovac-ovo-je-otvoreni-napad-na-vjt-i-glavnog-tuzioca/42544416),
   [Glas Srpske — ostavka](https://www.glassrpske.com/lat/novosti/srbija/zatrazena-ostavka-vrhovnog-javnog-tuzioca-zagorke-dolovac/659429)
+
+## Konačan izbor za v0.11
+`nadstresnica` (kartice 1–2), `zvucni-top` (4), `izbori-2023` (6),
+`napadi-studenti` (5, FDU). Jovanjica otpada: TOK je postupio, zastoj je na
+sudu, a novije stanje od feb. 2026. nije nađeno. KRIK otpada: nije nađen
+jedan konkretan, datiran nalaz bez reakcije.
 
 ## Duga lista (nije obrađeno)
 - BIRN o tužiteljki za korupciju i predmetima povezanim sa partnerom (2023);
