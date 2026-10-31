@@ -1,5 +1,6 @@
 import { SPRITES } from "../assets";
 import { getOffice, maxScore, OFFICE_IDS } from "../data/offices";
+import { wakeHud } from "../data/story";
 import { k } from "../kaplayContext";
 import { isReadyForEnding } from "../progress";
 import { visitOffice } from "../score";
@@ -13,8 +14,7 @@ export function registerOverworldScene(): void {
     const session = getSession();
     createMapView({
       leaderSprite: SPRITES.princess,
-      hudText: () =>
-        `Score ${session.score.total}/${maxScore()}  Offices ${session.score.visited.length}/${OFFICE_IDS.length}`,
+      hudText: () => wakeHud(session.score.total, maxScore(), session.score.visited.length, OFFICE_IDS.length),
       officeMark: (id) => (session.score.visited.includes(id) ? "check" : null),
       onVisit: (id, talk) => {
         const office = getOffice(id);

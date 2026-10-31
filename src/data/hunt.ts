@@ -1,5 +1,7 @@
+import type { Compass } from "../hint";
+
 // "Find Zaga" mode: tuning numbers and copy.
-export const HUNT_TITLE = "Find Zaga";
+export const HUNT_TITLE = "Nađi Zagu";
 
 // The crowd: the leader and this many followers.
 export const FOLLOWERS = 2;
@@ -12,20 +14,35 @@ export const NEAR_DISTANCE = 150;
 export const MID_DISTANCE = 450;
 
 export const HUNT_INTRO: readonly string[] = [
-  "Somewhere in Serbia, in one of the offices, Zaga is fast asleep.",
-  "Three of you go looking for her. Shout at the offices and follow the snoring.",
+  "Negde u Srbiji, u jednom od tužilaštava, Zaga čvrsto spava.",
+  "Vas troje krećete u potragu. Vičite na tužilaštva i pratite hrkanje.",
 ];
 
-export const HINT_NEAR = "Very close! Zzz...";
-export const hintMid = (direction: string) => `Zzz... snoring to the ${direction}, not far.`;
-export const hintFar = (direction: string) => `Zzz... snoring to the ${direction}, far away.`;
+// Where the snoring comes from, as "na <side>".
+const COMPASS_PLACE: Record<Compass, string> = {
+  east: "na istoku",
+  "north-east": "na severoistoku",
+  north: "na severu",
+  "north-west": "na severozapadu",
+  west: "na zapadu",
+  "south-west": "na jugozapadu",
+  south: "na jugu",
+  "south-east": "na jugoistoku",
+};
 
-export const HUNT_ENDING_LINE = "Zaga is awake!";
-export const foundIn = (visits: number) => `Found in ${visits} visits`;
+export const HINT_NEAR = "Sasvim blizu! Zzz...";
+export const hintMid = (direction: Compass) => `Zzz... hrkanje ${COMPASS_PLACE[direction]}, nedaleko.`;
+export const hintFar = (direction: Compass) => `Zzz... hrkanje ${COMPASS_PLACE[direction]}, daleko.`;
 
-export const FOUND_LINE = "There she is, fast asleep in the office!";
-export const CAUGHT_LINE = "Caught her again - still asleep!";
-export const SLEEPWALK_LINE = "She sleepwalks off to another office. After her!";
+export const huntHud = (round: number, rounds: number, visits: number) => `Runda ${round}/${rounds}  Posete ${visits}`;
+
+export const HUNT_ENDING_LINE = "Zaga je budna!";
+// "Broj poseta: N" avoids Serbian plural forms of "poseta".
+export const foundIn = (visits: number) => `Broj poseta: ${visits}`;
+
+export const FOUND_LINE = "Evo je, čvrsto spava u kancelariji!";
+export const CAUGHT_LINE = "Opet smo je našli - i dalje spava!";
+export const SLEEPWALK_LINE = "Mesečareći odlazi u drugo tužilaštvo. Za njom!";
 
 export type TalkChoice = { shout: string; reply: string };
 
@@ -33,18 +50,18 @@ export type TalkChoice = { shout: string; reply: string };
 // answers it, a little more awake each round. Shouts fit one dialog line.
 export const TALK_ROUNDS: readonly (readonly TalkChoice[])[] = [
   [
-    { shout: "Budite se, na posao!", reply: "Mmm... five more minutes..." },
-    { shout: "The press is outside!", reply: "Tell them I'm in a meeting... zzz" },
-    { shout: "Cases are piling up!", reply: "Let them pile... piles are comfy..." },
+    { shout: "Budite se, na posao!", reply: "Mmm... još pet minuta..." },
+    { shout: "Novinari su ispred!", reply: "Recite im da sam na sastanku... zzz" },
+    { shout: "Predmeti se gomilaju!", reply: "Neka se gomilaju... gomila je mekana..." },
   ],
   [
-    { shout: "Two years, no answer!", reply: "Who is shouting? It's not even noon..." },
-    { shout: "The citizens are waiting!", reply: "Waiting builds character... zzz" },
-    { shout: "We brought coffee!", reply: "Coffee...? No... too early..." },
+    { shout: "Dve godine bez odgovora!", reply: "Ko to viče? Nije još ni podne..." },
+    { shout: "Građani čekaju!", reply: "Čekanje izgrađuje karakter... zzz" },
+    { shout: "Doneli smo kafu!", reply: "Kafa...? Ne... prerano je..." },
   ],
   [
-    { shout: "We are not leaving!", reply: "Fine, fine... I'm getting up!" },
-    { shout: "The whole country sees you!", reply: "The whole country? ...Even TV?!" },
-    { shout: "Budite se, na posao!", reply: "Alright! I'm awake! I'm awake!" },
+    { shout: "Ne idemo odavde!", reply: "Dobro, dobro... ustajem!" },
+    { shout: "Cela zemlja vas gleda!", reply: "Cela zemlja? ...I televizija?!" },
+    { shout: "Budite se, na posao!", reply: "Dobro! Budna sam! Budna sam!" },
   ],
 ];

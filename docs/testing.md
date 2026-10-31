@@ -64,6 +64,8 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   picks are ignored; a tap's row maps to an option.
 - **Talk:** each round offers its shouts; a pick returns shout + reply and
   moves on; done after 3 rounds; 3 × 3 choices, shouts fit one line.
+- **Copy:** hints name all 8 directions in Serbian; HUDs, the score line and
+  "back to menu" read in Serbian; mode names fit the title button.
 - **Desk wake:** phase times; skipped frames still enter every phase in order.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,

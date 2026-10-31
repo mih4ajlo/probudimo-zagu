@@ -1,6 +1,6 @@
 import { SPRITE_SCALE, SPRITES } from "../assets";
 import { createTrail, followerPositions, pushTrail } from "../crowd";
-import { FOLLOWERS, SLEEPWALK_LINE, SLEEPWALK_SPEED, TALK_ROUNDS } from "../data/hunt";
+import { FOLLOWERS, huntHud, SLEEPWALK_LINE, SLEEPWALK_SPEED, TALK_ROUNDS } from "../data/hunt";
 import { SERBIA_RINGS } from "../data/serbia-geo";
 import { isInsideAny, lineOnLand, projectRing, type Point } from "../geo";
 import { createHunt, huntFlee, huntResult, huntRound, huntVisit } from "../hunt";
@@ -135,7 +135,7 @@ export function registerHuntScene(): void {
 
     createMapView({
       leaderSprite: SPRITES.protester,
-      hudText: () => `Round ${huntRound(hunt)}/${TALK_ROUNDS.length}  Visits ${hunt.visits}`,
+      hudText: () => huntHud(huntRound(hunt), TALK_ROUNDS.length, hunt.visits),
       officeMark: (id) => (hunt.searched.includes(id) ? "question" : null),
       onVisit: (id, view) => {
         const visit = huntVisit(hunt, id);
