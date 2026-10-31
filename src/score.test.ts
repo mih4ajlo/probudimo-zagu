@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createScore, visitOffice } from "./score";
+import { createCases, visitForCases } from "./cases";
+import { CASES } from "./data/cases";
+import { createScore, grantCase, visitOffice, wakeMaxScore } from "./score";
 
 describe("visitOffice", () => {
   it("grants the office's level points only on the first visit", () => {
@@ -23,5 +25,29 @@ describe("visitOffice", () => {
     expect(visitOffice(state, "dragon").granted).toBe(0);
     expect(state.total).toBe(0);
     expect(state.visited).toEqual([]);
+  });
+});
+
+describe("case points", () => {
+  it("grants case points only once per case", () => {
+    const state = createScore();
+    expect(grantCase(state, "x").granted).toBe(50);
+    expect(grantCase(state, "x").granted).toBe(0);
+    expect(state.total).toBe(50);
+    expect(state.cases).toEqual(["x"]);
+  });
+
+  it("adds case points to the wake max score", () => {
+    expect(wakeMaxScore()).toBe(1060 + 50 * CASES.length);
+  });
+
+  it("grants office points once even on a case office", () => {
+    const state = createScore();
+    const cases = createCases();
+    visitForCases(cases, "vjt-u-novom-sadu");
+    expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(20);
+    visitForCases(cases, "vjt-u-novom-sadu");
+    expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(0);
+    expect(state.total).toBe(20);
   });
 });
