@@ -58,3 +58,17 @@ describe("hintFor", () => {
     expect(hintFor(origin, { x: 0, y: 800 })).toBe(hintFar("south"));
   });
 });
+
+describe("hint copy", () => {
+  it("says where she snores in Serbian", () => {
+    expect(hintMid("north")).toBe("Zzz... hrkanje na severu, nedaleko.");
+    expect(hintFar("south-west")).toBe("Zzz... hrkanje na jugozapadu, daleko.");
+  });
+
+  it("names all eight directions differently", () => {
+    const all = (["east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east"] as const).map(
+      (direction) => hintMid(direction),
+    );
+    expect(new Set(all).size).toBe(8);
+  });
+});

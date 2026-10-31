@@ -1,5 +1,6 @@
 import { SPRITES } from "../assets";
 import { foundIn, HUNT_ENDING_LINE } from "../data/hunt";
+import { backToTitle } from "../data/story";
 import { phasesToEnter, WAKE_PHASES, type WakePhase } from "../deskWake";
 import { k, useGameUnits } from "../kaplayContext";
 import { getSession } from "../session";
@@ -38,7 +39,7 @@ export function registerHuntEndingScene(): void {
         ]);
       } else if (phase === "text") {
         addDeskBox(
-          [HUNT_ENDING_LINE, foundIn(visits), k.isTouchscreen() ? "Tap for title" : "Press Enter for title"].join(
+          [HUNT_ENDING_LINE, foundIn(visits), backToTitle(k.isTouchscreen())].join(
             "\n",
           ),
         );

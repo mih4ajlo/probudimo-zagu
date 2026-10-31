@@ -23,7 +23,7 @@ The title offers two modes (↑/↓ + Enter, or tap one):
 - **Find Zaga** — opens at her desk: Zaga asleep behind the PC, Z's rising,
   intro text. Then three protesters (a leader and two followers in its
   trail; the crowd never grows) search the offices. An empty office shouts
-  back a hint: compass direction and "very close / not far / far away",
+  back a hint: compass direction and "sasvim blizu / nedaleko / daleko",
   and gets a "?" mark. At her office she appears asleep on the map and a
   talk round starts: pick one of 3 lines to shout (↑/↓ + Enter, or tap a
   line) and she answers it. Every pick works. After rounds 1 and 2 she
@@ -31,7 +31,7 @@ The title offers two modes (↑/↓ + Enter, or tap one):
   another office at least 300 units away that she can reach in a straight
   line without leaving Serbia, and stays asleep there; chase her and the
   next round starts. The HUD round moves on when she walks off. After round 3 the desk scene shows her waking
-  with a start, then "Found in N visits". No points, no fail state. Same
+  with a start, then "Broj poseta: N". No points, no fail state. Same
   map, controls, zoom and dialog rules as Wake the offices.
 
 ## Rules
@@ -89,7 +89,10 @@ Vitest for logic. Playwright for one browser smoke test. Details in
 A stranger can open the game, finish all visits in a few minutes, see score
 go up, and reach the ending without a console error.
 
+## Language
+All player-facing text is Serbian in Latin script (the pixel font has the
+Latin Extended letters č, ć, š, ž, đ). Copy lives in `src/data/`.
+
 ## Open (decide before or during implementation)
-- Dialog language (Serbian vs English)
 - Final office reply copy (placeholders in `src/data/replies.ts`)
 - Pixel size (recommend 16×16 sprites, integer scale, no blur)

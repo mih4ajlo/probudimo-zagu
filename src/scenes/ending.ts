@@ -1,4 +1,4 @@
-import { ENDING_LINES, TITLE } from "../data/story";
+import { backToTitle, ENDING_LINES, scoreLine, TITLE } from "../data/story";
 import { maxScore } from "../data/offices";
 import { GAME_WIDTH, k, useGameUnits } from "../kaplayContext";
 import { getSession } from "../session";
@@ -18,12 +18,12 @@ export function registerEndingScene(): void {
       k.anchor("center"),
     ]);
     k.add([
-      k.text(`Score ${session.score.total} / ${maxScore()}`, { size: 16 }),
+      k.text(scoreLine(session.score.total, maxScore()), { size: 16 }),
       k.pos(GAME_WIDTH / 2, 120),
       k.anchor("center"),
     ]);
     k.add([
-      k.text(k.isTouchscreen() ? "Tap for title" : "Press Enter for title", { size: 8 }),
+      k.text(backToTitle(k.isTouchscreen()), { size: 8 }),
       k.pos(GAME_WIDTH / 2, 160),
       k.color(250, 220, 140),
       k.anchor("center"),
