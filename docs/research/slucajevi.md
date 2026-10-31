@@ -113,7 +113,7 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   5% (parlamentarni) i 9% (beogradski) biračkih mesta, organizovane migracije
   birača; tužilaštvo po CRTA nije postupilo.
 - **Status:** ishod predmeta nije nađen **[proveriti]**.
-- **Za igru:** „Gde su fantomski birači?“ — 30 znakova.
+- **Za igru:** „Gde su fantomski birači?“ — 24 znaka.
 - Izvori: [CRTA — prijave](https://crta.rs/krivicne-prijave-crta-izbori-2023/),
   [CRTA — završni izveštaj](https://crta.rs/wp-content/uploads/2024/02/CRTA_Zavrsni-izborni-izvestaj-2023.pdf),
   [RSE](https://www.slobodnaevropa.org/a/tuzilastvo-srbija-nepravilnosti-izbori/32744616.html),
