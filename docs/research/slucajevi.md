@@ -159,7 +159,7 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   Forum pravnika traži ostavku — formalni postupak razrešenja nije potvrđen
   **[proveriti]**.
 - **Za igru:** najbolja tema za Zagin lik — kasno buđenje: „87 tužilaštava,
-  a tek sad?“ (28 znakova). Zaga: „Probudila sam se... na 87 mesta...“.
+  a tek sad?“ (26 znakova). Zaga: „Probudila sam se... na 87 mesta...“.
 - Izvori: [RTV](https://rtv.rs/sr_ci/drustvo/zagorka-dolovac-nalozila-uvid-u-predmete-svih-javnih-tuzilastava-kontrola-prvo-usla-u-vjt_1754749.html),
   [021 — reakcije](https://www.021.rs/info/srbija/459608/o-odluci-zagorke-dolovac-da-pokrene-kontrolu-tuzilastava-dobro-ali-gde-je-bila-i-sta-je-radila-do-sada),
   [021 — uništavanje spisa](https://www.021.rs/info/srbija/459668/dolovac-izdala-jos-jedno-obavezno-uputstvo-svim-tuziocima-spreciti-unistavanje-dokumentacije),
