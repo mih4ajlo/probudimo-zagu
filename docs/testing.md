@@ -50,8 +50,11 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
 - **Hunt:** she hides at least `MIN_HIDE_DISTANCE` away (also on the real
   map from Beograd); empty offices hint and get "?" once; her office is a
   find (first "found", later "caught again") and clears the "?" marks;
-  `huntFlee` sends her to another office at least the min distance away;
-  unknown offices are ignored; the result is the visit count.
+  `huntFlee` sends her to another office at least the min distance away,
+  preferring one she can walk to on land (every flee stays on Serbian land
+  on the real map); the round moves on only when she flees; unknown offices
+  are ignored; the result is the visit count.
+- **Line on land:** a straight walk is on land only if every point on it is.
 - **Crowd:** followers stand a fixed path distance behind the leader, round
   corners, do not collapse when the leader stands still, wait at the oldest
   point on a short path; the trail keeps only what the last follower needs.

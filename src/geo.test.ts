@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CITIES, type LonLat } from "./data/cities";
 import { SERBIA_RINGS } from "./data/serbia-geo";
-import { isInside, isInsideAny, mapBounds, project, projectRing, tryMove, type Point } from "./geo";
+import { isInside, isInsideAny, lineOnLand, mapBounds, project, projectRing, tryMove, type Point } from "./geo";
 
 const square: Point[] = [
   { x: 0, y: 0 },
@@ -73,5 +73,18 @@ describe("tryMove", () => {
 
   it("stays put when every option leaves the land", () => {
     expect(tryMove({ x: 9.5, y: 9.5 }, { x: 1, y: 1 }, inSquare)).toEqual({ x: 9.5, y: 9.5 });
+  });
+});
+
+describe("lineOnLand", () => {
+  // Land is everything except the strip 40 < x < 60.
+  const canStand = (p: Point) => p.x <= 40 || p.x >= 60;
+
+  it("accepts a straight line that stays on land", () => {
+    expect(lineOnLand({ x: 0, y: 0 }, { x: 40, y: 30 }, canStand)).toBe(true);
+  });
+
+  it("rejects a line that crosses water, even when both ends are on land", () => {
+    expect(lineOnLand({ x: 0, y: 0 }, { x: 100, y: 0 }, canStand)).toBe(false);
   });
 });

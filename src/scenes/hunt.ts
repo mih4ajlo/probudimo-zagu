@@ -1,8 +1,9 @@
 import { SPRITE_SCALE, SPRITES } from "../assets";
 import { createTrail, followerPositions, pushTrail } from "../crowd";
 import { FOLLOWERS, SLEEPWALK_LINE, SLEEPWALK_SPEED, TALK_ROUNDS } from "../data/hunt";
-import type { Point } from "../geo";
-import { createHunt, huntFlee, huntResult, huntVisit } from "../hunt";
+import { SERBIA_RINGS } from "../data/serbia-geo";
+import { isInsideAny, lineOnLand, projectRing, type Point } from "../geo";
+import { createHunt, huntFlee, huntResult, huntRound, huntVisit } from "../hunt";
 import { k } from "../kaplayContext";
 import { officePositions, spawnPoint } from "../officeLayout";
 import type { PrincessAnim } from "../princess";
@@ -31,7 +32,9 @@ export function registerHuntScene(): void {
     const session = getSession();
     const start = spawnPoint();
     const positions = officePositions();
-    const hunt = createHunt(positions, start, Math.random);
+    const serbia = SERBIA_RINGS.map(projectRing);
+    const canWalk = (from: Point, to: Point) => lineOnLand(from, to, (p) => isInsideAny(p, serbia));
+    const hunt = createHunt(positions, start, Math.random, canWalk);
     const talk = createTalk();
     const trail = createTrail(start);
     const followers = FOLLOWER_TINTS.slice(0, FOLLOWERS).map((tint) =>
@@ -63,6 +66,7 @@ export function registerHuntScene(): void {
       const p = spot(office);
       zaga.pos = k.vec2(p.x, p.y);
       zaga.opacity = 1;
+      zaga.flipX = false;
       zaga.play("idle");
     }
 
@@ -131,7 +135,7 @@ export function registerHuntScene(): void {
 
     createMapView({
       leaderSprite: SPRITES.protester,
-      hudText: () => `Round ${Math.min(talk.round + 1, TALK_ROUNDS.length)}/${TALK_ROUNDS.length}  Visits ${hunt.visits}`,
+      hudText: () => `Round ${huntRound(hunt)}/${TALK_ROUNDS.length}  Visits ${hunt.visits}`,
       officeMark: (id) => (hunt.searched.includes(id) ? "question" : null),
       onVisit: (id, view) => {
         const visit = huntVisit(hunt, id);
