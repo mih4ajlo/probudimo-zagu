@@ -33,23 +33,32 @@ import {
 } from "../joystick";
 import { addScreenLayer, hasTouched, k, PIXEL_DENSITY, screenFit } from "../kaplayContext";
 import { MAP_COLORS, pickMapDetail, type RGB } from "../mapCanvas";
+import { clearNarration, createNarrator, LINE_SECONDS, narrate, tickNarrator } from "../narrator";
 import { createPinch, pinchDown, pinchMove, pinchUp } from "../pinch";
 import { MARKER_SIZE, officePositions, spawnPoint, touchedOffice, visitToStart } from "../officeLayout";
 import type { ScreenFit } from "../screen";
 import { createTap, tapDown, tapMove, tapUp } from "../tap";
+import { wrappedRows } from "../textFit";
 import { walkStep } from "../walkTo";
 import { characterLayout, faceFromInput, pickAnim, type Facing, type PrincessAnim } from "../princess";
 import { createShout, isShouting, startShout, tickShout } from "../shout";
 import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
 export type OfficeMark = "check" | "question" | null;
-export type LeaderFrame = { pos: Point; anim: PrincessAnim; facing: Facing; blocked: boolean };
+// idleFact: she walked freely long enough with nothing narrated; the mode may narrate a fact.
+export type LeaderFrame = { pos: Point; anim: PrincessAnim; facing: Facing; blocked: boolean; idleFact: boolean };
 export type MapTalk = {
   // Lines in the dialog box; shoutFirst puts the leader in the shout pose on
   // the first line; then runs after the last line closes.
   say(lines: readonly string[], options?: { shoutFirst?: boolean; then?: () => void }): void;
   // Options in the dialog box; then gets the picked index.
   ask(options: readonly string[], then: (index: number) => void): void;
+  // A narrator line under the HUD; it does not block movement and hides after
+  // `seconds` (null holds it until cleared).
+  narrate(text: string, seconds?: number | null): void;
+  clearNarration(): void;
+  // A narrator text that blocks movement like dialog; then runs when it closes.
+  splash(text: string, then?: () => void): void;
 };
 export type MapViewHooks = {
   // Sprite with idle/walk/shout anims (see loadCharacter in assets.ts).
@@ -76,6 +85,8 @@ const DIALOG_WIDTH = 300;
 const DIALOG_HEIGHT = 48;
 // Choice rows in the dialog box: 8-unit text + 4 line spacing.
 const CHOICE_ROW = 12;
+// Box height for rows of 8-unit text with 4 line spacing and 8-unit padding.
+const boxHeight = (rows: number) => 16 + CHOICE_ROW * rows - 4;
 
 function controlLayout(fit: ScreenFit) {
   return {
@@ -99,6 +110,11 @@ const CHECK: RGB = [40, 150, 70];
 // Case folders fade from fresh to dusty.
 const FOLDER: RGB = [240, 200, 80];
 const DUST: RGB = [140, 140, 140];
+// The narrator box looks unlike dialog: teal fill, pale outline, an "i" badge.
+const NARRATOR_FILL: RGB = [14, 48, 56];
+const NARRATOR_EDGE: RGB = [140, 210, 210];
+const DIALOG_FILL: RGB = [12, 10, 20];
+const DIALOG_EDGE: RGB = [220, 200, 140];
 const LEVEL_COLORS: Record<OfficeLevel, RGB> = {
   OJT: [156, 156, 166],
   VJT: [72, 120, 204],
@@ -119,6 +135,9 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
   let shoutLine: string | null = null;
   let afterDialog: (() => void) | null = null;
   let afterChoice: ((index: number) => void) | null = null;
+  const narrator = createNarrator();
+  // The open dialog is a splash: drawn in the narrator look.
+  let splashing = false;
   const bounds = mapBounds();
   let zoom = ZOOM_START;
   let facing: Facing = "right";
@@ -314,11 +333,22 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
   const dialogBox = ui.add([
     k.rect(DIALOG_WIDTH, DIALOG_HEIGHT),
     k.pos(0, 0),
-    k.color(12, 10, 20),
-    k.outline(1, k.rgb(220, 200, 140)),
+    k.color(...DIALOG_FILL),
+    k.outline(1, rgb(DIALOG_EDGE)),
     k.opacity(0),
   ]);
   const dialogText = ui.add([k.text("", { size: 8, width: DIALOG_WIDTH - 16, lineSpacing: 4 }), k.pos(0, 0)]);
+  const narratorBox = ui.add([
+    k.rect(DIALOG_WIDTH, boxHeight(1)),
+    k.pos(0, 0),
+    k.color(...NARRATOR_FILL),
+    k.outline(1, rgb(NARRATOR_EDGE)),
+    k.opacity(0),
+  ]);
+  const narratorText = ui.add([k.text("", { size: 8, width: DIALOG_WIDTH - 16, lineSpacing: 4 }), k.pos(0, 0)]);
+  // The "i" badge sits on the top-left corner of whichever narrator box shows.
+  const badge = ui.add([k.rect(9, 9), k.pos(0, 0), k.color(...NARRATOR_EDGE), k.opacity(0)]);
+  const badgeText = ui.add([k.text("i", { size: 8 }), k.pos(0, 0), k.color(...NARRATOR_FILL), k.opacity(0)]);
 
   // Touch controls: joystick, shout button, zoom buttons. Hidden until the
   // first touch, and while a dialog is open.
@@ -379,15 +409,42 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
     placeButton(zoomOutButton, layout.zoomOut);
     placeButton(zoomInButton, layout.zoomIn);
     hudBar.width = fit.w;
-    const box = { x: (fit.w - DIALOG_WIDTH) / 2, y: fit.h - DIALOG_HEIGHT - 10 };
+    const box = { x: (fit.w - DIALOG_WIDTH) / 2, y: fit.h - dialogBox.height - 10 };
     dialogBox.pos = vec(box);
     dialogText.pos = k.vec2(box.x + 8, box.y + 8);
+    // Just under the HUD bar, so it never covers the HUD or the dialog box.
+    const line = { x: box.x, y: hudBar.height + 4 };
+    narratorBox.pos = vec(line);
+    narratorText.pos = k.vec2(line.x + 8, line.y + 8);
+  }
+
+  function placeBadge(corner: Point, shown: boolean): void {
+    badge.pos = k.vec2(corner.x - 3, corner.y - 3);
+    badgeText.pos = k.vec2(corner.x - 1, corner.y - 2);
+    badge.opacity = shown ? 1 : 0;
+    badgeText.opacity = shown ? 1 : 0;
+  }
+
+  // Narrator line and badge follow the narrator state; a splash takes the badge.
+  function refreshNarrator(): void {
+    const text = narrator.text;
+    const shown = text !== null && !splashing;
+    narratorBox.opacity = shown ? 1 : 0;
+    narratorBox.outline.width = shown ? 1 : 0;
+    narratorText.text = shown ? text : "";
+    if (shown) {
+      narratorBox.height = boxHeight(wrappedRows(text));
+    }
+    placeBadge(splashing ? dialogBox.pos : narratorBox.pos, shown || splashing);
   }
   placeUi(screenFit());
 
   function showBox(text: string): void {
     dialogBox.opacity = 1;
     dialogBox.outline.width = 1;
+    dialogBox.color = rgb(splashing ? NARRATOR_FILL : DIALOG_FILL);
+    dialogBox.outline.color = rgb(splashing ? NARRATOR_EDGE : DIALOG_EDGE);
+    dialogBox.height = splashing ? boxHeight(wrappedRows(text)) : DIALOG_HEIGHT;
     dialogText.text = text;
   }
 
@@ -408,6 +465,7 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
     dialogBox.opacity = 0;
     dialogBox.outline.width = 0;
     dialogText.text = "";
+    splashing = false;
     const then = afterDialog;
     afterDialog = null;
     then?.();
@@ -416,6 +474,7 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
   const talk: MapTalk = {
     say(lines, options = {}) {
       walkTarget = null;
+      splashing = false;
       shoutLine = options.shoutFirst ? (lines[0] ?? null) : null;
       afterDialog = options.then ?? null;
       openDialog(dialog, lines);
@@ -423,9 +482,26 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
     },
     ask(options, then) {
       walkTarget = null;
+      splashing = false;
       shoutLine = null;
       afterChoice = then;
       openChoices(dialog, options);
+      refreshDialog();
+    },
+    narrate(text, seconds = LINE_SECONDS) {
+      narrate(narrator, text, seconds);
+      refreshNarrator();
+    },
+    clearNarration() {
+      clearNarration(narrator);
+      refreshNarrator();
+    },
+    splash(text, then) {
+      walkTarget = null;
+      shoutLine = null;
+      afterDialog = then ?? null;
+      splashing = true;
+      openDialog(dialog, [text]);
       refreshDialog();
     },
   };
@@ -604,10 +680,13 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
     bubbleText.opacity = showBubble;
     bubble.scale = k.vec2(1 / zoom);
     bubble.pos = player.pos.sub(0, leader.bubbleLift);
-    hooks.onFrame?.({ pos: { x: player.pos.x, y: player.pos.y }, anim, facing, blocked: isMovementBlocked(dialog) });
+    const blockedNow = isMovementBlocked(dialog);
+    const idleFact = tickNarrator(narrator, k.dt(), blockedNow);
+    hooks.onFrame?.({ pos: { x: player.pos.x, y: player.pos.y }, anim, facing, blocked: blockedNow, idleFact });
 
     const fit = screenFit();
     placeUi(fit);
+    refreshNarrator();
     k.camScale(fit.scale * zoom);
     const size = { w: fit.w / zoom, h: fit.h / zoom };
     const cam = clampCamera({ x: player.pos.x, y: player.pos.y - leader.bodyCenter }, size, bounds);
