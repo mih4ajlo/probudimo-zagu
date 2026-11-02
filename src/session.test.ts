@@ -41,3 +41,13 @@ describe("cases", () => {
     }
   });
 });
+
+describe("teaching", () => {
+  it("starts a new game with nothing taught", () => {
+    resetSession();
+    getSession().taught.push("level");
+    expect(getSession().taught).toEqual(["level"]);
+    resetSession();
+    expect(getSession().taught).toEqual([]);
+  });
+});

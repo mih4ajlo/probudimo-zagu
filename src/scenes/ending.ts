@@ -1,6 +1,7 @@
 import { caseReport } from "../cases";
 import { nextPage, reportPage } from "../data/cases";
-import { backToTitle, ENDING_LINES, scoreLine, TITLE } from "../data/story";
+import { OFFICE_IDS } from "../data/offices";
+import { backToTitle, ENDING_LINES, scoreLine, TITLE, visitedLine } from "../data/story";
 import { GAME_WIDTH, k, useGameUnits } from "../kaplayContext";
 import { wakeMaxScore } from "../score";
 import { getSession } from "../session";
@@ -25,12 +26,18 @@ export function registerEndingScene(): void {
       k.pos(GAME_WIDTH / 2, 120),
       k.anchor("center"),
     ]);
+    const visited = k.add([
+      k.text(visitedLine(session.score.visited.length, OFFICE_IDS.length), { size: 8 }),
+      k.pos(GAME_WIDTH / 2, 140),
+      k.anchor("center"),
+    ]);
     const hint = k.add([k.text("", { size: 8 }), k.pos(GAME_WIDTH / 2, 160), k.color(250, 220, 140), k.anchor("center")]);
 
     function show(): void {
       const first = page === 0;
       title.hidden = !first;
       score.hidden = !first;
+      visited.hidden = !first;
       if (first) {
         body.text = ENDING_LINES.join("\n");
         body.pos = k.vec2(GAME_WIDTH / 2, 72);

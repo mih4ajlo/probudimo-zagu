@@ -4,6 +4,7 @@ import {
   carriedCase,
   caseMark,
   caseReport,
+  casesResolved,
   createCases,
   tickCases,
   visitForCases,
@@ -198,6 +199,29 @@ describe("case files", () => {
       { title: "OTHER", result: "working", reality: ["other fact"], asOf: "okt. 2026" },
       { title: "THIRD", result: "untouched", reality: ["third fact"], asOf: "okt. 2026" },
     ]);
+  });
+
+  it("is resolved only when every case is working or expired", () => {
+    const state = createCases([LONG, OTHER, file("third", ["q", "r"]), file("fourth", ["s", "t"])]);
+    state.entries[0].status = "working";
+    state.entries[1].status = "expired";
+    state.entries[2].status = "working";
+    expect(casesResolved(state)).toBe(false);
+    visitForCases(state, "s");
+    visitForCases(state, "t");
+    answerCase(state, 1);
+    expect(casesResolved(state)).toBe(true);
+  });
+
+  it("resolves when the last case expires on the road", () => {
+    const state = fixture();
+    visitForCases(state, "x");
+    visitForCases(state, "c");
+    answerCase(state, 1);
+    visitForCases(state, "a");
+    expect(casesResolved(state)).toBe(false);
+    tickCases(state, DUST_SECONDS);
+    expect(casesResolved(state)).toBe(true);
   });
 
   it("uses the real cases by default", () => {

@@ -1,24 +1,24 @@
 import { SPRITES } from "../assets";
-import { answerCase, carriedCase, caseMark, tickCases, visitForCases } from "../cases";
+import { answerCase, carriedCase, caseMark, casesResolved, tickCases, visitForCases } from "../cases";
 import { carryHud, expiredLine } from "../data/cases";
 import { getOffice, OFFICE_IDS } from "../data/offices";
 import { wakeHud } from "../data/story";
 import { k } from "../kaplayContext";
-import { isReadyForEnding } from "../progress";
 import { grantCase, visitOffice, wakeMaxScore } from "../score";
 import { getSession } from "../session";
 import { withShout } from "../shout";
 import { createMapView, type MapTalk } from "./mapView";
 
-// Wake the offices: Zaga visits every office; first visits score points.
+// Wake the offices: Zaga visits offices; first visits score points.
 // Case files ride along: offices bounce them until the right demand.
+// The round ends when every case is at work or expired.
 export function registerOverworldScene(): void {
   k.scene("overworld", () => {
     const session = getSession();
     const cases = session.cases;
 
     function checkEnding(): void {
-      if (isReadyForEnding(session.score.visited, OFFICE_IDS)) {
+      if (casesResolved(cases)) {
         k.go("ending");
       }
     }
@@ -70,7 +70,7 @@ export function registerOverworldScene(): void {
       onFrame: (frame) => {
         const expired = tickCases(cases, frame.blocked ? 0 : k.dt());
         if (expired.length > 0) {
-          talkRef?.say(expired.map((entry) => expiredLine(entry.file.title)));
+          talkRef?.say(expired.map((entry) => expiredLine(entry.file.title)), { then: checkEnding });
         }
       },
     });

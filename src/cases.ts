@@ -34,6 +34,11 @@ export function createCases(files: readonly CaseFile[] = CASES): CasesState {
   };
 }
 
+// Every case is either at work or expired: the Wake round is over.
+export function casesResolved(state: CasesState): boolean {
+  return state.entries.every((entry) => entry.status === "working" || entry.status === "expired");
+}
+
 export function carriedCase(state: CasesState): CaseEntry | null {
   return state.entries.find((entry) => entry.status === "carried") ?? null;
 }
