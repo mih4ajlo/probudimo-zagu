@@ -7,6 +7,7 @@ import {
   MARKER_GAP,
   MARKER_SIZE,
   MAX_RING_RADIUS,
+  RING_TURNS,
   TOUCH_RADIUS,
   WALK_GAP,
   layoutOffices,
@@ -55,15 +56,29 @@ describe("layoutOffices", () => {
   });
 
   it("keeps every real office within MAX_RING_RADIUS of its city", () => {
-    const positions = layoutOffices(OFFICES, (name) => project(CITIES[name]));
+    const positions = officePositions();
     for (const office of OFFICES) {
       const p = positions.get(office.id) as Point;
       expect(distance(p, project(CITIES[office.city])), office.id).toBeLessThanOrEqual(MAX_RING_RADIUS);
     }
   });
 
+  it("keeps touch zones of offices in different cities apart", () => {
+    const positions = officePositions();
+    for (let i = 0; i < OFFICES.length; i++) {
+      for (let j = i + 1; j < OFFICES.length; j++) {
+        const [a, b] = [OFFICES[i], OFFICES[j]];
+        if (a.city === b.city) {
+          continue;
+        }
+        const d = distance(positions.get(a.id) as Point, positions.get(b.id) as Point);
+        expect(d, `${a.id} / ${b.id}`).toBeGreaterThanOrEqual(2 * TOUCH_RADIUS + WALK_GAP);
+      }
+    }
+  });
+
   it("places every real office on land", () => {
-    const positions = layoutOffices(OFFICES, (name) => project(CITIES[name]));
+    const positions = officePositions();
     expect(positions.size).toBe(OFFICES.length);
     for (const [id, p] of positions) {
       expect(isInsideAny(p, serbia), id).toBe(true);
@@ -110,7 +125,7 @@ describe("spawnPoint", () => {
     const spawn = spawnPoint();
     expect(isInsideAny(spawn, serbia)).toBe(true);
     expect(distance(spawn, project(CITIES.Beograd))).toBeLessThan(80);
-    const positions = layoutOffices(OFFICES, (name) => project(CITIES[name]));
+    const positions = officePositions();
     expect(touchedOffice(spawn, positions)).toBeNull();
   });
 });
@@ -119,6 +134,6 @@ describe("officePositions", () => {
   it("places every office", () => {
     const positions = officePositions();
     expect(positions.size).toBe(OFFICES.length);
-    expect(positions).toEqual(layoutOffices(OFFICES, (name) => project(CITIES[name])));
+    expect(positions).toEqual(layoutOffices(OFFICES, (name) => project(CITIES[name]), RING_TURNS));
   });
 });

@@ -7,6 +7,7 @@ import {
   type CaseFile,
   type CaseResult,
 } from "./data/cases";
+import type { HopReason } from "./data/jurisdiction";
 
 export type CaseStatus = "waiting" | "carried" | "working" | "expired";
 // hop: index in file.chain of the target office while carried (0 while waiting).
@@ -16,7 +17,7 @@ export type CasesState = { entries: CaseEntry[]; asking: string | null };
 export type CaseVisit =
   | { kind: "none" }
   | { kind: "busy"; line: string }
-  | { kind: "pickup" | "bounce"; caseId: string; line: string; next: string }
+  | { kind: "pickup" | "bounce"; caseId: string; line: string; next: string; reason: HopReason }
   | { kind: "ask"; caseId: string; ask: string; demands: readonly string[] };
 
 export type CaseAnswer =
@@ -33,6 +34,11 @@ export function createCases(files: readonly CaseFile[] = CASES): CasesState {
   };
 }
 
+// Every case is either at work or expired: the Wake round is over.
+export function casesResolved(state: CasesState): boolean {
+  return state.entries.every((entry) => entry.status === "working" || entry.status === "expired");
+}
+
 export function carriedCase(state: CasesState): CaseEntry | null {
   return state.entries.find((entry) => entry.status === "carried") ?? null;
 }
@@ -44,8 +50,9 @@ function waitingAt(state: CasesState, officeId: string): CaseEntry | undefined {
 // Moves the carried file one office on and says the bounce line of the office it leaves.
 function bounce(entry: CaseEntry, kind: "pickup" | "bounce"): CaseVisit {
   const line = entry.file.bounces[entry.hop];
+  const reason = entry.file.reasons[entry.hop];
   entry.hop += 1;
-  return { kind, caseId: entry.file.id, line, next: entry.file.chain[entry.hop] };
+  return { kind, caseId: entry.file.id, line, next: entry.file.chain[entry.hop], reason };
 }
 
 export function visitForCases(state: CasesState, officeId: string): CaseVisit {

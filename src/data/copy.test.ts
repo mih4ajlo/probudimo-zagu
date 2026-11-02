@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { foundIn, huntHud } from "./hunt";
-import { backToTitle, MODES, scoreLine, wakeHud } from "./story";
+import { backToTitle, MODES, scoreLine, visitedLine, wakeHud } from "./story";
 
 describe("on-screen copy", () => {
+  it("formats the visited line", () => {
+    expect(visitedLine(12, 90)).toBe("Posećeno: 12/90");
+  });
+
   it("shows the Find Zaga HUD and result in Serbian", () => {
     expect(huntHud(2, 3, 7)).toBe("Runda 2/3  Posete 7");
     expect(foundIn(9)).toBe("Broj poseta: 9");

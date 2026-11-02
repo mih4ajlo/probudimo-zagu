@@ -28,6 +28,7 @@ export const MENU_HINT_KEYS = "Gore/Dole, pa Enter";
 export const wakeHud = (score: number, maxScore: number, visited: number, offices: number) =>
   `Poeni ${score}/${maxScore}  Tužilaštva ${visited}/${offices}`;
 export const scoreLine = (score: number, maxScore: number) => `Poeni ${score} / ${maxScore}`;
+export const visitedLine = (visited: number, offices: number) => `Posećeno: ${visited}/${offices}`;
 
 // Under both endings.
 export const backToTitle = (touch: boolean) => (touch ? "Dodirni za meni" : "Enter za meni");

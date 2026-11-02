@@ -15,14 +15,17 @@ office count and score fill up, then see an ending.
 2. Wake dialog (the prosecutors are asleep; visit every office)
 3. Serbia map: walk, touch an office, shout + reply, points once
 4. HUD: score / max and offices visited / total
-5. When every office is visited → ending scene
+5. When all four case files are resolved → ending scene
 
 ## Modes
 The title offers two modes (↑/↓ + Enter, or tap one):
 - **Wake the offices** — the v1 loop above, plus case files: real stalled
   cases (`src/data/cases.ts`, research in `docs/research/slucajevi.md`)
   wait as folders at their start office. Visiting it picks the file up and
-  the office bounces it to the next office in its chain ("Nismo nadležni!").
+  the office bounces it to the next office in its chain. Every bounce
+  follows real jurisdiction (`src/data/jurisdiction.ts`) and its line names
+  the reason: `level` (OJT ↔ its own VJT), `area` (same level, other office)
+  or `tok` (to or from TOK).
   The crowd carries one file at a time (a second start office says "Prvo
   završite taj predmet!"); the HUD's second line names the target office,
   which gets a pulsing ring. At the last office the player picks one of 3
@@ -30,9 +33,19 @@ The title offers two modes (↑/↓ + Enter, or tap one):
   one says "Vraćeno na dopunu." and sends the file back one office. Each
   file gathers dust over 300 s of play (time with a dialog open does not
   count); full dust makes it "ZASTARELO" (grey, dropped, no points, no fail
-  state). Cases are optional: the ending still comes when every office is
-  visited. After the score, the ending shows one page per case: the game
-  result and a dated, sourced "U stvarnosti" line.
+  state). The round ends when every case is "U RADU" or "ZASTARELO": after
+  the last resolving line closes, the ending comes. After the score and
+  "Posećeno: N/90", the ending shows one page per case: the game result and
+  a dated, sourced "U stvarnosti" line.
+  A neutral **narrator box** (teal, an "i" badge, just under the HUD; never
+  over the dialog) teaches who prosecutes what and where:
+  - entering a VJT area shows `Područje VJT u X; žalbe: AJT u Y.` (her
+    area is the VJT of the nearest OJT seat; no borders are drawn);
+  - after 20 s of free walking with nothing shown, a sourced fact
+    (`src/data/facts.ts`); a line hides after 6 s;
+  - the first `level`, `area` and `tok` bounce of a game each get a splash
+    after the bounce dialog: narrator look, blocks movement until dismissed,
+    once per game.
 - **Find Zaga** — opens at her desk: Zaga asleep behind the PC, Z's rising,
   intro text. Then three protesters (a leader and two followers in its
   trail; the crowd never grows) search the offices. An empty office shouts
@@ -43,7 +56,9 @@ The title offers two modes (↑/↓ + Enter, or tap one):
   sleepwalks (her avatar walks across the map, half the crowd's speed) to
   another office at least 300 units away that she can reach in a straight
   line without leaving Serbia, and stays asleep there; chase her and the
-  next round starts. The HUD round moves on when she walks off. After round 3 the desk scene shows her waking
+  next round starts. The HUD round moves on when she walks off. While she
+  sleepwalks, the narrator box shows a fact about where she heads (its
+  level or VJT area) until she arrives. She hides among all 90 offices. After round 3 the desk scene shows her waking
   with a start, then "Broj poseta: N". No points, no fail state. Same
   map, controls, zoom and dialog rules as Wake the offices.
 
@@ -52,8 +67,10 @@ The title offers two modes (↑/↓ + Enter, or tap one):
   Natural Earth borders. Kosovo is walkable; no offices there.
 - She starts in Beograd and can only walk on Serbian land; walking into the
   border slides along it.
-- Stops are the 60 public prosecutor's offices in `assets/tuzilastva.csv`,
-  each its own marker around its city.
+- Stops are the 90 public prosecutor's offices in `assets/tuzilastva.csv`
+  (all 58 OJT; the cybercrime office is a VJT Beograd department since 2023
+  and is not a stop), each its own marker around its city. Beograd's and
+  Pančevo's rings are turned so their offices stay apart.
 - Each visit opens with the shout ("Budite se, na posao!", hands in the air),
   then the office's reply. Dialog is linear, except the 3-option choices
   (Find Zaga talk, case demands).
@@ -78,13 +95,15 @@ The title offers two modes (↑/↓ + Enter, or tap one):
 ## Content
 | Level | Office | Points | Count |
 |---|---|---|---|
-| OJT | osnovno | 10 | 27 |
+| OJT | osnovno | 10 | 58 |
 | VJT | više | 20 | 25 |
 | AJT | apelaciono | 30 | 4 |
-| PJT | posebno | 40 | 3 |
+| PJT | posebno | 40 | 2 |
 | VRHOVNO | Vrhovno javno tužilaštvo | 50 | 1 |
 
-Max score 1060 for offices, plus 50 per case file (1260 with 4 cases).
+Max score 1330 for offices, plus 50 per case file (1530 with 4 cases).
+Jurisdiction (municipality → OJT → VJT → AJT) lives in
+`src/data/jurisdiction.ts`, from `docs/research/nadleznost.md`.
 Replies per level live in `src/data/replies.ts`.
 
 ## Out of scope for v1

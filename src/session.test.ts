@@ -30,7 +30,7 @@ describe("hunt result", () => {
 describe("cases", () => {
   it("starts fresh cases on reset", () => {
     resetSession();
-    visitForCases(getSession().cases, "vjt-u-novom-sadu");
+    visitForCases(getSession().cases, "vjt-u-beogradu");
     expect(carriedCase(getSession().cases)).not.toBeNull();
     resetSession();
     const cases = getSession().cases;
@@ -39,5 +39,15 @@ describe("cases", () => {
       expect(entry.status).toBe("waiting");
       expect(entry.dust).toBe(entry.file.startDust);
     }
+  });
+});
+
+describe("teaching", () => {
+  it("starts a new game with nothing taught", () => {
+    resetSession();
+    getSession().taught.push("level");
+    expect(getSession().taught).toEqual(["level"]);
+    resetSession();
+    expect(getSession().taught).toEqual([]);
   });
 });

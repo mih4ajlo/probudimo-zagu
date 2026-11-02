@@ -1,6 +1,7 @@
 # Slučajevi tužilaštva 2022–2026 — istraživanje za dijaloge
 
-Stanje: prvi krug pretrage, 31. 10. 2026. Ništa odavde još ne ide u igru.
+Stanje: prvi krug pretrage, 31. 10. 2026. Od v0.11 četiri slučaja su u igri
+(`src/data/cases.ts`).
 Svaka tvrdnja ima izvor; oznaka **[proveriti]** znači da se izvori ne slažu,
 datum nije siguran ili je izvor pristrasan.
 
@@ -47,8 +48,10 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   [021 — treći put oborena](https://www.021.rs/story/Novi-Sad/Vesti/449295/Apelacioni-sud-treci-put-oborio-optuznicu-za-pad-nadstresnice-u-Novom-Sadu.html),
   [021 — Ninić, ročište](https://www.021.rs/story/Novi-Sad/Vesti/449677/Advokat-Ninic-o-tome-kako-bi-dalje-mogao-da-tece-slucaj-Nadstresnica-i-kad-se-ocekuje-rociste.html),
   [N1 — odložen početak](https://n1info.rs/vesti/sudjenje-nadstresnica-odlaganje-advokati/).
-- **Lanac u igri:** VJT Novi Sad → VJT Beograd → TOK (stvarni put
-  korupcijskog dela, kartica 2).
+- **Lanac u igri (v0.12):** OJT Novi Sad → VJT Novi Sad → TOK. VJT Novi Sad
+  vodi deo o smrti 16 ljudi (preko 10 godina); korupcijski deo je pre TOK-a
+  bio u VJT Beograd (kartica 2), što igra preskače: VJT Novi Sad samo kaže
+  da je deo o novcu Vrhovno JT dalo TOK-u (tačno, 12. 2. 2025).
 - **Za igru:** „20 meseci do potvrđene optužnice“, „gde je suđenje?“.
   Žrtve se ne pominju u šali.
 - Izvori: [021.rs](https://www.021.rs/novi-sad/vesti/449240/nakon-sto-je-novosadski-sud-potvrdio-optuznicu-cetiri-vazna-pitanja-o-predmetu-nadstresnica),
@@ -109,6 +112,9 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   [Insajder](https://insajder.net/teme/jedina-istraga-o-mogucoj-upotrebi-zvucnog-topa-premestena-u-vjt-koje-tvrdi-da-nema-mesta-gonjenju).
 - **Lanac u igri:** Prvo OJT → TOK → Prvo OJT → VJT Beograd (stvarni put:
   TOK vratio Prvom OJT; VJT tražio da mu se predmet ustupi).
+- **Razlozi skokova (v0.12):** `tok` (prijave za terorizam protiv NN lica
+  podnete TOK-u), `tok` (TOK vraća spise: nije njegova nadležnost), `level`
+  (VJT preuzima kao teže delo). Provereno 2. 11. 2026.
 - **Sporno:** udruženja (npr. BCLjP) traže obrazloženje; nalaz VJT osporavaju.
 - **Za igru:** „Šta se desilo 15. marta?“ — Zaga: „Panika... zzz...“
   (karikatura, ne citat).
@@ -136,8 +142,8 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   Izvori: [Insajder — bez epiloga](https://insajder.net/vesti/napad-na-studente-fdu-bez-epiloga-preostali-napadaci-i-dalje-nepoznati-video),
   [N1 — prijave odbačene](https://n1info.rs/vesti/napad-na-studente-fdu-i-dalje-bez-epiloga-neke-krivicne-prijave-odbacene-identitet-dva-napadaca-jos-nepoznat/),
   [Danas — Matić](https://www.danas.rs/vesti/drustvo/veran-matic-o-sudjenju-za-napad-na-studente-fdu-doslo-do-kraja-a-da-nije-ni-pocelo/).
-- **Lanac u igri:** OJT Novi Sad → VJT Novi Sad → VJT Beograd. Prva dva
-  skoka su karikatura; VJT Beograd stvarno vodi FDU predmet.
+- **Lanac u igri (v0.12):** Treće OJT Bgd (FDU je na Novom Beogradu) →
+  VJT Beograd, koje stvarno vodi FDU predmet.
 - **Za igru:** „Ko je udarao studente?“; procesuiranje napadača bilo je
   među prvim zahtevima blokada.
 - Izvori: [RSE](https://www.slobodnaevropa.org/a/beogradsko-tuzilastvo-napadi-na-studente/33287462.html),
@@ -159,6 +165,11 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   [Insajder — Dimitrijević](https://insajder.net/teme/pavle-dimitrijevic-crta-u-markeru-hipoteticki-je-moguce-da-se-izborna-lista-proglasi-sa-falsifikovanim-potpisima).
 - **Lanac u igri:** VJT Beograd → Prvo OJT (stvarni put: deo o
   falsifikovanju poslat Prvom OJT).
+- **Razlog skoka (v0.12):** `level`. Prijava podneta Posebnom odeljenju za
+  suzbijanje korupcije VJT Beograd, prosleđena Prvom OJT; prijava gradske
+  izborne komisije je za falsifikovanje službene isprave, delo do 10 godina
+  (OJT). Izvor: [N1 — CRTA poziva tužilaštva](https://n1info.rs/vesti/izbori-2023/crta-poziva-tuzilastva-da-hitno-istraze-slucajeve-falsifikovanja-potpisa-na-vise-lista/).
+  Provereno 2. 11. 2026.
 - **Za igru:** „Gde su fantomski birači?“ — 24 znaka.
 - Izvori: [CRTA — prijave](https://crta.rs/krivicne-prijave-crta-izbori-2023/),
   [CRTA — završni izveštaj](https://crta.rs/wp-content/uploads/2024/02/CRTA_Zavrsni-izborni-izvestaj-2023.pdf),

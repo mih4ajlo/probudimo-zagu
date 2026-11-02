@@ -4,21 +4,25 @@ import { LEVEL_POINTS, OFFICES, OFFICE_IDS, getOffice, maxScore, type OfficeLeve
 import { REPLIES } from "./replies";
 
 describe("OFFICES", () => {
-  it("has all 60 offices from the CSV with unique ids", () => {
-    expect(OFFICES).toHaveLength(60);
-    expect(new Set(OFFICE_IDS).size).toBe(60);
+  it("has all 90 offices from the CSV with unique ids", () => {
+    expect(OFFICES).toHaveLength(90);
+    expect(new Set(OFFICE_IDS).size).toBe(90);
   });
 
-  it("has 27 OJT, 25 VJT, 4 AJT, 3 PJT and 1 VRHOVNO", () => {
+  it("has 58 OJT, 25 VJT, 4 AJT, 2 PJT and 1 VRHOVNO", () => {
     const count = (level: OfficeLevel) => OFFICES.filter((o) => o.level === level).length;
-    expect([count("OJT"), count("VJT"), count("AJT"), count("PJT"), count("VRHOVNO")]).toEqual([27, 25, 4, 3, 1]);
+    expect([count("OJT"), count("VJT"), count("AJT"), count("PJT"), count("VRHOVNO")]).toEqual([58, 25, 4, 2, 1]);
   });
 
-  it("gives each office its level's points and a max score of 1060", () => {
+  it("gives each office its level's points and a max score of 1330", () => {
     for (const office of OFFICES) {
       expect(office.points).toBe(LEVEL_POINTS[office.level]);
     }
-    expect(maxScore()).toBe(1060);
+    expect(maxScore()).toBe(1330);
+  });
+
+  it("has no cybercrime office (a VJT Beograd department since 2023)", () => {
+    expect(OFFICE_IDS.filter((id) => id.includes("visokotehnoloski"))).toEqual([]);
   });
 
   it("fixes the CSV's broken Š and Ž in city names", () => {
