@@ -25,7 +25,8 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   municipality in two OJT; `legalHop` allows only real hops; every area line
   fits two rows.
 - **Area:** the nearest OJT seat gives the right VJT for towns away from
-  borders; `watchArea` reports only real changes (back and forth too).
+  borders; `watchArea` reports only real changes and does not name an area
+  again within `AREA_REPEAT_SECONDS` (zig-zag across a border).
 - **Geo:** projection keeps north up; known cities inside/outside the
   Serbia+Kosovo outline; every office city inside; blocked diagonals slide.
 - **Layout:** offices of one city do not overlap; touch zones of offices in
@@ -89,9 +90,9 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   once, never repeats the last one across a reshuffle, prefers an unseen
   fact matching the target, falls back to rotation; `factTarget` finds an
   office's level and VJT area.
-- **Narrator:** a line hides after `LINE_SECONDS` or holds when null; the
-  idle fact comes after `IDLE_FACT_SECONDS` of free walking; blocked time
-  and time with a line showing do not count.
+- **Narrator:** a line hides after `LINE_SECONDS` or holds when null, and
+  waits while blocked; the idle fact comes after `IDLE_FACT_SECONDS` of
+  walking; standing, blocked time and time with a line showing do not count.
 - **Text fit:** `wrappedRows` (`src/textFit.ts`) wraps like Kaplay — a full
   row cannot also hold the space after it.
 - **Desk wake:** phase times; skipped frames still enter every phase in order.

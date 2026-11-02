@@ -28,11 +28,11 @@ export const FACTS: readonly Fact[] = [
   // §1, ZUS čl. 25 st. 1 t. 1
   { id: "preko-10", text: "VJT goni dela za koja je propisano preko 10 godina zatvora.", topic: "level", levels: ["VJT"] },
   // §1, ZUS čl. 25 st. 1 t. 2
-  { id: "mito", text: "Mito i pranje novca idu u VJT, bez obzira na kaznu.", topic: "level", levels: ["VJT"] },
+  { id: "mito", text: "Primanje mita i pranje novca idu u VJT, bez obzira na kaznu.", topic: "level", levels: ["VJT"] },
   // §1, ZUS čl. 25 st. 1 t. 2
   {
     id: "javni-skup",
-    text: "Nasilje na javnom skupu ide u VJT, bez obzira na kaznu.",
+    text: "Nasilničko ponašanje na javnom skupu uvek ide u VJT.",
     topic: "level",
     levels: ["VJT"],
   },
@@ -88,7 +88,7 @@ export const FACTS: readonly Fact[] = [
   // §2
   {
     id: "trece-ojt",
-    text: "Treće OJT u Beogradu pokriva Novi Beograd, Zemun i Surčin.",
+    text: "Do 1. 3. 2027. Treće OJT Beograd pokriva i Zemun i Surčin.",
     topic: "area",
     vjt: "vjt-u-beogradu",
   },
@@ -98,7 +98,7 @@ export const FACTS: readonly Fact[] = [
 export const SPLASH: Readonly<Record<HopReason, string>> = {
   // §1, ZUS čl. 24 i 25; ZJT čl. 25
   level:
-    "OJT goni dela do 10 godina zatvora. Teža dela, i neka sa posebne liste (mito, nasilje na javnom skupu), goni VJT. Tužilaštvo prati sud.",
+    "OJT goni dela do 10 godina zatvora. Teža dela, i neka sa posebne liste (primanje mita, nasilničko ponašanje na javnom skupu), goni VJT.",
   // §2, ZJT čl. 26; §1, ZJT čl. 27
   area: "Svako tužilaštvo goni samo na području svog suda. Ako se dva tužilaštva ne slože, odlučuje ono iznad oba.",
   // §1, ZJT čl. 13 i 21 st. 2; slucajevi.md (Nadstrešnica, Zvučni top)

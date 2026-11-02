@@ -40,9 +40,11 @@ The title offers two modes (↑/↓ + Enter, or tap one):
   A neutral **narrator box** (teal, an "i" badge, just under the HUD; never
   over the dialog) teaches who prosecutes what and where:
   - entering a VJT area shows `Područje VJT u X; žalbe: AJT u Y.` (her
-    area is the VJT of the nearest OJT seat; no borders are drawn);
-  - after 20 s of free walking with nothing shown, a sourced fact
-    (`src/data/facts.ts`); a line hides after 6 s;
+    area is the VJT of the nearest OJT town; no borders are drawn; an area
+    named in the last 30 s is not named again);
+  - after 20 s of walking with nothing shown, a sourced fact
+    (`src/data/facts.ts`); a line hides after 6 s, and waits while a dialog
+    is open;
   - the first `level`, `area` and `tok` bounce of a game each get a splash
     after the bounce dialog: narrator look, blocks movement until dismissed,
     once per game.
