@@ -6,7 +6,7 @@ when implementation starts, not while the repo is docs-only.
 ## Stack
 | Layer | Tool | What it covers |
 |--------|------|----------------|
-| Logic | Vitest + TypeScript | Score, dialog, office data, map geometry, zoom, “all visited”, hunt rules |
+| Logic | Vitest + TypeScript | Score, dialog, office data, jurisdiction, map geometry, zoom, cases, facts, narrator, hunt rules |
 | Browser smoke | Playwright | Page loads, canvas exists, Find Zaga starts, no page error |
 
 Vite is the bundler, so Vitest is the runner. Do not add Jest or Cypress.
@@ -18,16 +18,21 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   last line closes the box and unblocks movement.
 - **Score:** first visit grants the office's level points (10/20/30/40/50);
   a second visit grants 0; unknown ids grant 0.
-- **Offices:** 60 entries, unique ids, level counts 27/25/4/3/1, max 1060,
-  every city has coordinates.
+- **Offices:** 90 entries, unique ids, level counts 58/25/4/2/1, max 1330,
+  no cybercrime office, every city has coordinates.
+- **Jurisdiction:** every OJT maps to an existing VJT; every VJT has an OJT
+  and an AJT; AJT sizes 4/6/8/7; VJT Šabac under AJT Novi Sad; no
+  municipality in two OJT; `legalHop` allows only real hops; every area line
+  fits two rows.
+- **Area:** the nearest OJT seat gives the right VJT for towns away from
+  borders; `watchArea` reports only real changes (back and forth too).
 - **Geo:** projection keeps north up; known cities inside/outside the
   Serbia+Kosovo outline; every office city inside; blocked diagonals slide.
-- **Layout:** offices of one city do not overlap; every office on land;
+- **Layout:** offices of one city do not overlap; touch zones of offices in
+  different cities keep a walkable gap; every office on land;
   a visit starts only when stepping onto a new office with no dialog open.
 - **Zoom:** clamped to its limits; camera never shows past the map, centers
   when the map is smaller than the view.
-- **Progress:** after every office is visited, the game is ready for the
-  ending scene.
 - **Princess:** facing follows sideways input and is kept when still; the
   animation is shout over walk over idle.
 - **Shout:** lasts `SHOUT_SECONDS`, does not restart mid-shout, and an office
@@ -69,19 +74,32 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
 - **Case data:** chains use real office ids (≥ 2), one bounce line per hop,
   3 demands that fit one choice line, other lines within two dialog lines,
   unique start offices, a dated reality line per case, the carry HUD line
-  fits one line.
+  fits one line, a reason per hop and every hop legal (`legalHop`).
 - **Cases:** pickup only at the start office; one file at a time ("busy");
   bounces follow the chain; the right demand puts the case to work, a wrong
   one sends it back one hop (also on a 2-office chain); answers count only
   while asked; dust grows with time, not with dt 0 or once working, and
   expires at 1 (dropping a carried file); folder/target marks; the report
   lists every case; case points once; `wakeMaxScore` adds them; a reset
-  starts fresh cases.
+  starts fresh cases; pickup/bounce visits carry the hop reason; the round is
+  resolved only when every case is working or expired (also when the last
+  one expires on the road); a reset clears what was taught.
+- **Facts:** 10–20 facts with unique ids, each within two rows; splashes
+  within five rows; vjt facts point at real VJT; rotation shows every fact
+  once, never repeats the last one across a reshuffle, prefers an unseen
+  fact matching the target, falls back to rotation; `factTarget` finds an
+  office's level and VJT area.
+- **Narrator:** a line hides after `LINE_SECONDS` or holds when null; the
+  idle fact comes after `IDLE_FACT_SECONDS` of free walking; blocked time
+  and time with a line showing do not count.
+- **Text fit:** `wrappedRows` (`src/textFit.ts`) wraps like Kaplay — a full
+  row cannot also hold the space after it.
 - **Desk wake:** phase times; skipped frames still enter every phase in order.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
-offices, geo, officeLayout, zoom, progress, hint, hunt, crowd, titleMenu,
-talk, deskWake, cases).
+offices, geo, officeLayout, zoom, hint, hunt, crowd, titleMenu,
+talk, deskWake, cases, area, facts, narrator, textFit; data modules such as
+jurisdiction and facts test in `src/data/`).
 
 ## What not to test
 - Pixel drawing, sprite animation, camera, or Kaplay internals
