@@ -1,5 +1,6 @@
 import { FACTS, type Fact } from "./data/facts";
-import type { OfficeLevel } from "./data/offices";
+import { OJT_AREAS } from "./data/jurisdiction";
+import { getOffice, type OfficeLevel } from "./data/offices";
 import type { Rng } from "./hunt";
 
 // order: a shuffle of fact indices; pos: the next one to show; last: the id shown last.
@@ -36,7 +37,7 @@ export function nextFact(state: FactsState, facts: readonly Fact[] = FACTS): Fac
 // The next unseen fact about the target's level or VJT area, else the next in rotation.
 export function factFor(
   state: FactsState,
-  target: { level: OfficeLevel; vjt: string | null },
+  target: FactTarget,
   facts: readonly Fact[] = FACTS,
 ): Fact {
   const matches = (fact: Fact) =>
@@ -46,4 +47,16 @@ export function factFor(
     [state.order[state.pos], state.order[at]] = [state.order[at], state.order[state.pos]];
   }
   return nextFact(state, facts);
+}
+
+export type FactTarget = { level: OfficeLevel; vjt: string | null };
+
+// An office's level and VJT area (its own id for a VJT), for factFor.
+export function factTarget(officeId: string): FactTarget | null {
+  const office = getOffice(officeId);
+  if (!office) {
+    return null;
+  }
+  const vjt = office.level === "VJT" ? office.id : (OJT_AREAS[office.id]?.vjt ?? null);
+  return { level: office.level, vjt };
 }

@@ -3,6 +3,7 @@ import { createTrail, followerPositions, pushTrail } from "../crowd";
 import { FOLLOWERS, huntHud, SLEEPWALK_LINE, SLEEPWALK_SPEED, TALK_ROUNDS } from "../data/hunt";
 import { SERBIA_RINGS } from "../data/serbia-geo";
 import { isInsideAny, lineOnLand, projectRing, type Point } from "../geo";
+import { createFacts, factFor, factTarget } from "../facts";
 import { createHunt, huntFlee, huntResult, huntRound, huntVisit } from "../hunt";
 import { k } from "../kaplayContext";
 import { officePositions, spawnPoint } from "../officeLayout";
@@ -26,7 +27,8 @@ const SNORE_EVERY = 0.7;
 const SNORE_LIFE = 2;
 
 // Find Zaga: three protesters search the offices for the sleeping princess and
-// talk her awake over three rounds; between rounds she sleepwalks away.
+// talk her awake over three rounds; between rounds she sleepwalks away, and
+// the narrator shows a fact about where she heads until she gets there.
 export function registerHuntScene(): void {
   k.scene("hunt", () => {
     const session = getSession();
@@ -37,6 +39,9 @@ export function registerHuntScene(): void {
     const hunt = createHunt(positions, start, Math.random, canWalk);
     const talk = createTalk();
     const trail = createTrail(start);
+    const facts = createFacts();
+    // Set once the map view exists; Zaga only walks after that.
+    let viewRef: MapTalk | null = null;
     const followers = FOLLOWER_TINTS.slice(0, FOLLOWERS).map((tint) =>
       k.add([
         k.sprite(SPRITES.protester, { anim: "idle" }),
@@ -63,6 +68,7 @@ export function registerHuntScene(): void {
 
     function placeZaga(office: Point): void {
       walkTo = null;
+      viewRef?.clearNarration();
       const p = spot(office);
       zaga.pos = k.vec2(p.x, p.y);
       zaga.opacity = 1;
@@ -82,6 +88,7 @@ export function registerHuntScene(): void {
       if (step.done) {
         walkTo = null;
         zaga.play("idle");
+        viewRef?.clearNarration();
       }
     });
     k.loop(SNORE_EVERY, () => {
@@ -111,6 +118,10 @@ export function registerHuntScene(): void {
       const { to } = huntFlee(hunt);
       walkTo = spot(to);
       zaga.play("walk");
+      const target = factTarget(hunt.hidden);
+      if (target) {
+        viewRef?.narrate(factFor(facts, target).text, null);
+      }
     }
 
     function talkRound(view: MapTalk): void {
@@ -133,7 +144,7 @@ export function registerHuntScene(): void {
       });
     }
 
-    createMapView({
+    viewRef = createMapView({
       leaderSprite: SPRITES.protester,
       hudText: () => huntHud(huntRound(hunt), TALK_ROUNDS.length, hunt.visits),
       officeMark: (id) => (hunt.searched.includes(id) ? "question" : null),

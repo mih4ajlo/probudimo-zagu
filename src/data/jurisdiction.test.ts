@@ -61,7 +61,7 @@ describe("jurisdiction", () => {
   });
 
   it("names the area and its appeals office", () => {
-    expect(areaLine("vjt-u-sapcu")).toBe("Područje VJT u Šapcu. Žalbe: AJT u Novom Sadu.");
+    expect(areaLine("vjt-u-sapcu")).toBe("Područje VJT u Šapcu; žalbe: AJT u Novom Sadu.");
   });
 
   it("keeps every area line to two rows", () => {

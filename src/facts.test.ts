@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Fact } from "./data/facts";
-import { createFacts, factFor, nextFact } from "./facts";
+import { createFacts, factFor, factTarget, nextFact } from "./facts";
 
 const FIXTURE: readonly Fact[] = [
   { id: "a", text: "a", topic: "level", levels: ["OJT"] },
@@ -43,5 +43,14 @@ describe("facts rotation", () => {
     const state = createFacts(FIXTURE, fixedRng);
     const ids = FIXTURE.map(() => factFor(state, { level: "PJT", vjt: null }, FIXTURE).id);
     expect(new Set(ids).size).toBe(FIXTURE.length);
+  });
+});
+
+describe("factTarget", () => {
+  it("finds the VJT area of the office she heads to", () => {
+    expect(factTarget("ojt-u-rumi")).toEqual({ level: "OJT", vjt: "vjt-u-sremskoj-mitrovici" });
+    expect(factTarget("vjt-u-sapcu")).toEqual({ level: "VJT", vjt: "vjt-u-sapcu" });
+    expect(factTarget("ajt-u-nisu")).toEqual({ level: "AJT", vjt: null });
+    expect(factTarget("nope")).toBeNull();
   });
 });

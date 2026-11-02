@@ -129,7 +129,7 @@ export function legalHop(from: string, to: string, reason: HopReason): boolean {
   return OJT_AREAS[from]?.vjt === to || OJT_AREAS[to]?.vjt === from;
 }
 
-// Shown when she walks into a VJT area, e.g. "Područje VJT u Šapcu. Žalbe: AJT u Novom Sadu."
+// Shown when she walks into a VJT area, e.g. "Područje VJT u Šapcu; žalbe: AJT u Novom Sadu."
 export function areaLine(vjtId: string): string {
-  return `Područje ${getOffice(vjtId)?.name}. Žalbe: ${getOffice(VJT_AJT[vjtId])?.name}.`;
+  return `Područje ${getOffice(vjtId)?.name}; žalbe: ${getOffice(VJT_AJT[vjtId])?.name}.`;
 }
