@@ -15,13 +15,30 @@ export function vjtAreaAt(point: Point, seats: ReadonlyMap<string, Point>): stri
   return best === null ? null : (OJT_AREAS[best]?.vjt ?? null);
 }
 
-export type AreaWatch = { current: string | null };
+// An area named less than this many seconds ago is not named again, so walking
+// along a border does not repeat the line at every crossing.
+export const AREA_REPEAT_SECONDS = 30;
 
-// The new area when it differs from the last one seen, else null.
-export function watchArea(state: AreaWatch, vjt: string | null): string | null {
+// current: the area she is in; named: when each area was last named.
+export type AreaWatch = { current: string | null; named: Record<string, number> };
+
+export function createAreaWatch(): AreaWatch {
+  return { current: null, named: {} };
+}
+
+// The new area to name when she enters it, else null.
+export function watchArea(state: AreaWatch, vjt: string | null, now: number): string | null {
   if (vjt === state.current) {
     return null;
   }
   state.current = vjt;
+  if (vjt === null) {
+    return null;
+  }
+  const last = state.named[vjt];
+  if (last !== undefined && now - last < AREA_REPEAT_SECONDS) {
+    return null;
+  }
+  state.named[vjt] = now;
   return vjt;
 }

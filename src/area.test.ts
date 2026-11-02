@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { vjtAreaAt, watchArea } from "./area";
+import { AREA_REPEAT_SECONDS, createAreaWatch, vjtAreaAt, watchArea } from "./area";
 import { CITIES } from "./data/cities";
 import { OJT_AREAS } from "./data/jurisdiction";
 import { getOffice } from "./data/offices";
@@ -25,11 +25,26 @@ describe("vjtAreaAt", () => {
 
 describe("watchArea", () => {
   it("reports an area only when it changes", () => {
-    const state = { current: null };
-    expect(watchArea(state, "a")).toBe("a");
-    expect(watchArea(state, "a")).toBeNull();
-    expect(watchArea(state, "b")).toBe("b");
-    expect(watchArea(state, "a")).toBe("a");
-    expect(watchArea(state, "a")).toBeNull();
+    const state = createAreaWatch();
+    expect(watchArea(state, "a", 0)).toBe("a");
+    expect(watchArea(state, "a", 1)).toBeNull();
+    expect(watchArea(state, "b", 2)).toBe("b");
+    expect(watchArea(state, "b", 3)).toBeNull();
+  });
+
+  it("does not name an area again soon when zig-zagging across a border", () => {
+    const state = createAreaWatch();
+    watchArea(state, "a", 0);
+    watchArea(state, "b", 1);
+    expect(watchArea(state, "a", 2)).toBeNull();
+    expect(watchArea(state, "b", 3)).toBeNull();
+    expect(state.current).toBe("b");
+  });
+
+  it("names an area again after AREA_REPEAT_SECONDS", () => {
+    const state = createAreaWatch();
+    watchArea(state, "a", 0);
+    watchArea(state, "b", 1);
+    expect(watchArea(state, "a", AREA_REPEAT_SECONDS)).toBe("a");
   });
 });
