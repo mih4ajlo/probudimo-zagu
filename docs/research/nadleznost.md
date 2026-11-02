@@ -65,7 +65,7 @@ Tužilaštvo ima područje svog suda (ZJT čl. 13 i 26). Lanac: **opština →
 osnovni sud → OJT → VJT → AJT**.
 
 - 58 OJT, 25 VJT, 4 AJT (= 87, isto koliko kaže Vrhovno JT u slucajevi.md;
-  tamo je napisano „uključujući TOK“) **[proveriti brojanje]**.
+  tamo je napisano „uključujući TOK“) (potvrđeno 2. 11. 2026: tabele zakona, test `src/data/jurisdiction.test.ts`).
 - Od **1. 3. 2027.** Treće OJT u Beogradu ostaje samo za Novi Beograd, a novo
   **Četvrto OJT** dobija Zemun i Surčin (izmene 9/2026, čl. 8). Do tada
   Treće OJT pokriva sve tri opštine. **Igra danas: Treće = N. Beograd,
