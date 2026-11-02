@@ -1,6 +1,7 @@
 # Slučajevi tužilaštva 2022–2026 — istraživanje za dijaloge
 
-Stanje: prvi krug pretrage, 31. 10. 2026. Ništa odavde još ne ide u igru.
+Stanje: prvi krug pretrage, 31. 10. 2026. Od v0.11 četiri slučaja su u igri
+(`src/data/cases.ts`).
 Svaka tvrdnja ima izvor; oznaka **[proveriti]** znači da se izvori ne slažu,
 datum nije siguran ili je izvor pristrasan.
 
