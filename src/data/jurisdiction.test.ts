@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { OJT_AREAS, TOK_ID, VJT_AJT, legalHop } from "./jurisdiction";
+import { wrappedRows } from "../textFit";
+import { OJT_AREAS, TOK_ID, VJT_AJT, areaLine, legalHop } from "./jurisdiction";
 import { OFFICES, getOffice } from "./offices";
 
 const ids = (level: string) => OFFICES.filter((o) => o.level === level).map((o) => o.id);
@@ -56,5 +57,15 @@ describe("jurisdiction", () => {
     expect(legalHop("vjt-u-novom-sadu", "vjt-u-beogradu", "area")).toBe(true);
     expect(legalHop("vjt-u-beogradu", "vjt-u-beogradu", "area")).toBe(false);
     expect(legalHop("ojt-u-nisu", "vjt-u-beogradu", "area")).toBe(false);
+  });
+
+  it("names the area and its appeals office", () => {
+    expect(areaLine("vjt-u-sapcu")).toBe("Područje VJT u Šapcu. Žalbe: AJT u Novom Sadu.");
+  });
+
+  it("keeps every area line to two rows", () => {
+    for (const vjt of Object.keys(VJT_AJT)) {
+      expect(wrappedRows(areaLine(vjt)), vjt).toBeLessThanOrEqual(2);
+    }
   });
 });

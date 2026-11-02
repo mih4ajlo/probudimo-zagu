@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MAX_SHOUT_CHARS } from "../talk";
+import { wrappedRows } from "../textFit";
 import {
   BUSY_LINE,
   CASES,
@@ -12,24 +13,6 @@ import {
 } from "./cases";
 import { OFFICE_IDS } from "./offices";
 
-// One 284-unit dialog row at 8 units per letter.
-const ROW_CHARS = 35;
-
-// Rows the dialog text takes when it wraps at word boundaries.
-function wrappedRows(text: string, width = ROW_CHARS): number {
-  let rows = 1;
-  let used = 0;
-  for (const word of text.split(" ")) {
-    const need = used === 0 ? word.length : used + 1 + word.length;
-    if (need <= width) {
-      used = need;
-    } else {
-      rows += 1;
-      used = word.length;
-    }
-  }
-  return rows;
-}
 // The 320-unit HUD strip minus its 8-unit margins, at 8 units per letter.
 const HUD_CHARS = 38;
 
