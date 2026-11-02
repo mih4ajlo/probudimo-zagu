@@ -53,6 +53,7 @@ describe("jurisdiction", () => {
     expect(legalHop("vjt-u-novom-sadu", "ojt-u-novom-sadu", "level")).toBe(true);
     expect(legalHop("ojt-u-rumi", "vjt-u-novom-sadu", "level")).toBe(false);
     expect(legalHop("vjt-u-novom-sadu", TOK_ID, "tok")).toBe(true);
+    expect(legalHop(TOK_ID, "prvo-ojt-u-beogradu", "tok")).toBe(true);
     expect(legalHop("vjt-u-novom-sadu", "vjt-u-beogradu", "tok")).toBe(false);
     expect(legalHop("vjt-u-novom-sadu", "vjt-u-beogradu", "area")).toBe(true);
     expect(legalHop("vjt-u-beogradu", "vjt-u-beogradu", "area")).toBe(false);

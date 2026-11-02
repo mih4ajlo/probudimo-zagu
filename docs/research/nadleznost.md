@@ -173,19 +173,22 @@ Kosovo i Metohija: posebni prelazni režim (čl. 17) — van igre.
 
 ## 3. Šta igra danas ima, a šta se razlikuje
 
-- Igra ima svih 25 VJT i 4 AJT, ali samo **27 od 58 OJT**. Jedanaest VJT
-  nema nijedno svoje OJT na mapi: Zrenjanin, Sremska Mitrovica, Jagodina,
-  Kraljevo, Novi Pazar, Požarevac, Pirot, Prokuplje, Vranje, Zaječar, Negotin.
-- „Posebno JT za visokotehnološki kriminal“ je u igri nivo PJT; po zakonu
-  to je odeljenje VJT Beograd (vidi gore).
-- Lanci slučajeva u v0.11 su delom karikatura. Šta stvarna pravila kažu:
-  - **Napad na studente FDU:** FDU je na Novom Beogradu (Treće OJT), ali
-    „nasilničko ponašanje na javnom skupu“ je na listi VJT, pa je VJT
-    Beograd nadležno od početka **[proveriti kvalifikaciju dela]**.
-  - **Nadstrešnica:** smrt 16 ljudi (teško delo protiv opšte sigurnosti) →
-    VJT Novi Sad; korupcijski deo → TOK po čl. 21 st. 2 ZJT.
-  - **Zvučni top i Izbori 2023.:** kvalifikacija dela odlučuje OJT ili VJT;
-    treba proveriti u izvorima iz slucajevi.md.
+- Od v0.12 igra ima svih 58 OJT, 25 VJT i 4 AJT (90 tužilaštava ukupno).
+  Do v0.11 je imala samo 27 OJT.
+- „Posebno JT za visokotehnološki kriminal“ je do v0.11 bilo u igri kao PJT;
+  po zakonu to je odeljenje VJT Beograd (vidi gore), pa je od v0.12 izbačeno.
+- Lanci slučajeva od v0.12 (`src/data/cases.ts`), svaki skok proveren testom:
+  - **Nadstrešnica:** OJT Novi Sad → VJT Novi Sad (smrt 16 ljudi, kazna preko
+    10 godina) → TOK (korupcijski deo, čl. 21 st. 2 ZJT, 12. 2. 2025).
+  - **Napad na studente FDU:** Treće OJT Bgd (FDU je na Novom Beogradu) →
+    VJT Beograd. Predmet vodi VJT Beograd (insajder.net, 19. 3. 2026);
+    „nasilničko ponašanje na javnom skupu“ je na listi VJT (ZUS čl. 25).
+  - **Izbori 2023.:** VJT Beograd → Prvo OJT Bgd. Prijava za lažne potpise
+    podneta je Posebnom odeljenju za suzbijanje korupcije VJT Beograd i
+    prosleđena Prvom OJT, koje je otvorilo predmet; krivična prijava je za
+    falsifikovanje službene isprave (n1info.rs, izbori 2023; CRTA, jun 2025).
+  - **Zvučni top:** Prvo OJT Bgd → TOK (prijave za terorizam podnete TOK-u) →
+    Prvo OJT Bgd (TOK vratio spise, 2025) → VJT Beograd (2026).
 
 ## 4. Kandidati za tekst u hodu (nacrt, ne ide u igru bez pregleda)
 

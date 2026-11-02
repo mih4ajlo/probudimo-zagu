@@ -1,6 +1,8 @@
 // Wake the offices: real stalled cases as files the offices bounce around.
 // Research and sources: docs/research/slucajevi.md. Lines are caricature of
-// the institutions' pace; only `reality` states facts, each with its date.
+// the institutions' pace, but every bounce names the real reason the file moves
+// (docs/research/nadleznost.md); only `reality` states facts, each with its date.
+import type { HopReason } from "./jurisdiction";
 
 export type CaseResult = "working" | "expired" | "untouched";
 
@@ -11,6 +13,8 @@ export type CaseFile = {
   chain: readonly string[];
   // bounces[i] is said at chain[i] and names chain[i + 1].
   bounces: readonly string[];
+  // reasons[i] is why the file goes from chain[i] to chain[i + 1].
+  reasons: readonly HopReason[];
   // Said at the last office before the demands.
   ask: string;
   demands: readonly [string, string, string];
@@ -35,11 +39,12 @@ export const CASES: readonly CaseFile[] = [
   {
     id: "nadstresnica",
     title: "Nadstrešnica",
-    chain: ["vjt-u-novom-sadu", "vjt-u-beogradu", TOK],
+    chain: ["ojt-u-novom-sadu", "vjt-u-novom-sadu", TOK],
     bounces: [
-      "Novac? Nismo nadležni. Nosite to u VJT Beograd.",
-      "Imamo uputstvo da predamo. Nosite to u TOK.",
+      "Kazna preko 10 godina? Nismo mi. Nosite to u VJT.",
+      "Deo o novcu Vrhovno JT dalo je TOK-u. Nosite tamo.",
     ],
+    reasons: ["level", "tok"],
     ask: "TOK: Dobro, šta tačno tražite?",
     demands: ["Pošaljite saopštenje za medije!", "Podignite optužnicu za novac!", "Sačekajte još 20 meseci!"],
     right: 1,
@@ -49,16 +54,18 @@ export const CASES: readonly CaseFile[] = [
     startDust: 0.3,
   },
   // Sources: insajder.net/teme/jedina-istraga-o-mogucoj-upotrebi-zvucnog-topa-...,
-  // n1info.rs/vesti/zvucni-top-istraga-tok/, 021.rs 446649 and 446727 (jun 2026)
+  // n1info.rs/vesti/zvucni-top-istraga-tok/ (TOK returned the files to Prvo OJT),
+  // 021.rs 446649 and 446727 (jun 2026, VJT Beograd)
   {
     id: "zvucni-top",
     title: "Zvučni top",
     chain: ["prvo-ojt-u-beogradu", TOK, "prvo-ojt-u-beogradu", "vjt-u-beogradu"],
     bounces: [
-      "Zvučni top? Zvuči organizovano. Nosite to u TOK.",
-      "Nije za nas. Vratite to Prvom OJT.",
-      "Opet vi? VJT je tražio predmet. Nosite tamo.",
+      "Prijave za terorizam? To je za TOK. Nosite tamo.",
+      "Nije organizovani kriminal. Vratite to Prvom OJT.",
+      "Opet vi? Teška dela su za VJT. Nosite tamo.",
     ],
+    reasons: ["tok", "tok", "level"],
     ask: "VJT: Šta hoćete? Nema mesta gonjenju.",
     demands: ["Objavite obrazloženje!", "Proglasite sve simulacijom!", "Ugasite zvučnike!"],
     right: 0,
@@ -71,12 +78,14 @@ export const CASES: readonly CaseFile[] = [
     startDust: 0.1,
   },
   // Sources: crta.rs/wp-content/uploads/2025/06/Krivicne-prijave-koje-je-Crta-podnela-a-tuzilastvo-zanemarilo.pdf,
-  // danas.rs/vesti/politika/izbori-2023/vise-javno-tuzilastvo-se-oglasilo-...
+  // danas.rs/vesti/politika/izbori-2023/vise-javno-tuzilastvo-se-oglasilo-...,
+  // n1info.rs/vesti/izbori-2023/crta-poziva-tuzilastva-da-hitno-istraze-... (VJT forwarded to Prvo OJT)
   {
     id: "izbori-2023",
     title: "Izbori 2023.",
     chain: ["vjt-u-beogradu", "prvo-ojt-u-beogradu"],
-    bounces: ["Nema dokaza... a potpisi su za Prvo OJT."],
+    bounces: ["Lažni potpisi? Do 10 godina, to je za Prvo OJT."],
+    reasons: ["level"],
     ask: "Prvo OJT: Potpisi? Koji potpisi?",
     demands: ["Sačekajte sledeće izbore!", "Pošaljite pozivnice biračima!", "Ispitajte falsifikovane potpise!"],
     right: 2,
@@ -87,15 +96,13 @@ export const CASES: readonly CaseFile[] = [
   },
   // Sources: insajder.net/vesti/napad-na-studente-fdu-bez-epiloga-... (19. 3. 2026),
   // n1info.rs/vesti/napad-na-studente-fdu-i-dalje-bez-epiloga-... (10. 2. 2025).
-  // The first two hops are caricature; VJT Beograd runs the FDU case.
+  // FDU is on Novi Beograd (Treće OJT); VJT Beograd runs the case.
   {
     id: "napadi-studenti",
     title: "Napad na studente",
-    chain: ["ojt-u-novom-sadu", "vjt-u-novom-sadu", "vjt-u-beogradu"],
-    bounces: [
-      "Napad? Zvuči ozbiljno. Nosite to u VJT, mi smo osnovni.",
-      "Snimci su iz Beograda? Nosite to u VJT Beograd.",
-    ],
+    chain: ["trece-ojt-u-beogradu", "vjt-u-beogradu"],
+    bounces: ["Nasilje na javnom skupu? To je za VJT. Nosite tamo."],
+    reasons: ["level"],
     ask: "VJT: Troje je priznalo. Šta još hoćete?",
     demands: ["Pogledajte snimke dogodine!", "Nađite ostale napadače!", "Zatvorite predmet, dosta je!"],
     right: 1,
@@ -113,6 +120,7 @@ export const OFFICE_LABEL: Readonly<Record<string, string>> = {
   [TOK]: "TOK",
   "prvo-ojt-u-beogradu": "Prvo OJT Bgd",
   "ojt-u-novom-sadu": "OJT N. Sad",
+  "trece-ojt-u-beogradu": "3. OJT Bgd",
 };
 
 export const BUSY_LINE = "Prvo završite taj predmet!";

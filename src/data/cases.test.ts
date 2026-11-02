@@ -11,12 +11,27 @@ import {
   reportPage,
   RETURNED_LINE,
 } from "./cases";
+import { legalHop } from "./jurisdiction";
 import { OFFICE_IDS } from "./offices";
 
 // The 320-unit HUD strip minus its 8-unit margins, at 8 units per letter.
 const HUD_CHARS = 38;
 
 describe("case files", () => {
+  it("gives every hop a reason", () => {
+    for (const c of CASES) {
+      expect(c.reasons, c.id).toHaveLength(c.chain.length - 1);
+    }
+  });
+
+  it("follows real jurisdiction on every hop", () => {
+    for (const c of CASES) {
+      c.reasons.forEach((reason, i) => {
+        expect(legalHop(c.chain[i], c.chain[i + 1], reason), `${c.id} hop ${i}`).toBe(true);
+      });
+    }
+  });
+
   it("has between 4 and 6 cases with unique ids", () => {
     expect(CASES.length).toBeGreaterThanOrEqual(4);
     expect(CASES.length).toBeLessThanOrEqual(6);

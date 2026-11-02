@@ -30,7 +30,7 @@ describe("hunt result", () => {
 describe("cases", () => {
   it("starts fresh cases on reset", () => {
     resetSession();
-    visitForCases(getSession().cases, "vjt-u-novom-sadu");
+    visitForCases(getSession().cases, "vjt-u-beogradu");
     expect(carriedCase(getSession().cases)).not.toBeNull();
     resetSession();
     const cases = getSession().cases;

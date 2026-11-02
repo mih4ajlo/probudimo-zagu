@@ -110,6 +110,9 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   [Insajder](https://insajder.net/teme/jedina-istraga-o-mogucoj-upotrebi-zvucnog-topa-premestena-u-vjt-koje-tvrdi-da-nema-mesta-gonjenju).
 - **Lanac u igri:** Prvo OJT → TOK → Prvo OJT → VJT Beograd (stvarni put:
   TOK vratio Prvom OJT; VJT tražio da mu se predmet ustupi).
+- **Razlozi skokova (v0.12):** `tok` (prijave za terorizam protiv NN lica
+  podnete TOK-u), `tok` (TOK vraća spise: nije njegova nadležnost), `level`
+  (VJT preuzima kao teže delo). Provereno 2. 11. 2026.
 - **Sporno:** udruženja (npr. BCLjP) traže obrazloženje; nalaz VJT osporavaju.
 - **Za igru:** „Šta se desilo 15. marta?“ — Zaga: „Panika... zzz...“
   (karikatura, ne citat).
@@ -160,6 +163,11 @@ Napomena o broju: Vrhovno javno tužilaštvo kaže da tužilaštava ima **87**
   [Insajder — Dimitrijević](https://insajder.net/teme/pavle-dimitrijevic-crta-u-markeru-hipoteticki-je-moguce-da-se-izborna-lista-proglasi-sa-falsifikovanim-potpisima).
 - **Lanac u igri:** VJT Beograd → Prvo OJT (stvarni put: deo o
   falsifikovanju poslat Prvom OJT).
+- **Razlog skoka (v0.12):** `level`. Prijava podneta Posebnom odeljenju za
+  suzbijanje korupcije VJT Beograd, prosleđena Prvom OJT; prijava gradske
+  izborne komisije je za falsifikovanje službene isprave, delo do 10 godina
+  (OJT). Izvor: [N1 — CRTA poziva tužilaštva](https://n1info.rs/vesti/izbori-2023/crta-poziva-tuzilastva-da-hitno-istraze-slucajeve-falsifikovanja-potpisa-na-vise-lista/).
+  Provereno 2. 11. 2026.
 - **Za igru:** „Gde su fantomski birači?“ — 24 znaka.
 - Izvori: [CRTA — prijave](https://crta.rs/krivicne-prijave-crta-izbori-2023/),
   [CRTA — završni izveštaj](https://crta.rs/wp-content/uploads/2024/02/CRTA_Zavrsni-izborni-izvestaj-2023.pdf),

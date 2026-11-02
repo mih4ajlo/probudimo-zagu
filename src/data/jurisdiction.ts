@@ -6,7 +6,8 @@ import { getOffice } from "./offices";
 // Surčin until Četvrto OJT starts on 1. 3. 2027.
 
 // Why a file moves on: level (OJT ↔ its own VJT), area (same level, other office),
-// tok (the Supreme prosecutor hands it to TOK, ZJT čl. 21 st. 2).
+// tok (the file goes to TOK, e.g. the Supreme prosecutor hands it over, ZJT čl. 21
+// st. 2, or TOK hands back what is not its own).
 export type HopReason = "level" | "area" | "tok";
 
 export const TOK_ID = "javno-tuzilastvo-za-organizovani-kriminal";
@@ -119,7 +120,7 @@ export const VJT_AJT: Readonly<Record<string, string>> = {
 
 export function legalHop(from: string, to: string, reason: HopReason): boolean {
   if (reason === "tok") {
-    return to === TOK_ID && from !== TOK_ID;
+    return (to === TOK_ID) !== (from === TOK_ID);
   }
   if (reason === "area") {
     const [a, b] = [getOffice(from), getOffice(to)];

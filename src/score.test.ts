@@ -46,10 +46,10 @@ describe("case points", () => {
   it("grants office points once even on a case office", () => {
     const state = createScore();
     const cases = createCases();
-    expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(20);
-    expect(visitForCases(cases, "vjt-u-novom-sadu").kind).toBe("pickup");
-    expect(visitOffice(state, "vjt-u-novom-sadu").granted).toBe(0);
-    expect(visitForCases(cases, "vjt-u-novom-sadu").kind).toBe("none");
+    expect(visitOffice(state, "vjt-u-beogradu").granted).toBe(20);
+    expect(visitForCases(cases, "vjt-u-beogradu").kind).toBe("pickup");
+    expect(visitOffice(state, "vjt-u-beogradu").granted).toBe(0);
+    expect(visitForCases(cases, "vjt-u-beogradu").kind).toBe("none");
     expect(state.total).toBe(20);
   });
 });

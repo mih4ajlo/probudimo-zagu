@@ -18,6 +18,7 @@ function file(id: string, chain: string[], startDust = 0): CaseFile {
     title: id.toUpperCase(),
     chain,
     bounces: chain.slice(0, -1).map((office, i) => `${office} -> ${chain[i + 1]}`),
+    reasons: chain.slice(0, -1).map((_, i) => (i === 0 ? "level" : "area")),
     ask: `${id} ask`,
     demands: ["wrong", "right", "also wrong"],
     right: 1,
@@ -53,9 +54,15 @@ describe("case files", () => {
   it("picks up a file only at its start office", () => {
     const state = fixture();
     expect(visitForCases(state, "b")).toEqual({ kind: "none" });
-    expect(visitForCases(state, "a")).toEqual({ kind: "pickup", caseId: "long", line: "a -> b", next: "b" });
+    expect(visitForCases(state, "a")).toEqual({ kind: "pickup", caseId: "long", line: "a -> b", next: "b", reason: "level" });
     expect(carriedCase(state)?.file.id).toBe("long");
     expect(entry(state, "long").hop).toBe(1);
+  });
+
+  it("tells the scene why a file bounces", () => {
+    const state = fixture();
+    expect(visitForCases(state, "a")).toMatchObject({ kind: "pickup", reason: "level" });
+    expect(visitForCases(state, "b")).toMatchObject({ kind: "bounce", reason: "area" });
   });
 
   it("carries one file at a time", () => {
@@ -68,7 +75,7 @@ describe("case files", () => {
   it("bounces along the chain in order", () => {
     const state = fixture();
     visitForCases(state, "a");
-    expect(visitForCases(state, "b")).toEqual({ kind: "bounce", caseId: "long", line: "b -> c", next: "c" });
+    expect(visitForCases(state, "b")).toEqual({ kind: "bounce", caseId: "long", line: "b -> c", next: "c", reason: "area" });
     expect(visitForCases(state, "c")).toEqual({
       kind: "ask",
       caseId: "long",
@@ -114,7 +121,7 @@ describe("case files", () => {
     visitForCases(state, "x");
     visitForCases(state, "c");
     expect(answerCase(state, 2)).toMatchObject({ kind: "returned", next: "x" });
-    expect(visitForCases(state, "x")).toEqual({ kind: "bounce", caseId: "other", line: "x -> c", next: "c" });
+    expect(visitForCases(state, "x")).toEqual({ kind: "bounce", caseId: "other", line: "x -> c", next: "c", reason: "level" });
     expect(visitForCases(state, "c").kind).toBe("ask");
   });
 
