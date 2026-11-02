@@ -1,6 +1,7 @@
 # Ko je nadležan — istraživanje za mape i učenje
 
-Stanje: prvi krug, 2. 11. 2026. Ništa odavde još ne ide u igru.
+Stanje: prvi krug, 2. 11. 2026. Od v0.12 podaci iz §2, činjenice iz §1 i §2
+(`src/data/facts.ts`) i lanci slučajeva (§3) su u igri; stavke **[proveriti]** nisu.
 Izvori su zakoni (tekst sa paragraf.rs, Sl. glasnik RS); oznaka **[proveriti]**
 znači da izvor nije službeni tekst ili da se izvori razilaze.
 

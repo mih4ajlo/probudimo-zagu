@@ -62,7 +62,7 @@ export const CASES: readonly CaseFile[] = [
     chain: ["prvo-ojt-u-beogradu", TOK, "prvo-ojt-u-beogradu", "vjt-u-beogradu"],
     bounces: [
       "Prijave za terorizam? To je za TOK. Nosite tamo.",
-      "Nije organizovani kriminal. Vratite to Prvom OJT.",
+      "Nije naša nadležnost. Vratite to Prvom OJT.",
       "Opet vi? Teška dela su za VJT. Nosite tamo.",
     ],
     reasons: ["tok", "tok", "level"],

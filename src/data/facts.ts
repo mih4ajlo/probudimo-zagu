@@ -64,7 +64,7 @@ export const FACTS: readonly Fact[] = [
   // §1, ZJT čl. 13
   {
     id: "cela-srbija",
-    text: "Samo dva tužilaštva rade za celu Srbiju: TOK i za ratne zločine.",
+    text: "Posebna tužilaštva su samo dva: TOK i za ratne zločine.",
     topic: "special",
     levels: ["PJT"],
   },
