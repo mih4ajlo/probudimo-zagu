@@ -5,7 +5,6 @@ R.br.,Nivo / Vrsta tužilaštva,Naziv tužilaštva,Sedište / Mesto,Adresa,Telef
 1,Vrhovno javno tužilaštvo,Vrhovno javno tužilaštvo,Beograd,Nemanjina 22-26,011/3613-702,kabinet@vrhovnojt.gov.rs
 2,PJT,Javno tužilaštvo za organizovani kriminal,Beograd,Ustanićka 29,011/3082-670,kabinet@tok.jt.rs
 3,PJT,Javno tužilaštvo za ratne zločine,Beograd,Ustanićka 29,011/3082-650,kabinet@jtrz.jt.rs
-4,PJT,Posebno JT za visokotehnološki kriminal,Beograd,Savska 17a,011/745-1375,vtk@beograd.vtk.jt.rs
 5, AJT, AJT u Beogradu,Beograd,Katanićeva 15,011/635-4894,uprava@beograd.apjt.rs
 6, AJT, AJT u Novom Sadu,Novi Sad,Sutjeska 3,021/4876-521,uprava@novisad.apjt.rs
 7, AJT, AJT u Kragujevcu,Kragujevac,Slobode 4,034/6196-000,uprava@kragujevac.apjt.rs
@@ -62,3 +61,34 @@ R.br.,Nivo / Vrsta tužilaštva,Naziv tužilaštva,Sedište / Mesto,Adresa,Telef
 58, OJT, OJT u Čačku,Čačak,Cara Dušana 6,032/327-257,uprava@cacak.ojt.rs
 59, OJT, OJT u Užicu,Užice,Marije Mage Magazinović 11,031/513-722,uprava@uzice.ojt.rs
 60, OJT, OJT u Kruševcu,Kruševac,Trg kosovskih junaka 3,037/413-610,uprava@krusevac.ojt.rs
+61, OJT, OJT u Aleksincu,Aleksinac,,,
+62, OJT, OJT u Aranđelovcu,Aranđelovac,,,
+63, OJT, OJT u Bečeju,Bečej,,,
+64, OJT, OJT u Boru,Bor,,,
+65, OJT, OJT u Brusu,Brus,,,
+66, OJT, OJT u Velikom Gradištu,Veliko Gradište,,,
+67, OJT, OJT u Vladičinom Hanu,Vladičin Han,,,
+68, OJT, OJT u Vranju,Vranje,,,
+69, OJT, OJT u Gornjem Milanovcu,Gornji Milanovac,,,
+70, OJT, OJT u Despotovcu,Despotovac,,,
+71, OJT, OJT u Zaječaru,Zaječar,,,
+72, OJT, OJT u Zrenjaninu,Zrenjanin,,,
+73, OJT, OJT u Jagodini,Jagodina,,,
+74, OJT, OJT u Kikindi,Kikinda,,,
+75, OJT, OJT u Kraljevu,Kraljevo,,,
+76, OJT, OJT u Kuršumliji,Kuršumlija,,,
+77, OJT, OJT u Lebanu,Lebane,,,
+78, OJT, OJT u Negotinu,Negotin,,,
+79, OJT, OJT u Novom Pazaru,Novi Pazar,,,
+80, OJT, OJT u Paraćinu,Paraćin,,,
+81, OJT, OJT u Petrovcu na Mlavi,Petrovac na Mlavi,,,
+82, OJT, OJT u Pirotu,Pirot,,,
+83, OJT, OJT u Požarevcu,Požarevac,,,
+84, OJT, OJT u Požegi,Požega,,,
+85, OJT, OJT u Prijepolju,Prijepolje,,,
+86, OJT, OJT u Prokuplju,Prokuplje,,,
+87, OJT, OJT u Raškoj,Raška,,,
+88, OJT, OJT u Rumi,Ruma,,,
+89, OJT, OJT u Sremskoj Mitrovici,Sremska Mitrovica,,,
+90, OJT, OJT u Staroj Pazovi,Stara Pazova,,,
+91, OJT, OJT u Trsteniku,Trstenik,,,

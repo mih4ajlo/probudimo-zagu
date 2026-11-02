@@ -11,6 +11,12 @@ export const TOUCH_RADIUS = 9;
 export const WALK_GAP = 6;
 export const MAX_RING_RADIUS = 40;
 export const START_CITY = "Beograd";
+// Ring turns (radians) for cities whose rings would crowd a neighbour's:
+// Beograd's east office sits too close to Pančevo's ring without them.
+export const RING_TURNS: Readonly<Record<string, number>> = {
+  Beograd: Math.PI / 12,
+  Pančevo: -Math.PI / 12,
+};
 // She wakes a little south of Beograd's offices, on land.
 const SPAWN_OFFSET: Point = { x: 0, y: 45 };
 
@@ -24,10 +30,12 @@ export function ringRadius(count: number): number {
   return Math.min(MAX_RING_RADIUS, Math.max(14, spacing / (2 * Math.sin(Math.PI / count))));
 }
 
-// Offices of one city sit evenly on a ring around the city point, first at the top.
+// Offices of one city sit evenly on a ring around the city point, first at the top
+// (turned clockwise by the city's turn, if any).
 export function layoutOffices(
   offices: readonly { id: string; city: string }[],
   cityPoint: (city: string) => Point,
+  turns: Readonly<Record<string, number>> = {},
 ): Map<string, Point> {
   const byCity = new Map<string, string[]>();
   for (const office of offices) {
@@ -38,7 +46,7 @@ export function layoutOffices(
     const center = cityPoint(city);
     const radius = ringRadius(ids.length);
     ids.forEach((id, i) => {
-      const angle = -Math.PI / 2 + (2 * Math.PI * i) / ids.length;
+      const angle = -Math.PI / 2 + (turns[city] ?? 0) + (2 * Math.PI * i) / ids.length;
       positions.set(id, { x: center.x + radius * Math.cos(angle), y: center.y + radius * Math.sin(angle) });
     });
   }
@@ -47,7 +55,7 @@ export function layoutOffices(
 
 // Where every office sits on the map.
 export function officePositions(): Map<string, Point> {
-  return layoutOffices(OFFICES, (city) => project(CITIES[city]));
+  return layoutOffices(OFFICES, (city) => project(CITIES[city]), RING_TURNS);
 }
 
 export function touchedOffice(feet: Point, positions: ReadonlyMap<string, Point>): string | null {

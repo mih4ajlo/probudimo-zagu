@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCases, visitForCases } from "./cases";
 import { CASES } from "./data/cases";
+import { maxScore } from "./data/offices";
 import { createScore, grantCase, visitOffice, wakeMaxScore } from "./score";
 
 describe("visitOffice", () => {
@@ -38,7 +39,7 @@ describe("case points", () => {
   });
 
   it("adds case points to the wake max score", () => {
-    expect(wakeMaxScore()).toBe(1060 + 50 * CASES.length);
+    expect(wakeMaxScore()).toBe(maxScore() + 50 * CASES.length);
   });
 
   // Same order as the overworld visit: office points first, then the case file.
