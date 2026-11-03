@@ -5,16 +5,16 @@ describe("narrator", () => {
   it("hides a line after LINE_SECONDS", () => {
     const state = createNarrator();
     narrate(state, "hello", LINE_SECONDS);
-    tickNarrator(state, LINE_SECONDS - 0.1, false);
+    tickNarrator(state, LINE_SECONDS - 0.1, false, true);
     expect(state.text).toBe("hello");
-    tickNarrator(state, 0.2, false);
+    tickNarrator(state, 0.2, false, true);
     expect(state.text).toBeNull();
   });
 
   it("holds a line until cleared when seconds is null", () => {
     const state = createNarrator();
     narrate(state, "hold", null);
-    tickNarrator(state, 1000, false);
+    tickNarrator(state, 1000, false, true);
     expect(state.text).toBe("hold");
     clearNarration(state);
     expect(state.text).toBeNull();
@@ -22,36 +22,52 @@ describe("narrator", () => {
 
   it("asks for an idle fact after IDLE_FACT_SECONDS of free walking", () => {
     const state = createNarrator();
-    expect(tickNarrator(state, IDLE_FACT_SECONDS - 1, false)).toBe(false);
-    expect(tickNarrator(state, 1, false)).toBe(true);
+    expect(tickNarrator(state, IDLE_FACT_SECONDS - 1, false, true)).toBe(false);
+    expect(tickNarrator(state, 1, false, true)).toBe(true);
     expect(state.idle).toBe(0);
-    expect(tickNarrator(state, 1, false)).toBe(false);
+    expect(tickNarrator(state, 1, false, true)).toBe(false);
   });
 
   it("does not count blocked time or time with a line showing", () => {
     const state = createNarrator();
-    expect(tickNarrator(state, IDLE_FACT_SECONDS * 2, true)).toBe(false);
+    expect(tickNarrator(state, IDLE_FACT_SECONDS * 2, true, true)).toBe(false);
     expect(state.idle).toBe(0);
     narrate(state, "line", LINE_SECONDS);
-    expect(tickNarrator(state, LINE_SECONDS / 2, false)).toBe(false);
+    expect(tickNarrator(state, LINE_SECONDS / 2, false, true)).toBe(false);
     expect(state.idle).toBe(0);
     narrate(state, "held", null);
-    expect(tickNarrator(state, IDLE_FACT_SECONDS * 2, false)).toBe(false);
+    expect(tickNarrator(state, IDLE_FACT_SECONDS * 2, false, true)).toBe(false);
     expect(state.idle).toBe(0);
   });
 
   it("replaces the current line with a new one", () => {
     const state = createNarrator();
     narrate(state, "old", LINE_SECONDS);
-    tickNarrator(state, LINE_SECONDS - 1, false);
+    tickNarrator(state, LINE_SECONDS - 1, false, true);
     narrate(state, "new", LINE_SECONDS);
-    tickNarrator(state, 2, false);
+    tickNarrator(state, 2, false, true);
     expect(state.text).toBe("new");
+  });
+
+  it("keeps a line on screen while blocked", () => {
+    const state = createNarrator();
+    narrate(state, "area", LINE_SECONDS);
+    tickNarrator(state, LINE_SECONDS * 3, true, false);
+    expect(state.text).toBe("area");
+    tickNarrator(state, LINE_SECONDS, false, true);
+    expect(state.text).toBeNull();
+  });
+
+  it("counts only walking time toward the idle fact", () => {
+    const state = createNarrator();
+    expect(tickNarrator(state, IDLE_FACT_SECONDS * 2, false, false)).toBe(false);
+    expect(state.idle).toBe(0);
+    expect(tickNarrator(state, IDLE_FACT_SECONDS, false, true)).toBe(true);
   });
 
   it("starts the idle count again after a line", () => {
     const state = createNarrator();
-    tickNarrator(state, IDLE_FACT_SECONDS - 1, false);
+    tickNarrator(state, IDLE_FACT_SECONDS - 1, false, true);
     narrate(state, "area", LINE_SECONDS);
     expect(state.idle).toBe(0);
   });

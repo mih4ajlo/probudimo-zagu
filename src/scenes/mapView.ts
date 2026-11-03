@@ -45,7 +45,7 @@ import { createShout, isShouting, startShout, tickShout } from "../shout";
 import { clampCamera, scrollZoom, ZOOM_START, zoomIn, zoomOut } from "../zoom";
 
 export type OfficeMark = "check" | "question" | null;
-// idleFact: she walked freely long enough with nothing narrated; the mode may narrate a fact.
+// idleFact: she walked long enough with nothing narrated; the mode may narrate a fact.
 export type LeaderFrame = { pos: Point; anim: PrincessAnim; facing: Facing; blocked: boolean; idleFact: boolean };
 export type MapTalk = {
   // Lines in the dialog box; shoutFirst puts the leader in the shout pose on
@@ -681,7 +681,7 @@ export function createMapView(hooks: MapViewHooks): MapTalk {
     bubble.scale = k.vec2(1 / zoom);
     bubble.pos = player.pos.sub(0, leader.bubbleLift);
     const blockedNow = isMovementBlocked(dialog);
-    const idleFact = tickNarrator(narrator, k.dt(), blockedNow);
+    const idleFact = tickNarrator(narrator, k.dt(), blockedNow, dx !== 0 || dy !== 0);
     hooks.onFrame?.({ pos: { x: player.pos.x, y: player.pos.y }, anim, facing, blocked: blockedNow, idleFact });
 
     const fit = screenFit();

@@ -1,15 +1,15 @@
-import { vjtAreaAt, watchArea, type AreaWatch } from "../area";
+import { createAreaWatch, vjtAreaAt, watchArea } from "../area";
 import { SPRITES } from "../assets";
 import { answerCase, carriedCase, caseMark, casesResolved, tickCases, visitForCases } from "../cases";
 import { carryHud, expiredLine } from "../data/cases";
+import { CITIES } from "../data/cities";
 import { SPLASH } from "../data/facts";
 import { areaLine, OJT_AREAS } from "../data/jurisdiction";
 import { getOffice, OFFICE_IDS } from "../data/offices";
 import { wakeHud } from "../data/story";
 import { createFacts, nextFact } from "../facts";
-import type { Point } from "../geo";
+import { project, type Point } from "../geo";
 import { k } from "../kaplayContext";
-import { officePositions } from "../officeLayout";
 import { grantCase, visitOffice, wakeMaxScore } from "../score";
 import { getSession } from "../session";
 import { withShout } from "../shout";
@@ -24,9 +24,11 @@ export function registerOverworldScene(): void {
   k.scene("overworld", () => {
     const session = getSession();
     const cases = session.cases;
-    const positions = officePositions();
-    const seats = new Map<string, Point>(Object.keys(OJT_AREAS).map((id) => [id, positions.get(id) as Point]));
-    const area: AreaWatch = { current: null };
+    // Areas come from the OJT towns, not the office markers ringed around them.
+    const seats = new Map<string, Point>(
+      Object.keys(OJT_AREAS).map((id) => [id, project(CITIES[getOffice(id)!.city])]),
+    );
+    const area = createAreaWatch();
     const facts = createFacts();
 
     function checkEnding(): void {
@@ -95,7 +97,7 @@ export function registerOverworldScene(): void {
         });
       },
       onFrame: (frame) => {
-        const entered = watchArea(area, vjtAreaAt(frame.pos, seats));
+        const entered = watchArea(area, vjtAreaAt(frame.pos, seats), k.time());
         if (entered) {
           talkRef?.narrate(areaLine(entered));
         } else if (frame.idleFact) {

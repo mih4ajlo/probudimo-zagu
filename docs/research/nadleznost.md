@@ -204,3 +204,35 @@ Kratko, jedna činjenica, sa izvorom iznad:
 - AJT ne goni od početka: prati i usmerava, i radi žalbe.
 - Napad na javnom skupu? To je lista VJT, bez obzira na kaznu.
 - Od 1. 3. 2027. Beograd dobija Četvrto OJT: Zemun i Surčin.
+
+## 5. Ko radi u tužilaštvu i kako se bira
+
+Izvor: Zakon o javnom tužilaštvu (Sl. glasnik RS 10/2023), proveren tekst iz
+izvora iznad (nov. 2026). Izmena iz avgusta 2026 (Sl. glasnik RS 80/2026)
+menja čl. 78 i 84, ne član 80 i 82 (paragraf.rs, pregled izmena).
+
+- **Vrste (čl. 13):** Vrhovno JT, apelaciona (AJT), viša (VJT), osnovna
+  (OJT) i dva posebne nadležnosti (TOK, ratni zločini).
+- **Odnos (čl. 15, 17):** glavni javni tužilac odgovara Vrhovnom javnom
+  tužiocu i neposredno višem glavnom javnom tužiocu; javni tužilac odgovara
+  svom glavnom javnom tužiocu. Neposredno viši glavni javni tužilac može
+  nižem da izda obavezno uputstvo u predmetu, kad postoji sumnja u
+  efikasnost ili zakonitost; Vrhovni javni tužilac može svakom.
+- **Ko bira (čl. 80):** Vrhovnog javnog tužioca Narodna skupština, na predlog
+  Visokog saveta tužilaštva, na šest godina; glavnog javnog tužioca Visoki
+  savet tužilaštva, na šest godina; javnog tužioca Visoki savet tužilaštva, na
+  stalnu funkciju (i čl. 61).
+- **Ponovni izbor (čl. 62):** glavni javni tužilac ne može ponovo biti biran
+  u istom javnom tužilaštvu.
+- **Staž (čl. 82):** rad u pravnoj struci posle pravosudnog ispita:
+
+  | Tužilaštvo | Javni tužilac | Glavni javni tužilac |
+  |---|---|---|
+  | OJT | 3 | 4 |
+  | VJT | 6 | 7 |
+  | AJT, posebne nadležnosti (TOK) | 9 | 10 |
+  | Vrhovno | 11 | 12 |
+
+- **Prvi izbor (čl. 84):** proverava se stručnost i osposobljenost; ko je
+  završio početnu obuku na Pravosudnoj akademiji, za OJT ne polaže ispit
+  Saveta. Izmena 80/2026 ovo menja **[proveriti — ne ide u igru]**.
