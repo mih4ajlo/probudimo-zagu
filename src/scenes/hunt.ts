@@ -1,6 +1,7 @@
 import { SPRITE_SCALE, SPRITES } from "../assets";
 import { createTrail, followerPositions, pushTrail } from "../crowd";
 import { FOLLOWERS, huntHud, SLEEPWALK_LINE, SLEEPWALK_SPEED, TALK_ROUNDS } from "../data/hunt";
+import { CHECK_CHOICES, CHECK_CLOSE, CHECK_INTRO } from "../data/trail";
 import { SERBIA_RINGS } from "../data/serbia-geo";
 import { isInsideAny, lineOnLand, projectRing, type Point } from "../geo";
 import { createFacts, factFor, factTarget } from "../facts";
@@ -11,6 +12,7 @@ import type { PrincessAnim } from "../princess";
 import { getSession } from "../session";
 import { withShout } from "../shout";
 import { createTalk, isTalkDone, talkChoices, talkPick } from "../talk";
+import { checkAnswer, checkRecap, createFileTrail, trailPage } from "../trail";
 import { walkStep } from "../walkTo";
 import { createMapView, type MapTalk } from "./mapView";
 
@@ -28,7 +30,8 @@ const SNORE_LIFE = 2;
 
 // Find Zaga: three protesters search the offices for the sleeping princess and
 // talk her awake over three rounds; between rounds she sleepwalks away, and
-// the narrator shows a fact about where she heads until she gets there.
+// the narrator shows a fact about where she heads until she gets there. Each
+// find turns up a page of a case file; awake, she checks it step by step.
 export function registerHuntScene(): void {
   k.scene("hunt", () => {
     const session = getSession();
@@ -40,6 +43,7 @@ export function registerHuntScene(): void {
     const talk = createTalk();
     const trail = createTrail(start);
     const facts = createFacts();
+    const fileTrail = createFileTrail();
     // Set once the map view exists; Zaga only walks after that.
     let viewRef: MapTalk | null = null;
     const followers = FOLLOWER_TINTS.slice(0, FOLLOWERS).map((tint) =>
@@ -124,6 +128,26 @@ export function registerHuntScene(): void {
       }
     }
 
+    // One step of her check: the recap waits in the narrator box while the
+    // player calls it, then her verdict and the rule.
+    function checkStep(view: MapTalk): void {
+      const recap = checkRecap(fileTrail);
+      if (!recap) {
+        view.say([CHECK_CLOSE], {
+          then: () => {
+            session.hunt = huntResult(hunt, fileTrail);
+            k.go("huntEnding");
+          },
+        });
+        return;
+      }
+      view.narrate(recap, null);
+      view.ask(CHECK_CHOICES, (index) => {
+        view.clearNarration();
+        view.say(checkAnswer(fileTrail, index === 0) ?? [], { then: () => checkStep(view) });
+      });
+    }
+
     function talkRound(view: MapTalk): void {
       const choices = talkChoices(talk);
       if (!choices) {
@@ -134,8 +158,7 @@ export function registerHuntScene(): void {
           shoutFirst: true,
           then: () => {
             if (isTalkDone(talk)) {
-              session.hunt = huntResult(hunt);
-              k.go("huntEnding");
+              view.say([CHECK_INTRO], { then: () => checkStep(view) });
               return;
             }
             view.say([SLEEPWALK_LINE], { then: sleepwalk });
@@ -159,7 +182,7 @@ export function registerHuntScene(): void {
         }
         // Caught, even if she had not arrived yet.
         placeZaga(positions.get(id) as Point);
-        view.say(visit.lines, { then: () => talkRound(view) });
+        view.say([...visit.lines, ...(trailPage(fileTrail) ?? [])], { then: () => talkRound(view) });
       },
       onFrame: (frame) => {
         pushTrail(trail, frame.pos);

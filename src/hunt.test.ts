@@ -3,6 +3,7 @@ import { CAUGHT_LINE, FOUND_LINE, MIN_HIDE_DISTANCE } from "./data/hunt";
 import type { Point } from "./geo";
 import { hintFor } from "./hint";
 import { createHunt, huntFlee, huntResult, huntRound, huntVisit, pickHideout } from "./hunt";
+import { checkAnswer, createFileTrail } from "./trail";
 import { officePositions, spawnPoint } from "./officeLayout";
 import { SERBIA_RINGS } from "./data/serbia-geo";
 import { isInsideAny, lineOnLand, projectRing } from "./geo";
@@ -126,7 +127,8 @@ describe("sleepwalking on land", () => {
         expect(canWalk(walk.from, walk.to)).toBe(true);
       }
     }
-  });
+    // 30 random runs over the real outline take 2-6 s; the default 5 s flakes.
+  }, 20_000);
 });
 
 describe("huntRound", () => {
@@ -147,6 +149,13 @@ describe("huntResult", () => {
     huntVisit(hunt, "o0");
     huntVisit(hunt, "o1");
     huntVisit(hunt, "o3");
-    expect(huntResult(hunt)).toEqual({ visits: 3 });
+    expect(huntResult(hunt, createFileTrail())).toEqual({ visits: 3, right: 0, total: 3 });
+  });
+
+  it("reports the right calls of her check", () => {
+    const hunt = createHunt(line(10), start, first);
+    const trail = createFileTrail();
+    checkAnswer(trail, false);
+    expect(huntResult(hunt, trail)).toEqual({ visits: 0, right: 1, total: 3 });
   });
 });

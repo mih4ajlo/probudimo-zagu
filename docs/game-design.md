@@ -60,8 +60,16 @@ The title offers two modes (↑/↓ + Enter, or tap one):
   line without leaving Serbia, and stays asleep there; chase her and the
   next round starts. The HUD round moves on when she walks off. While she
   sleepwalks, the narrator box shows a fact about where she heads (its
-  level or VJT area) until she arrives. She hides among all 90 offices. After round 3 the desk scene shows her waking
-  with a start, then "Broj poseta: N". No points, no fail state. Same
+  level or VJT area) until she arrives. Each find also turns up a page of
+  a made-up case file ("Trag spisa", `src/data/trail.ts`, rules in
+  `docs/research/trag-spisa.md`): the prosecutor's instruction and the rumor
+  of how the evidence was gathered. After round 3 she checks the file: for
+  each step its recap waits in the narrator box while the player calls it
+  "Po propisu" or "Nije po propisu", and she answers "Tačno."/"Netačno."
+  with the ZKP article and the rule; a last line says unlawful evidence is
+  set apart (ZKP čl. 84). She hides among all 90 offices. After round 3 the desk scene shows her waking
+  with a start, then "Broj poseta: N" and
+  "Tačne procene: N/3". No points, no fail state. Same
   map, controls, zoom and dialog rules as Wake the offices.
 
 ## Rules

@@ -55,7 +55,10 @@ export function addSnore(): { burst(): void } {
 }
 
 // The text box used by the desk scenes (same place as the wake scene's).
-export function addDeskBox(text: string) {
-  k.add([k.rect(300, 48), k.pos(10, 122), k.color(12, 10, 20), k.outline(1, k.rgb(220, 200, 140))]);
-  return k.add([k.text(text, { size: 8, width: 284, lineSpacing: 4 }), k.pos(18, 130)]);
+// The box grows upward from its bottom edge, 12 units per row of text.
+export function addDeskBox(text: string, rows = 3) {
+  const height = rows * 12 + 12;
+  const top = 170 - height;
+  k.add([k.rect(300, height), k.pos(10, top), k.color(12, 10, 20), k.outline(1, k.rgb(220, 200, 140))]);
+  return k.add([k.text(text, { size: 8, width: 284, lineSpacing: 4 }), k.pos(18, top + 8)]);
 }

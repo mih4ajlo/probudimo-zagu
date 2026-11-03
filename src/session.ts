@@ -3,7 +3,8 @@ import type { HopReason } from "./data/jurisdiction";
 import { createScore, type ScoreState } from "./score";
 
 // How the last Find Zaga run ended, for its ending screen.
-export type HuntResult = { visits: number };
+// `right` of `total` file-trail steps called correctly.
+export type HuntResult = { visits: number; right: number; total: number };
 
 export type Session = {
   score: ScoreState;

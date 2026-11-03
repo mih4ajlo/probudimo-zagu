@@ -93,13 +93,18 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
 - **Narrator:** a line hides after `LINE_SECONDS` or holds when null, and
   waits while blocked; the idle fact comes after `IDLE_FACT_SECONDS` of
   walking; standing, blocked time and time with a line showing do not count.
+- **File trail:** one page per find, in order, then none; the check walks
+  the steps in order, answers each call with "Tačno."/"Netačno." + article
+  and the rule, counts right calls, ignores calls after the last step; one
+  step per talk round, both lawful and unlawful steps, every line within two
+  rows, two choices that fit; the hunt result carries right/total.
 - **Text fit:** `wrappedRows` (`src/textFit.ts`) wraps like Kaplay — a full
   row cannot also hold the space after it.
 - **Desk wake:** phase times; skipped frames still enter every phase in order.
 
 Colocate tests: `src/score.ts` → `src/score.test.ts` (same for dialog,
 offices, geo, officeLayout, zoom, hint, hunt, crowd, titleMenu,
-talk, deskWake, cases, area, facts, narrator, textFit; data modules such as
+talk, deskWake, cases, area, facts, narrator, textFit, trail; data modules such as
 jurisdiction and facts test in `src/data/`).
 
 ## What not to test
