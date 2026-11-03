@@ -4,9 +4,9 @@ import { FACTS, SPLASH } from "./facts";
 import { VJT_AJT } from "./jurisdiction";
 
 describe("facts", () => {
-  it("has 10 to 20 facts with unique ids", () => {
+  it("has 10 to 30 facts with unique ids", () => {
     expect(FACTS.length).toBeGreaterThanOrEqual(10);
-    expect(FACTS.length).toBeLessThanOrEqual(20);
+    expect(FACTS.length).toBeLessThanOrEqual(30);
     expect(new Set(FACTS.map((f) => f.id)).size).toBe(FACTS.length);
   });
 

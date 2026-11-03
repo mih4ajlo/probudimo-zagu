@@ -85,7 +85,7 @@ Keep rules in modules that do not import Kaplay, then unit-test those modules.
   starts fresh cases; pickup/bounce visits carry the hop reason; the round is
   resolved only when every case is working or expired (also when the last
   one expires on the road); a reset clears what was taught.
-- **Facts:** 10–20 facts with unique ids, each within two rows; splashes
+- **Facts:** 10–30 facts with unique ids, each within two rows; splashes
   within five rows; vjt facts point at real VJT; rotation shows every fact
   once, never repeats the last one across a reshuffle, prefers an unseen
   fact matching the target, falls back to rotation; `factTarget` finds an

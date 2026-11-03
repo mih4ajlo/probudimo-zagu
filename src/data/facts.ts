@@ -4,7 +4,7 @@
 import type { HopReason } from "./jurisdiction";
 import type { OfficeLevel } from "./offices";
 
-export type FactTopic = "level" | "area" | "special" | "oversight" | "conflict";
+export type FactTopic = "level" | "area" | "special" | "oversight" | "conflict" | "staff";
 
 export type Fact = {
   id: string;
@@ -91,6 +91,61 @@ export const FACTS: readonly Fact[] = [
     text: "Do 1. 3. 2027. Treće OJT Beograd pokriva i Zemun i Surčin.",
     topic: "area",
     vjt: "vjt-u-beogradu",
+  },
+  // §5, ZJT čl. 13
+  { id: "skracenice", text: "OJT, VJT i AJT su osnovno, više i apelaciono javno tužilaštvo.", topic: "oversight" },
+  // §5, ZJT čl. 13 i 15
+  {
+    id: "lestvica",
+    text: "Iznad OJT je VJT, iznad VJT je AJT, a na vrhu je Vrhovno JT.",
+    topic: "oversight",
+    levels: ["OJT", "VJT", "AJT", "VRHOVNO"],
+  },
+  // §5, ZJT čl. 17
+  {
+    id: "uputstvo",
+    text: "Viši glavni tužilac može nižem da izda obavezno uputstvo za predmet.",
+    topic: "oversight",
+    levels: ["VJT", "AJT"],
+  },
+  // §5, ZJT čl. 15
+  {
+    id: "glavni-i-tuzioci",
+    text: "Tužilaštvo vodi glavni tužilac; javni tužioci odgovaraju njemu.",
+    topic: "staff",
+  },
+  // §5, ZJT čl. 80
+  { id: "bira-glavnog", text: "Glavnog javnog tužioca bira Visoki savet tužilaštva, na 6 godina.", topic: "staff" },
+  // §5, ZJT čl. 62
+  { id: "jednom", text: "Glavni tužilac ne može ponovo biti biran u istom tužilaštvu.", topic: "staff" },
+  // §5, ZJT čl. 61 i 80
+  { id: "stalna", text: "Javnog tužioca bira Visoki savet tužilaštva, na stalnu funkciju.", topic: "staff" },
+  // §5, ZJT čl. 80
+  {
+    id: "vrhovni-bira",
+    text: "Vrhovnog javnog tužioca bira Narodna skupština, na 6 godina.",
+    topic: "staff",
+    levels: ["VRHOVNO"],
+  },
+  // §5, ZJT čl. 82 t. 1
+  {
+    id: "staz-ojt",
+    text: "Tužilac u OJT: 3 godine u struci posle pravosudnog ispita.",
+    topic: "staff",
+    levels: ["OJT"],
+  },
+  // §5, ZJT čl. 82
+  {
+    id: "staz-vise",
+    text: "Tužilac u VJT: 6 godina staža, u AJT i TOK 9, u Vrhovnom 11.",
+    topic: "staff",
+    levels: ["VJT", "AJT", "PJT"],
+  },
+  // §5, ZJT čl. 82
+  {
+    id: "staz-glavni",
+    text: "Glavnom tužiocu treba godina više: OJT 4, VJT 7, AJT 10, Vrhovni 12.",
+    topic: "staff",
   },
 ];
 
