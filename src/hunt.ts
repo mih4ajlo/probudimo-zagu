@@ -2,6 +2,7 @@ import { CAUGHT_LINE, FOUND_LINE, MIN_HIDE_DISTANCE } from "./data/hunt";
 import type { Point } from "./geo";
 import { hintFor } from "./hint";
 import type { HuntResult } from "./session";
+import { checkScore, type FileTrailState } from "./trail";
 
 // Random number in [0, 1); scenes pass Math.random, tests a fixed value.
 export type Rng = () => number;
@@ -86,6 +87,6 @@ export function huntRound(state: HuntState): number {
 }
 
 // What the ending shows.
-export function huntResult(state: HuntState): HuntResult {
-  return { visits: state.visits };
+export function huntResult(state: HuntState, trail: FileTrailState): HuntResult {
+  return { visits: state.visits, right: checkScore(trail), total: trail.steps.length };
 }
